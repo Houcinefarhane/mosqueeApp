@@ -26,6 +26,7 @@ const adminNavItems: NavItem[] = [
   { label: "Tableau de bord", href: "/admin", icon: LayoutDashboard },
   { label: "Classes", href: "/admin/classes", icon: BookOpen },
   { label: "Élèves", href: "/admin/eleves", icon: Users },
+  { label: "Parents", href: "/admin/parents", icon: Users },
   { label: "Professeurs", href: "/admin/professeurs", icon: Users },
   { label: "Planning", href: "/admin/planning", icon: Calendar },
   { label: "Paiements", href: "/admin/paiements", icon: CreditCard },

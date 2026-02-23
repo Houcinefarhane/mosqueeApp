@@ -174,12 +174,20 @@ export default async function EleveDetailPage({
           </CardContent>
         </Card>
 
-        {eleve.parent && (
-          <Card variant="elevated">
-            <CardHeader>
+        <Card variant="elevated">
+          <CardHeader>
+            <div className="flex items-center justify-between">
               <CardTitle>Parent</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              <Link href={`/admin/eleves/${eleve.id}/assigner-parent`}>
+                <Button variant="ghost" size="sm">
+                  <Edit className="w-4 h-4 mr-2" />
+                  {eleve.parent ? "Modifier" : "Assigner"}
+                </Button>
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {eleve.parent ? (
               <div>
                 <p className="font-semibold">
                   {eleve.parent.prenom} {eleve.parent.nom}
@@ -189,9 +197,18 @@ export default async function EleveDetailPage({
                   <p className="text-sm text-gray-600">{eleve.parent.telephone}</p>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-500">Aucun parent assigné</p>
+                <Link href={`/admin/eleves/${eleve.id}/assigner-parent`}>
+                  <Button variant="outline" size="sm" className="mt-2">
+                    Assigner un parent
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <Card variant="elevated">
           <CardContent className="p-6">
