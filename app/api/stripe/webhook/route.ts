@@ -2,15 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-02-24.acacia",
-});
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+function getStripe() {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error("STRIPE_SECRET_KEY n'est pas configuré");
+  }
+  return new Stripe(secretKey, {
+    apiVersion: "2025-02-24.acacia",
+  });
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!signature) {
     return NextResponse.json(
@@ -19,9 +24,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  if (!webhookSecret) {
+    return NextResponse.json(
+      { error: "STRIPE_WEBHOOK_SECRET n'est pas configuré" },
+      { status: 500 }
+    );
+  }
+
   let event: Stripe.Event;
 
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
     console.error("Erreur webhook:", err.message);
