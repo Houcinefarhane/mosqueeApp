@@ -1,0 +1,297 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PROFESSEUR
+  PARENT
+  ELEVE
+}
+
+enum StatutPresence {
+  PRESENT
+  ABSENT
+  RETARD
+  EXCUSE
+}
+
+enum StatutPaiement {
+  EN_ATTENTE
+  PAYE
+  EN_RETARD
+  ANNULE
+}
+
+model Mosquee {
+  id        String   @id @default(cuid())
+  nom       String
+  adresse   String?
+  telephone String?
+  email     String?
+  logo      String?  // URL du logo de la mosquée
+  plan      String?  // URL ou description du plan
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  classes   Classe[]
+  eleves    Eleve[]
+  annonces  Annonce[]
+  paiements Paiement[]
+  presences    Presence[]
+  notes        Note[]
+  planning     Planning[]
+  appels       Appel[]
+  noteSessions NoteSession[]
+
+  @@index([nom])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  nom       String
+  prenom    String
+  telephone String?
+  role      Role
+  mosqueeId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  mosquee   Mosquee    @relation(fields: [mosqueeId], references: [id], onDelete: Cascade)
+  classes   Classe[]   // Classes enseignées par ce professeur
+  eleves    Eleve[]    @relation("ParentEleves") // Enfants de ce parent
+  eleve     Eleve?     @relation("EleveUser") // Compte élève lié
+  presences    Presence[]
+  notes        Note[]
+  annonces     Annonce[]
+  paiements    Paiement[]
+  appels       Appel[]
+  noteSessions NoteSession[]
+
+  @@index([mosqueeId])
+  @@index([email])
+  @@index([role])
+}
+
+model Classe {
+  id           String   @id @default(cuid())
+  nom          String
+  niveau       String
+  professeurId String?
+  mosqueeId    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  mosquee    Mosquee    @relation(fields: [mosqueeId], references: [id], onDelete: Cascade)
+  professeur User?      @relation(fields: [professeurId], references: [id], onDelete: SetNull)
+  eleves     Eleve[]
+  planning     Planning[]
+  presences    Presence[]
+  appels       Appel[]
+  noteSessions NoteSession[]
+
+  @@index([mosqueeId])
+  @@index([professeurId])
+  @@index([nom])
+}
+
+model Eleve {
+  id            String    @id @default(cuid())
+  nom           String
+  prenom        String
+  dateNaissance DateTime?
+  telephone     String?
+  email         String?
+  classeId      String
+  parentId      String? // ID du parent (User avec role PARENT)
+  userId        String? @unique // ID du compte User (si l'élève a un compte)
+  mosqueeId     String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  mosquee   Mosquee    @relation(fields: [mosqueeId], references: [id], onDelete: Cascade)
+  classe    Classe     @relation(fields: [classeId], references: [id], onDelete: Cascade)
+  parent    User?      @relation("ParentEleves", fields: [parentId], references: [id], onDelete: SetNull)
+  user      User?      @relation("EleveUser", fields: [userId], references: [id], onDelete: SetNull)
+  presences Presence[]
+  notes     Note[]
+  paiements Paiement[]
+
+  @@index([mosqueeId])
+  @@index([classeId])
+  @@index([parentId])
+  @@index([userId])
+  @@index([email])
+}
+
+model Appel {
+  id                String    @id @default(cuid())
+  date              DateTime
+  classeId          String
+  professeurId      String
+  mosqueeId         String
+  commentaireSeance String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  classe     Classe     @relation(fields: [classeId], references: [id], onDelete: Cascade)
+  professeur User       @relation(fields: [professeurId], references: [id], onDelete: Cascade)
+  mosquee    Mosquee    @relation(fields: [mosqueeId], references: [id], onDelete: Cascade)
+  presences  Presence[]
+
+  @@index([classeId])
+  @@index([date])
+  @@index([mosqueeId])
+  @@index([professeurId])
+  @@unique([classeId, date]) // Un appel par classe par jour
+}
+
+model Presence {
+  id           String         @id @default(cuid())
+  date         DateTime       @default(now())
+  statut       StatutPresence
+  eleveId      String
+  classeId     String
+  professeurId String
+  mosqueeId    String
+  appelId      String?
+  commentaire  String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  eleve      Eleve   @relation(fields: [eleveId], references: [id], onDelete: Cascade)
+  classe     Classe  @relation(fields: [classeId], references: [id], onDelete: Cascade)
+  professeur User    @relation(fields: [professeurId], references: [id], onDelete: Cascade)
+  mosquee    Mosquee @relation(fields: [mosqueeId], references: [id], onDelete: Cascade)
+  appel      Appel?  @relation(fields: [appelId], references: [id], onDelete: SetNull)
+
+  @@index([eleveId])
+  @@index([classeId])
+  @@index([date])
+  @@index([mosqueeId])
+  @@index([professeurId])
+  @@index([appelId])
+  @@unique([eleveId, classeId, date]) // Un élève ne peut avoir qu'une présence par jour par classe
+}
+
+model NoteSession {
+  id                String    @id @default(cuid())
+  date              DateTime  @default(now())
+  classeId          String
+  professeurId      String
+  mosqueeId         String
+  matiere           String
+  noteMax           Float     @default(20)
+  commentaireSeance String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  classe     Classe     @relation(fields: [classeId], references: [id], onDelete: Cascade)
+  professeur User       @relation(fields: [professeurId], references: [id], onDelete: Cascade)
+  mosquee    Mosquee    @relation(fields: [mosqueeId], references: [id], onDelete: Cascade)
+  notes      Note[]
+
+  @@index([classeId])
+  @@index([date])
+  @@index([mosqueeId])
+  @@index([professeurId])
+  @@index([matiere])
+}
+
+model Note {
+  id           String   @id @default(cuid())
+  valeur       Float
+  noteMax      Float    @default(20)
+  matiere      String
+  commentaire  String?
+  eleveId      String
+  professeurId String
+  mosqueeId    String
+  sessionId    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  eleve      Eleve       @relation(fields: [eleveId], references: [id], onDelete: Cascade)
+  professeur User        @relation(fields: [professeurId], references: [id], onDelete: Cascade)
+  mosquee    Mosquee     @relation(fields: [mosqueeId], references: [id], onDelete: Cascade)
+  session    NoteSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([eleveId])
+  @@index([mosqueeId])
+  @@index([professeurId])
+  @@index([matiere])
+  @@index([sessionId])
+}
+
+model Planning {
+  id         String   @id @default(cuid())
+  jour       String // LUNDI, MARDI, etc.
+  heureDebut String
+  heureFin   String
+  matiere    String
+  classeId   String
+  mosqueeId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  classe  Classe  @relation(fields: [classeId], references: [id], onDelete: Cascade)
+  mosquee Mosquee @relation(fields: [mosqueeId], references: [id], onDelete: Cascade)
+
+  @@index([classeId])
+  @@index([mosqueeId])
+  @@index([jour])
+}
+
+model Paiement {
+  id              String         @id @default(cuid())
+  montant         Float
+  statut          StatutPaiement
+  stripePaymentId String?
+  eleveId         String
+  parentId        String?
+  mosqueeId       String
+  dateEcheance    DateTime?
+  datePaiement    DateTime?
+  description     String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  eleve   Eleve   @relation(fields: [eleveId], references: [id], onDelete: Cascade)
+  parent  User?   @relation(fields: [parentId], references: [id], onDelete: SetNull)
+  mosquee Mosquee @relation(fields: [mosqueeId], references: [id], onDelete: Cascade)
+
+  @@index([eleveId])
+  @@index([parentId])
+  @@index([mosqueeId])
+  @@index([stripePaymentId])
+  @@index([statut])
+  @@index([dateEcheance])
+}
+
+model Annonce {
+  id        String   @id @default(cuid())
+  titre     String
+  contenu   String
+  auteurId  String
+  mosqueeId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auteur  User    @relation(fields: [auteurId], references: [id], onDelete: Cascade)
+  mosquee Mosquee @relation(fields: [mosqueeId], references: [id], onDelete: Cascade)
+
+  @@index([mosqueeId])
+  @@index([createdAt])
+  @@index([auteurId])
+}
