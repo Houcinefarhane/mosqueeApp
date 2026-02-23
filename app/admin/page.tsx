@@ -198,7 +198,7 @@ export default async function AdminDashboard() {
                           <p className="text-xl font-bold text-foreground">
                             {stat.value}
                           </p>
-                          {stat.amount > 0 && (
+                          {stat.amount !== undefined && stat.amount > 0 && (
                             <p className="text-sm text-gray-500 mt-1">
                               {stat.amount.toFixed(2)}€
                             </p>
