@@ -88,7 +88,7 @@ export default function NouvelElevePage() {
 
       <Card variant="elevated">
         <CardHeader>
-          <CardTitle>Informations de l'élève</CardTitle>
+          <CardTitle>Informations de l&apos;élève</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -179,7 +179,7 @@ export default function NouvelElevePage() {
                 Annuler
               </Button>
               <Button type="submit" isLoading={isLoading}>
-                Inscrire l'élève
+                Inscrire l&apos;élève
               </Button>
             </div>
           </form>

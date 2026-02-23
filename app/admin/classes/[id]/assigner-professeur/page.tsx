@@ -118,7 +118,7 @@ export default function AssignerProfesseurPage() {
                 onChange={(e) => setSelectedProfesseurId(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               >
-                <option value="">Aucun professeur (retirer l'assignation)</option>
+                <option value="">Aucun professeur (retirer l&apos;assignation)</option>
                 {professeurs.map((prof) => (
                   <option key={prof.id} value={prof.id}>
                     {prof.prenom} {prof.nom} ({prof.email})
@@ -144,7 +144,7 @@ export default function AssignerProfesseurPage() {
                 </Button>
               </Link>
               <Button type="submit" isLoading={isLoading}>
-                {selectedProfesseurId ? "Modifier l'assignation" : "Retirer l'assignation"}
+                {selectedProfesseurId ? "Modifier l&apos;assignation" : "Retirer l&apos;assignation"}
               </Button>
             </div>
           </form>

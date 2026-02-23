@@ -92,7 +92,7 @@ export default async function EleveDetailPage({
             <h1 className="text-3xl font-bold text-foreground">
               {eleve.prenom} {eleve.nom}
             </h1>
-            <p className="text-gray-600 mt-2">Détails de l'élève</p>
+            <p className="text-gray-600 mt-2">Détails de l&apos;élève</p>
           </div>
         </div>
         <Link href={`/admin/eleves/${eleve.id}/modifier`}>
@@ -156,7 +156,7 @@ export default async function EleveDetailPage({
                   {eleve.id}
                 </code>
                 <p className="text-xs text-gray-600">
-                  Partagez ce code avec l'élève pour qu'il puisse créer son compte sur{" "}
+                  Partagez ce code avec l&apos;élève pour qu&apos;il puisse créer son compte sur{" "}
                   <span className="font-medium">/auth/inscription/eleve</span>
                 </p>
               </div>

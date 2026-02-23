@@ -51,7 +51,7 @@ export default async function ElevePlanningPage() {
         <Card variant="elevated">
           <CardContent className="p-12 text-center">
             <p className="text-gray-600">
-              Votre compte n'est pas encore lié à un dossier élève.
+              Votre compte n&apos;est pas encore lié à un dossier élève.
             </p>
           </CardContent>
         </Card>

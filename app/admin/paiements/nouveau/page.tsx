@@ -130,7 +130,7 @@ export default function NouveauPaiementPage() {
 
             <Input
               type="date"
-              label="Date d'échéance"
+              label="Date d&apos;échéance"
               value={dateEcheance}
               onChange={(e) => setDateEcheance(e.target.value)}
               required

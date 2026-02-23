@@ -52,6 +52,7 @@ export default async function ProfesseurDashboard() {
       color: "text-primary",
     },
     {
+      // eslint-disable-next-line react/no-unescaped-entities
       title: "Appels aujourd'hui",
       value: presencesAujourdhui,
       icon: Calendar,

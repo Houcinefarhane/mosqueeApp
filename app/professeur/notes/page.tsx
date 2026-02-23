@@ -236,7 +236,7 @@ export default function NotesPage() {
                     {eleves.length} élève(s) dans cette classe
                   </p>
                   <p className="text-xs text-gray-500">
-                    Laissez vide la note d'un élève si vous ne voulez pas la
+                    Laissez vide la note d&apos;un élève si vous ne voulez pas la
                     saisir maintenant
                   </p>
                 </div>

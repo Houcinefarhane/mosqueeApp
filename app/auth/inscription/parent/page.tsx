@@ -134,8 +134,8 @@ export default function InscriptionParentPage() {
                   setFormData({ ...formData, codeMosquee: e.target.value })
                 }
                 required
-                placeholder="Demandez le code à l'administration"
-                helperText="Le code vous sera fourni par l'administration de la mosquée"
+                placeholder="Demandez le code à l&apos;administration"
+                helperText="Le code vous sera fourni par l&apos;administration de la mosquée"
               />
 
               <Input

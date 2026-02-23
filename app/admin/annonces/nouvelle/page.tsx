@@ -47,7 +47,7 @@ export default function NouvelleAnnoncePage() {
 
       <Card variant="elevated">
         <CardHeader>
-          <CardTitle>Informations de l'annonce</CardTitle>
+          <CardTitle>Informations de l&apos;annonce</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,7 +90,7 @@ export default function NouvelleAnnoncePage() {
                 Annuler
               </Button>
               <Button type="submit" isLoading={isLoading}>
-                Publier l'annonce
+                Publier l&apos;annonce
               </Button>
             </div>
           </form>

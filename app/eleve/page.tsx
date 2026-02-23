@@ -43,7 +43,7 @@ export default async function EleveDashboard() {
         <Card variant="elevated">
           <CardContent className="p-12 text-center">
             <p className="text-gray-600">
-              Votre compte n'est pas encore lié à un dossier élève. Contactez l'administration.
+              Votre compte n&apos;est pas encore lié à un dossier élève. Contactez l&apos;administration.
             </p>
           </CardContent>
         </Card>

@@ -148,13 +148,13 @@ export default function AppelPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Faire l'appel</h1>
+        <h1 className="text-3xl font-bold text-foreground">Faire l&apos;appel</h1>
         <p className="text-gray-600 mt-2">Marquez les présences des élèves</p>
       </div>
 
       <Card variant="elevated">
         <CardHeader>
-          <CardTitle>Paramètres de l'appel</CardTitle>
+          <CardTitle>Paramètres de l&apos;appel</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -298,7 +298,7 @@ export default function AppelPage() {
 
             <div className="mt-6 flex justify-end">
               <Button onClick={handleSubmit} isLoading={isLoading}>
-                Enregistrer l'appel
+                Enregistrer l&apos;appel
               </Button>
             </div>
           </CardContent>
@@ -309,7 +309,7 @@ export default function AppelPage() {
         <Card variant="elevated">
           <CardContent className="p-12 text-center">
             <p className="text-gray-600">
-              Sélectionnez une classe pour commencer l'appel
+              Sélectionnez une classe pour commencer l&apos;appel
             </p>
           </CardContent>
         </Card>

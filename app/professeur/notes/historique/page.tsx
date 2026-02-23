@@ -106,7 +106,7 @@ export default function HistoriqueNotesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Historique des notes</h1>
-          <p className="text-gray-600 mt-2">Consultez l'historique de toutes vos sessions de notes</p>
+          <p className="text-gray-600 mt-2">Consultez l&apos;historique de toutes vos sessions de notes</p>
         </div>
         <Link href="/professeur/notes">
           <Button variant="outline">

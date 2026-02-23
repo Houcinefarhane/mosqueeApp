@@ -88,6 +88,7 @@ export default async function AdminDashboard() {
       link: "/admin/professeurs",
     },
     {
+      // eslint-disable-next-line react/no-unescaped-entities
       title: "Présences aujourd'hui",
       value: `${presencesAujourdhui}/${elevesTotal}`,
       subtitle: `${tauxPresence}%`,
