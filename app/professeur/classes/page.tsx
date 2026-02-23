@@ -59,7 +59,7 @@ export default async function MesClassesPage() {
                 <div className="flex gap-2 mt-4">
                   <Link href="/professeur/appel" className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
-                      Faire l'appel
+                      Faire l&apos;appel
                     </Button>
                   </Link>
                   <Link href="/professeur/notes" className="flex-1">
@@ -80,7 +80,7 @@ export default async function MesClassesPage() {
             <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600">Aucune classe assignée</p>
             <p className="text-sm text-gray-500 mt-2">
-              Contactez l'administrateur pour vous assigner une classe
+              Contactez l&apos;administrateur pour vous assigner une classe
             </p>
           </CardContent>
         </Card>

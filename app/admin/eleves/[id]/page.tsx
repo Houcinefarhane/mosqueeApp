@@ -150,7 +150,7 @@ export default async function EleveDetailPage({
             {!eleve.userId && (
               <div className="mt-4 p-4 bg-primary/10 border-2 border-primary rounded-lg">
                 <p className="text-sm font-semibold text-primary mb-2">
-                  Code d'inscription élève
+                  Code d&apos;inscription élève
                 </p>
                 <code className="text-lg font-bold text-primary block mb-2">
                   {eleve.id}
@@ -167,7 +167,7 @@ export default async function EleveDetailPage({
                   ✓ Compte élève créé
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
-                  L'élève a déjà un compte utilisateur
+                  L&apos;élève a déjà un compte utilisateur
                 </p>
               </div>
             )}

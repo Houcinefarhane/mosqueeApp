@@ -235,7 +235,7 @@ export default function NouveauPlanningPage() {
                 </div>
               ) : (
                 <p className="text-gray-600 text-center py-8">
-                  Aucun cours ajouté. Cliquez sur "Ajouter un cours" pour commencer.
+                  Aucun cours ajouté. Cliquez sur &quot;Ajouter un cours&quot; pour commencer.
                 </p>
               )}
             </div>
