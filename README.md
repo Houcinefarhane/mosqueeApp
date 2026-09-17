@@ -331,6 +331,8 @@ Ordre recommandé pour la suite du développement :
 | Commande | Description |
 |----------|-------------|
 | `npm run dev` | Serveur dev (port **3002**) |
+| `npm run dev:log` | Dev + journal `.dev-server.log` (terminal 1) |
+| `npm run perf:watch` | Filtre les temps de réponse (terminal 2) |
 | `npm run build` | Build production |
 | `npm run start` | Serveur production |
 | `npm run lint` | ESLint |
