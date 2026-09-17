@@ -50,8 +50,8 @@ async function testConnection() {
     if (error.message.includes("DATABASE_URL")) {
       console.log("💡 Solution :");
       console.log("   1. Créez un fichier .env à la racine du projet");
-      console.log("   2. Ajoutez votre DATABASE_URL (ex: Neon PostgreSQL)");
-      console.log("   3. Format: DATABASE_URL=\"postgresql://user:password@host:5432/db?sslmode=require\"");
+      console.log("   2. Copiez .env.example vers .env");
+      console.log("   3. Format local: DATABASE_URL=\"postgresql://root@localhost:26257/madrasa?sslmode=disable\"");
       console.log("   4. Relancez: npm run db:push");
     } else if (error.message.includes("P1001") || error.message.includes("connect")) {
       console.log("💡 Solution :");

@@ -1,16 +1,31 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: madrasa-postgres
+  cockroachdb:
+    image: cockroachdb/cockroach:v24.3.8
+    container_name: madrasa-cockroachdb
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: madrasa
-      POSTGRES_PASSWORD: madrasa
-      POSTGRES_DB: madrasa
+    command: start-single-node --insecure --accept-sql-without-tls
     ports:
-      - "5433:5432"
+      - "26257:26257"
+      - "8080:8080"
     volumes:
-      - madrasa_pg_data:/var/lib/postgresql/data
+      - madrasa_crdb_data:/cockroach/cockroach-data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health?ready=1"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+
+  cockroach-init:
+    image: cockroachdb/cockroach:v24.3.8
+    depends_on:
+      cockroachdb:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        cockroach sql --insecure --host=cockroachdb -e "CREATE DATABASE IF NOT EXISTS madrasa;"
+    restart: "no"
 
 volumes:
-  madrasa_pg_data:
+  madrasa_crdb_data:

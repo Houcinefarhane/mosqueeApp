@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { withDevPerf } from "@/lib/dev/with-dev-perf";
 
-export async function GET(req: NextRequest) {
+async function getNoteSessions(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -88,3 +89,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDevPerf("GET /api/professeur/notes-sessions", getNoteSessions);

@@ -43,9 +43,15 @@ export async function withRetry<T>(
         error.message?.includes("Connection terminated") ||
         error.code === "P1001" ||
         error.code === "P1017" ||
-        error.code === "57P01"; // PostgreSQL: terminating connection due to administrator command
+        error.code === "57P01"; // terminating connection due to administrator command
+
+      // CockroachDB : conflit de transaction sérialisable — retry automatique
+      const isRetryableTransaction =
+        error.code === "P2034" ||
+        error.message?.includes("40001") ||
+        error.message?.includes("restart transaction");
       
-      if (isConnectionError && i < maxRetries - 1) {
+      if ((isConnectionError || isRetryableTransaction) && i < maxRetries - 1) {
         console.warn(`Tentative ${i + 1}/${maxRetries} - Reconnexion...`);
         
         // Déconnecter proprement

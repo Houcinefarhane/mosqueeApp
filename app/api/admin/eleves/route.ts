@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { withDevPerf } from "@/lib/dev/with-dev-perf";
 import { z } from "zod";
 import { revalidatePath, revalidateTag } from "next/cache";
 
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+async function getEleves(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -90,3 +91,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withDevPerf("GET /api/admin/eleves", getEleves);

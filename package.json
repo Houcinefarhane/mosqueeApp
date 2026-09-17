@@ -13,6 +13,7 @@
     "db:studio": "prisma studio",
     "db:test": "tsx scripts/test-db.ts",
     "db:seed": "tsx scripts/seed.ts",
+    "db:seed-charge": "tsx prisma/seed-charge.ts",
     "db:setup": "npm run db:push && npm run db:seed",
     "db:docker": "docker compose up -d"
   },
@@ -35,6 +36,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.14.12",
     "@types/react": "^18.3.3",

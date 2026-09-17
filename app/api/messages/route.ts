@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createMessageSchema } from "@/lib/validators/messages";
 import { isDestinataireAutorise } from "@/lib/messages/destinataires";
 import { MESSAGING_ROLES } from "@/lib/messages/constants";
+import { withDevPerf } from "@/lib/dev/with-dev-perf";
 import type { Role } from "@prisma/client";
 
 const ALLOWED_ROLES = MESSAGING_ROLES;
@@ -17,7 +18,7 @@ const messageInclude = {
 
 const boxSchema = z.enum(["received", "sent"]).default("received");
 
-export async function GET(req: NextRequest) {
+async function getMessages(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -57,6 +58,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+export const GET = withDevPerf("GET /api/messages", getMessages);
 
 export async function POST(req: NextRequest) {
   try {
