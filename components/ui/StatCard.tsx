@@ -6,31 +6,35 @@ type StatVariant = "green" | "gold" | "blue" | "purple";
 
 const VARIANT_STYLES: Record<
   StatVariant,
-  { iconColor: string; iconBg: string; border: string; accent: string }
+  { iconColor: string; iconBg: string; border: string; accent: string; bg: string }
 > = {
   green: {
-    iconColor: "text-emerald-600",
-    iconBg: "bg-emerald-50",
-    border: "bg-emerald-500",
-    accent: "text-emerald-600",
+    iconColor: "text-primary",
+    iconBg: "bg-primary/10",
+    border: "bg-primary",
+    accent: "text-primary",
+    bg: "from-surface-muted/90 to-surface",
   },
   gold: {
-    iconColor: "text-amber-600",
-    iconBg: "bg-amber-50",
-    border: "bg-amber-500",
-    accent: "text-amber-600",
+    iconColor: "text-secondary-dark",
+    iconBg: "bg-secondary/15",
+    border: "bg-secondary",
+    accent: "text-secondary-dark",
+    bg: "from-secondary/10 to-surface",
   },
   blue: {
-    iconColor: "text-blue-600",
-    iconBg: "bg-blue-50",
+    iconColor: "text-blue-700",
+    iconBg: "bg-blue-100/80",
     border: "bg-blue-500",
     accent: "text-blue-600",
+    bg: "from-blue-50/90 to-white",
   },
   purple: {
-    iconColor: "text-violet-600",
-    iconBg: "bg-violet-50",
+    iconColor: "text-violet-700",
+    iconBg: "bg-violet-100/80",
     border: "bg-violet-500",
     accent: "text-violet-600",
+    bg: "from-violet-50/90 to-white",
   },
 };
 
@@ -74,8 +78,9 @@ export default function StatCard({
   const content = (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow",
-        href && "cursor-pointer hover:shadow-md"
+        "relative overflow-hidden rounded-xl border border-primary/8 bg-gradient-to-br p-4 shadow-card transition-all sm:p-5",
+        styles.bg,
+        href && "cursor-pointer hover:-translate-y-0.5 hover:shadow-elevated"
       )}
     >
       <div
@@ -87,7 +92,7 @@ export default function StatCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-sm text-gray-600">{title}</p>
-          <p className="mt-1 text-3xl font-bold tracking-tight text-foreground">
+          <p className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {value}
           </p>
           {trendText && (

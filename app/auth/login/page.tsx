@@ -8,7 +8,7 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import Link from "next/link";
-import { GraduationCap, Sparkles } from "lucide-react";
+import Image from "next/image";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -72,7 +72,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-white to-accent/5 p-4 relative overflow-hidden">
+    <div className="app-background flex min-h-[100dvh] items-center justify-center p-3 sm:p-4 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -88,7 +88,7 @@ function LoginForm() {
           }}
         />
         <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl"
+          className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"
           animate={{
             x: [0, -100, 0],
             y: [0, -50, 0],
@@ -107,20 +107,30 @@ function LoginForm() {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-md relative z-10"
       >
-        <Card variant="elevated" className="backdrop-blur-sm bg-white/95">
+        <Card variant="elevated" className="border-secondary/20 backdrop-blur-sm bg-surface/95">
           <CardHeader className="text-center pb-6">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-primary to-primary-dark rounded-2xl flex items-center justify-center shadow-lg"
+              className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-2xl bg-white p-2 shadow-lg ring-1 ring-secondary/30"
             >
-              <GraduationCap className="w-8 h-8 text-white" />
+              <Image
+                src="/logo-mosquee.png"
+                alt="AMP Mosquée de Plaisir"
+                width={80}
+                height={80}
+                className="h-full w-full object-contain"
+                priority
+              />
             </motion.div>
-            <CardTitle className="text-3xl text-center text-primary mb-2">
+            <CardTitle className="text-3xl text-center text-primary mb-1">
               MadrasaApp
             </CardTitle>
-            <CardDescription className="text-center">
+            <p className="text-xs uppercase tracking-widest text-secondary-dark">
+              Mosquée de Plaisir
+            </p>
+            <CardDescription className="mt-2 text-center">
               Connectez-vous à votre compte
             </CardDescription>
           </CardHeader>

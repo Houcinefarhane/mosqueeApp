@@ -10,17 +10,22 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#1B4332",
-          light: "#2D6A4F",
-          dark: "#081C15",
+          DEFAULT: "#5D3A2F",
+          light: "#7B5245",
+          dark: "#3D251E",
         },
         secondary: {
-          DEFAULT: "#D4AF37",
-          light: "#F4D03F",
-          dark: "#B8941E",
+          DEFAULT: "#B28C5F",
+          light: "#C9A876",
+          dark: "#967349",
         },
-        background: "#F8F9FA",
-        foreground: "#1A1A2E",
+        background: "#FAF6F0",
+        surface: {
+          DEFAULT: "#FFFCF8",
+          muted: "#F0E8DE",
+          warm: "#F7F0E8",
+        },
+        foreground: "#3D251E",
         success: "#16A34A",
         danger: "#DC2626",
       },
@@ -28,7 +33,8 @@ const config: Config = {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        card: "0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06)",
+        card: "0 1px 3px 0 rgb(93 58 47 / 0.08), 0 4px 12px -2px rgb(93 58 47 / 0.1)",
+        elevated: "0 4px 6px -1px rgb(93 58 47 / 0.1), 0 10px 24px -4px rgb(93 58 47 / 0.14)",
       },
     },
   },

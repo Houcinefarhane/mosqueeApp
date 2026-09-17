@@ -12,26 +12,26 @@ export function Card({
   ...props
 }: CardProps) {
   const variants = {
-    default: "bg-white border border-gray-100 shadow-sm",
-    elevated: "bg-white shadow-sm border border-gray-100",
-    outlined: "bg-white border-2 border-primary/20",
+    default: "bg-surface border border-primary/8 shadow-card",
+    elevated: "bg-surface shadow-elevated border border-primary/10",
+    outlined: "bg-surface-warm border-2 border-primary/25 shadow-card",
   };
 
   return (
-    <div className={cn("rounded-xl", variants[variant], className)} {...props}>
+    <div className={cn("rounded-xl backdrop-blur-sm", variants[variant], className)} {...props}>
       {children}
     </div>
   );
 }
 
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("px-6 pt-6 pb-2", className)} {...props} />;
+  return <div className={cn("px-4 pt-4 pb-2 sm:px-6 sm:pt-6", className)} {...props} />;
 }
 
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={cn("text-base font-semibold tracking-tight text-foreground", className)}
+      className={cn("text-base font-semibold tracking-tight text-primary-dark", className)}
       {...props}
     />
   );
@@ -42,11 +42,11 @@ export function CardDescription({ className, ...props }: HTMLAttributes<HTMLPara
 }
 
 export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("px-6 pb-6", className)} {...props} />;
+  return <div className={cn("px-4 pb-4 sm:px-6 sm:pb-6", className)} {...props} />;
 }
 
 export function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("px-6 pb-6 pt-2 border-t border-gray-100", className)} {...props} />
+    <div className={cn("border-t border-gray-100 px-4 pb-4 pt-2 sm:px-6 sm:pb-6", className)} {...props} />
   );
 }

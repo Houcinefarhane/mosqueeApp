@@ -105,7 +105,7 @@ export default async function AdminDashboard() {
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <PageHeader
         title="Tableau de bord"
         description={`Bienvenue, ${session.user.name}`}
@@ -166,7 +166,7 @@ export default async function AdminDashboard() {
               <p className="text-sm text-gray-500">Aucune absence aujourd&apos;hui</p>
             ) : (
               absencesAujourdhui.map((a) => (
-                <div key={a.id} className="flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2">
+                <div key={a.id} className="flex items-center justify-between rounded-lg bg-surface-muted px-3 py-2 ring-1 ring-primary/5">
                   <div>
                     <p className="text-sm font-medium">{a.eleve.prenom} {a.eleve.nom}</p>
                     <p className="text-xs text-gray-500">{a.classe.nom}</p>
@@ -189,7 +189,7 @@ export default async function AdminDashboard() {
               <p className="text-sm text-gray-500">Aucun créneau planifié</p>
             ) : (
               planningProchain.map((p) => (
-                <div key={p.id} className="rounded-lg border border-gray-100 px-3 py-2">
+                <div key={p.id} className="rounded-lg bg-surface-muted px-3 py-2 ring-1 ring-primary/5">
                   <p className="text-sm font-medium">{p.matiere}</p>
                   <p className="text-xs text-gray-500">
                     {p.jour} · {p.heureDebut}–{p.heureFin} · {p.classe.nom}
@@ -215,7 +215,7 @@ export default async function AdminDashboard() {
               <p className="text-sm text-gray-500">Aucune annonce</p>
             ) : (
               annoncesRecentes.map((a) => (
-                <div key={a.id} className="rounded-lg border border-gray-100 px-3 py-2">
+                <div key={a.id} className="rounded-lg bg-surface-muted px-3 py-2 ring-1 ring-primary/5">
                   <p className="text-sm font-medium">{a.titre}</p>
                   <p className="text-xs text-gray-500">{formatDate(a.createdAt)}</p>
                 </div>

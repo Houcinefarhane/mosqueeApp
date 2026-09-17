@@ -67,28 +67,32 @@ export default function PresenceChart({
         Aucune donnée de présence disponible
       </div>
     ) : (
-      <ResponsiveContainer width="100%" height={280}>
-        <LineChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+      <div className="h-52 w-full min-w-0 sm:h-[280px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 8, right: 4, left: -16, bottom: 0 }}>
           <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" vertical={false} />
           <XAxis
             dataKey="date"
-            tick={{ fontSize: 11, fill: "#9ca3af" }}
+            tick={{ fontSize: 10, fill: "#9ca3af" }}
             tickLine={false}
             axisLine={{ stroke: "#e5e7eb" }}
+            interval="preserveStartEnd"
+            minTickGap={24}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: "#9ca3af" }}
+            tick={{ fontSize: 10, fill: "#9ca3af" }}
             tickLine={false}
             axisLine={false}
             allowDecimals={false}
+            width={28}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend
             verticalAlign="top"
-            align="right"
+            align="center"
             iconType="circle"
             iconSize={8}
-            wrapperStyle={{ fontSize: 12, paddingBottom: 12 }}
+            wrapperStyle={{ fontSize: 11, paddingBottom: 8 }}
           />
           <Line
             type="monotone"
@@ -110,12 +114,13 @@ export default function PresenceChart({
           />
         </LineChart>
       </ResponsiveContainer>
+      </div>
     );
 
   return (
-    <Card className="bg-white p-6 shadow-sm">
-      <div className="mb-5">
-        <CardTitle className="text-lg">{title}</CardTitle>
+    <Card className="overflow-hidden p-4 sm:p-6">
+      <div className="mb-4 sm:mb-5">
+        <CardTitle className="text-base sm:text-lg">{title}</CardTitle>
         <CardDescription>{subtitle}</CardDescription>
       </div>
       {chartBody}

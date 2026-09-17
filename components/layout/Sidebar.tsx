@@ -1,8 +1,9 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useMobileNav } from "@/components/layout/MobileNavContext";
 import {
   LayoutDashboard,
   Users,
@@ -10,7 +11,6 @@ import {
   Calendar,
   FileText,
   Bell,
-  Menu,
   X,
   ClipboardList,
   BookOpenCheck,
@@ -132,8 +132,7 @@ interface SidebarProps {
 export default function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const { isOpen, close } = useMobileNav();
   const [unreadCount, setUnreadCount] = useState(0);
 
   const hasMessaging =
@@ -141,10 +140,6 @@ export default function Sidebar({ role }: SidebarProps) {
     role === "PROFESSEUR" ||
     role === "PARENT" ||
     role === "ELEVE";
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!hasMessaging) return;
@@ -156,7 +151,7 @@ export default function Sidebar({ role }: SidebarProps) {
         const data = (await res.json()) as { count: number };
         setUnreadCount(data.count);
       } catch {
-        // silencieux — polling de fond
+        // silencieux
       }
     };
 
@@ -187,8 +182,6 @@ export default function Sidebar({ role }: SidebarProps) {
 
   const sections = getNavSections();
 
-  if (!isMounted) return null;
-
   const isActive = (href: string) => {
     const dashboards = ["/admin", "/professeur", "/parent", "/eleve"];
     if (dashboards.includes(href)) return pathname === href;
@@ -197,31 +190,32 @@ export default function Sidebar({ role }: SidebarProps) {
 
   return (
     <>
-      <button
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="fixed left-4 top-[4.5rem] z-50 rounded-lg border border-gray-200 bg-white p-2 shadow-sm lg:hidden"
-        aria-label="Menu"
-      >
-        {isMobileOpen ? (
-          <X className="h-5 w-5 text-primary" />
-        ) : (
-          <Menu className="h-5 w-5 text-primary" />
-        )}
-      </button>
-
       <aside
         className={cn(
-          "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-60 shrink-0 border-r border-gray-200 bg-slate-50 transition-transform duration-300 lg:sticky lg:translate-x-0",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          "fixed left-0 z-40 w-[min(18rem,85vw)] shrink-0 border-r border-primary-dark/60 bg-gradient-to-b from-primary-dark to-[#2a1812] shadow-xl transition-transform duration-300 lg:sticky lg:top-16 lg:z-auto lg:h-[calc(100vh-4rem)] lg:w-60 lg:translate-x-0",
+          "top-14 h-[calc(100dvh-3.5rem)] sm:top-16 sm:h-[calc(100dvh-4rem)]",
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        <nav className="flex h-full flex-col gap-1 overflow-y-auto p-3">
+        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 lg:hidden">
+          <p className="text-sm font-medium text-white">Navigation</p>
+          <button
+            type="button"
+            onClick={close}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-white/80 hover:bg-white/10"
+            aria-label="Fermer le menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <nav className="flex h-[calc(100%-3.25rem)] flex-col gap-1 overflow-y-auto p-3 lg:h-full">
           {sections.map((section, sectionIndex) => (
             <div key={section.label}>
               {sectionIndex > 0 && (
-                <div className="mb-1.5 mt-1 border-t border-gray-200/80" aria-hidden="true" />
+                <div className="mb-1.5 mt-1 border-t border-white/10" aria-hidden="true" />
               )}
-              <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+              <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-secondary/60">
                 {section.label}
               </p>
               <div className="space-y-0.5">
@@ -232,29 +226,30 @@ export default function Sidebar({ role }: SidebarProps) {
                   return (
                     <button
                       key={item.href}
+                      type="button"
                       onClick={() => {
-                        setIsMobileOpen(false);
+                        close();
                         router.push(item.href);
                       }}
                       className={cn(
-                        "relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors",
+                        "relative flex w-full min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all",
                         active
-                          ? "bg-primary/10 text-primary"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-primary"
+                          ? "bg-white/12 text-white shadow-sm ring-1 ring-white/10"
+                          : "text-white/65 hover:bg-white/8 hover:text-white"
                       )}
                     >
                       {active && (
-                        <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-primary" />
+                        <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-secondary" />
                       )}
                       <Icon
                         className={cn(
                           "h-[18px] w-[18px] shrink-0",
-                          active ? "text-primary" : "text-gray-400"
+                          active ? "text-secondary-light" : "text-white/40"
                         )}
                       />
                       <span className="flex-1 truncate">{item.label}</span>
                       {item.badge === "messages" && unreadCount > 0 && (
-                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary px-1.5 text-[10px] font-bold text-primary-dark">
                           {unreadCount > 99 ? "99+" : unreadCount}
                         </span>
                       )}
@@ -267,10 +262,10 @@ export default function Sidebar({ role }: SidebarProps) {
         </nav>
       </aside>
 
-      {isMobileOpen && (
+      {isOpen && (
         <div
-          className="fixed inset-0 top-16 z-30 bg-black/20 lg:hidden"
-          onClick={() => setIsMobileOpen(false)}
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          onClick={close}
           aria-hidden="true"
         />
       )}
