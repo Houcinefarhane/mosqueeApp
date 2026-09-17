@@ -52,11 +52,8 @@ npm install
 ```
 
 3. **Configurer les variables d'environnement**
-```bash
-cp .env.example .env
-```
 
-Remplir le fichier `.env` avec vos clés :
+Créer un fichier `.env` à la racine du projet avec :
 - `DATABASE_URL` : URL de connexion Neon PostgreSQL
 - `NEXTAUTH_SECRET` : Secret pour NextAuth (générer avec `openssl rand -base64 32`)
 - `NEXTAUTH_URL` : URL de l'application (ex: `http://localhost:3002`)
