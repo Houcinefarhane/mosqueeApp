@@ -45,14 +45,14 @@ export async function withRetry<T>(
         error.code === "P1017" ||
         error.code === "57P01"; // terminating connection due to administrator command
 
-      // CockroachDB : conflit de transaction sérialisable — retry automatique
       const isRetryableTransaction =
         error.code === "P2034" ||
         error.message?.includes("40001") ||
         error.message?.includes("restart transaction");
-      
+
       if ((isConnectionError || isRetryableTransaction) && i < maxRetries - 1) {
-        console.warn(`Tentative ${i + 1}/${maxRetries} - Reconnexion...`);
+        const reason = isRetryableTransaction ? "retry transaction" : "reconnexion";
+        console.warn(`Tentative ${i + 1}/${maxRetries} - ${reason}...`);
         
         // Déconnecter proprement
         try {

@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { withDevPerf } from "@/lib/dev/with-dev-perf";
+import { parseListParams, getPaginationMeta } from "@/lib/admin/list-params";
+import { buildEleveSearchWhere } from "@/lib/admin/search-filters";
 import { z } from "zod";
 import { revalidatePath, revalidateTag } from "next/cache";
 
@@ -75,15 +77,42 @@ async function getEleves(req: NextRequest) {
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const paginated =
+      searchParams.has("page") || searchParams.has("q");
+
+    if (!paginated) {
+      const eleves = await prisma.eleve.findMany({
+        where: { mosqueeId: session.user.mosqueeId },
+        include: { classe: true, parent: true },
+        orderBy: [{ nom: "asc" }, { prenom: "asc" }],
+      });
+      return NextResponse.json(eleves);
+    }
+
+    const { q, page, pageSize } = parseListParams({
+      q: searchParams.get("q") ?? undefined,
+      page: searchParams.get("page") ?? undefined,
+    });
+    const where = buildEleveSearchWhere(session.user.mosqueeId, q);
+    const total = await prisma.eleve.count({ where });
+    const { safePage, totalPages } = getPaginationMeta(total, page, pageSize);
+
     const eleves = await prisma.eleve.findMany({
-      where: { mosqueeId: session.user.mosqueeId },
-      include: {
-        classe: true,
-        parent: true,
-      },
+      where,
+      include: { classe: true, parent: true },
+      orderBy: [{ nom: "asc" }, { prenom: "asc" }],
+      skip: (safePage - 1) * pageSize,
+      take: pageSize,
     });
 
-    return NextResponse.json(eleves);
+    return NextResponse.json({
+      data: eleves,
+      total,
+      page: safePage,
+      pageSize,
+      totalPages,
+    });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || "Erreur serveur" },

@@ -45,7 +45,7 @@ Chaque mosquée est isolée : un admin crée sa mosquée, les autres utilisateur
 | Frontend | Next.js 14 (App Router), TypeScript, Tailwind CSS |
 | UI | Composants maison, Framer Motion, Recharts |
 | Backend | Next.js API Routes |
-| Base de données | CockroachDB (Cloud en prod, Docker local) |
+| Base de données | Neon PostgreSQL (serverless) |
 | ORM | Prisma |
 | Auth | NextAuth.js (credentials + JWT) |
 | Emails | Resend *(installé, pas encore branché)* |
@@ -119,7 +119,7 @@ Chaque mosquée est isolée : un admin crée sa mosquée, les autres utilisateur
 
 ## Modèle de données
 
-Entités principales (Prisma / CockroachDB) :
+Entités principales (Prisma / PostgreSQL) :
 
 - **Mosquee** — nom, adresse, contact, logo
 - **User** — compte avec rôle (`ADMIN`, `PROFESSEUR`, `PARENT`, `ELEVE`)
@@ -199,7 +199,7 @@ Palette extraite du logo **AMP — Mosquée de Plaisir** :
 ### Prérequis
 
 - Node.js 18+
-- CockroachDB (Docker local ou CockroachDB Cloud)
+- Neon PostgreSQL ([console.neon.tech](https://console.neon.tech/)) ou Docker local
 
 ### Étapes
 
@@ -212,17 +212,20 @@ npm install
 Copier `.env.example` vers `.env` et ajuster si besoin :
 
 ```env
-DATABASE_URL="postgresql://root@localhost:26257/madrasa?sslmode=disable"
+DATABASE_URL="postgresql://user:pass@ep-xxx.neon.tech/madrasa?sslmode=require"
 NEXTAUTH_SECRET="..."          # openssl rand -base64 32
 NEXTAUTH_URL="http://localhost:3002"
 NEXT_PUBLIC_APP_URL="http://localhost:3002"
 # RESEND_API_KEY="..."         # optionnel, pas encore utilisé
 ```
 
-Démarrer CockroachDB en local :
+> Guide Neon : [docs/neon.md](docs/neon.md)
+
+Option PostgreSQL local (Docker) :
 
 ```bash
-npm run db:docker   # single-node sur le port 26257 (UI admin : http://localhost:8080)
+npm run db:docker   # postgres:16 sur le port 5433
+# DATABASE_URL="postgresql://madrasa:madrasa@localhost:5433/madrasa"
 ```
 
 Initialiser la base :
@@ -319,7 +322,7 @@ Ordre recommandé pour la suite du développement :
 
 1. **Notifications email** (Resend) — annonces, absences, devoirs
 2. **Mot de passe oublié**
-3. **Migrations Prisma** + déploiement **Vercel**
+3. **Neon** + déploiement **Vercel** → [docs/neon.md](docs/neon.md) · [docs/vercel.md](docs/vercel.md)
 4. **CRUD admin** (création parent, édition comptes)
 5. **Justification absences** + page annonces parents
 6. **Exports PDF** (présences, relevés de notes)
@@ -342,8 +345,13 @@ Ordre recommandé pour la suite du développement :
 | `npm run db:studio` | Interface Prisma Studio |
 | `npm run db:seed` | Insérer les données démo |
 | `npm run db:setup` | `db:push` + `db:seed` |
-| `npm run db:docker` | CockroachDB via Docker Compose |
+| `npm run db:docker` | PostgreSQL local via Docker Compose |
+| `npm run db:docker:down` | Arrêter PostgreSQL Docker |
+| `npm run db:docker:logs` | Logs PostgreSQL en direct |
+| `npm run db:migrate:deploy` | Appliquer migrations (prod) |
 | `npm run db:seed-charge` | Seed massif pour tests de performance |
+
+> Guide Neon : [docs/neon.md](docs/neon.md)
 
 ---
 

@@ -51,8 +51,9 @@ async function testConnection() {
       console.log("💡 Solution :");
       console.log("   1. Créez un fichier .env à la racine du projet");
       console.log("   2. Copiez .env.example vers .env");
-      console.log("   3. Format local: DATABASE_URL=\"postgresql://root@localhost:26257/madrasa?sslmode=disable\"");
-      console.log("   4. Relancez: npm run db:push");
+      console.log("   3. Neon: DATABASE_URL=\"postgresql://user:pass@ep-xxx.neon.tech/madrasa?sslmode=require\"");
+      console.log("   4. Local Docker: DATABASE_URL=\"postgresql://madrasa:madrasa@localhost:5433/madrasa\"");
+      console.log("   5. Relancez: npm run db:push");
     } else if (error.message.includes("P1001") || error.message.includes("connect")) {
       console.log("💡 Solution :");
       console.log("   - Vérifiez que votre URL DATABASE_URL est correcte");
