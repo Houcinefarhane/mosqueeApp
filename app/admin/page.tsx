@@ -86,23 +86,33 @@ export default async function AdminDashboard() {
   const tauxPresence =
     elevesTotal > 0 ? Math.round((presencesAujourdhui / elevesTotal) * 100) : 0;
 
-  const presenceByDay = new Map<string, { presents: number; absents: number }>();
+  const presenceByDay = new Map<
+    string,
+    { day: Date; presents: number; absents: number }
+  >();
   for (let i = 29; i >= 0; i--) {
-    const d = subDays(today, i);
-    const key = format(d, "dd/MM", { locale: fr });
-    presenceByDay.set(key, { presents: 0, absents: 0 });
+    const day = subDays(today, i);
+    presenceByDay.set(format(day, "yyyy-MM-dd"), {
+      day,
+      presents: 0,
+      absents: 0,
+    });
   }
   for (const p of presences30j) {
-    const key = format(new Date(p.date), "dd/MM", { locale: fr });
+    const key = format(new Date(p.date), "yyyy-MM-dd");
     const entry = presenceByDay.get(key);
     if (!entry) continue;
     if (p.statut === "PRESENT") entry.presents++;
     else if (p.statut === "ABSENT" || p.statut === "RETARD") entry.absents++;
   }
-  const chartData = Array.from(presenceByDay.entries()).map(([date, v]) => ({
-    date,
-    ...v,
-  }));
+  const chartData = Array.from(presenceByDay.values()).map(
+    ({ day, presents, absents }) => ({
+      date: format(day, "d MMM", { locale: fr }),
+      dateFull: format(day, "EEEE d MMMM yyyy", { locale: fr }),
+      presents,
+      absents,
+    })
+  );
 
   return (
     <div className="space-y-4 sm:space-y-6">
