@@ -24,6 +24,9 @@ interface Eleve {
 const TOUCH_FIELD =
   "min-h-11 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent";
 
+const DATE_FIELD =
+  "min-h-11 w-[9.75rem] max-w-[42vw] rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent md:w-full md:max-w-none";
+
 export default function AppelPage() {
   return (
     <Suspense fallback={<AppelLoadingSkeleton />}>
@@ -231,9 +234,9 @@ function AppelPageContent() {
             Paramètres de l&apos;appel
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
+        <CardContent className="min-w-0 overflow-hidden">
+          <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
+            <div className="min-w-0">
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
                 Classe
               </label>
@@ -250,7 +253,7 @@ function AppelPageContent() {
                 ))}
               </select>
             </div>
-            <div>
+            <div className="shrink-0 md:min-w-0">
               <label className="mb-1.5 block text-sm font-medium text-gray-700">
                 Date
               </label>
@@ -258,7 +261,7 @@ function AppelPageContent() {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className={TOUCH_FIELD}
+                className={DATE_FIELD}
               />
             </div>
           </div>
