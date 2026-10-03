@@ -14,6 +14,7 @@ import { PRESENCE_STATUS } from "@/lib/constants/status";
 import { subDays, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { formatDate } from "@/lib/utils";
+import { getPresenceStatsToday } from "@/lib/dashboard/presence-today";
 
 export const metadata = {
   title: "Tableau de bord",
@@ -35,9 +36,7 @@ export default async function AdminDashboard() {
     elevesCount,
     classesCount,
     professeursCount,
-    presencesAujourdhui,
-    elevesTotal,
-    absencesAujourdhui,
+    presenceToday,
     presences30j,
     planningProchain,
     annoncesRecentes,
@@ -46,23 +45,7 @@ export default async function AdminDashboard() {
     prisma.eleve.count({ where: { mosqueeId } }),
     prisma.classe.count({ where: { mosqueeId } }),
     prisma.user.count({ where: { mosqueeId, role: "PROFESSEUR" } }),
-    prisma.presence.count({
-      where: { mosqueeId, date: { gte: today, lt: tomorrow }, statut: "PRESENT" },
-    }),
-    prisma.eleve.count({ where: { mosqueeId } }),
-    prisma.presence.findMany({
-      where: {
-        mosqueeId,
-        date: { gte: today, lt: tomorrow },
-        statut: { in: ["ABSENT", "RETARD"] },
-      },
-      include: {
-        eleve: { select: { prenom: true, nom: true } },
-        classe: { select: { nom: true } },
-      },
-      take: 8,
-      orderBy: { date: "desc" },
-    }),
+    getPresenceStatsToday(mosqueeId, today, tomorrow),
     prisma.presence.findMany({
       where: { mosqueeId, date: { gte: thirtyDaysAgo } },
       select: { date: true, statut: true },
@@ -83,8 +66,42 @@ export default async function AdminDashboard() {
     }),
   ]);
 
-  const tauxPresence =
-    elevesTotal > 0 ? Math.round((presencesAujourdhui / elevesTotal) * 100) : 0;
+  const absencesAujourdhui =
+    presenceToday.classeIds.length > 0
+      ? await prisma.presence.findMany({
+          where: {
+            mosqueeId,
+            date: { gte: today, lt: tomorrow },
+            statut: { in: ["ABSENT", "RETARD", "EXCUSE"] },
+            classeId: { in: presenceToday.classeIds },
+          },
+          include: {
+            eleve: { select: { prenom: true, nom: true } },
+            classe: { select: { nom: true } },
+          },
+          take: 8,
+          orderBy: { date: "desc" },
+        })
+      : [];
+
+  const presenceStatValue =
+    presenceToday.coursCount === 0
+      ? "—"
+      : `${presenceToday.presents}/${presenceToday.attendus}`;
+
+  const presenceStatTrend =
+    presenceToday.coursCount === 0
+      ? `Aucun cours le ${presenceToday.jourLabel.toLowerCase()}`
+      : `${presenceToday.taux ?? 0} % · ${presenceToday.coursCount} cours · ${presenceToday.attendus} attendus`;
+
+  const presenceTrendDirection =
+    presenceToday.taux === null
+      ? "neutral"
+      : presenceToday.taux >= 80
+        ? "up"
+        : presenceToday.taux >= 50
+          ? "neutral"
+          : "down";
 
   const presenceByDay = new Map<
     string,
@@ -152,10 +169,10 @@ export default async function AdminDashboard() {
           href="/admin/professeurs"
         />
         <StatCard
-          title="Présences aujourd'hui"
-          value={`${presencesAujourdhui}/${elevesTotal}`}
-          trend={`${tauxPresence}% de taux`}
-          trendDirection={tauxPresence >= 80 ? "up" : tauxPresence >= 50 ? "neutral" : "down"}
+          title="Taux de présence"
+          value={presenceStatValue}
+          trend={presenceStatTrend}
+          trendDirection={presenceTrendDirection}
           icon={Calendar}
           variant="purple"
         />
