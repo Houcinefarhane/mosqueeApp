@@ -41,8 +41,6 @@ export default function HistoriqueNotesPage() {
   const [classes, setClasses] = useState<any[]>([]);
   const [selectedClasseId, setSelectedClasseId] = useState("");
   const [matiere, setMatiere] = useState("");
-  const [dateDebut, setDateDebut] = useState("");
-  const [dateFin, setDateFin] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState<NoteSession | null>(null);
 
@@ -67,8 +65,6 @@ export default function HistoriqueNotesPage() {
         const params = new URLSearchParams();
         if (selectedClasseId) params.append("classeId", selectedClasseId);
         if (matiere) params.append("matiere", matiere);
-        if (dateDebut) params.append("dateDebut", dateDebut);
-        if (dateFin) params.append("dateFin", dateFin);
 
         const response = await fetch(`/api/professeur/notes-sessions?${params.toString()}`);
         
@@ -93,7 +89,7 @@ export default function HistoriqueNotesPage() {
     };
 
     fetchSessions();
-  }, [selectedClasseId, matiere, dateDebut, dateFin]);
+  }, [selectedClasseId, matiere]);
 
   const getMoyenne = (session: NoteSession) => {
     if (session.notes.length === 0) return 0;
@@ -121,15 +117,15 @@ export default function HistoriqueNotesPage() {
           <CardTitle>Filtres</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
                 Classe
               </label>
               <select
                 value={selectedClasseId}
                 onChange={(e) => setSelectedClasseId(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">Toutes les classes</option>
                 {classes.map((classe) => (
@@ -140,7 +136,7 @@ export default function HistoriqueNotesPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">
                 Matière
               </label>
               <input
@@ -148,29 +144,7 @@ export default function HistoriqueNotesPage() {
                 value={matiere}
                 onChange={(e) => setMatiere(e.target.value)}
                 placeholder="Ex: Coran, Arabe..."
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Date début
-              </label>
-              <input
-                type="date"
-                value={dateDebut}
-                onChange={(e) => setDateDebut(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Date fin
-              </label>
-              <input
-                type="date"
-                value={dateFin}
-                onChange={(e) => setDateFin(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           </div>

@@ -37,8 +37,6 @@ export default function HistoriqueAppelPage() {
   const [appels, setAppels] = useState<Appel[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [selectedClasseId, setSelectedClasseId] = useState("");
-  const [dateDebut, setDateDebut] = useState("");
-  const [dateFin, setDateFin] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAppel, setSelectedAppel] = useState<Appel | null>(null);
 
@@ -62,8 +60,6 @@ export default function HistoriqueAppelPage() {
       try {
         const params = new URLSearchParams();
         if (selectedClasseId) params.append("classeId", selectedClasseId);
-        if (dateDebut) params.append("dateDebut", dateDebut);
-        if (dateFin) params.append("dateFin", dateFin);
 
         const response = await fetch(`/api/professeur/appels?${params.toString()}`);
         
@@ -90,7 +86,7 @@ export default function HistoriqueAppelPage() {
     };
 
     fetchAppels();
-  }, [selectedClasseId, dateDebut, dateFin]);
+  }, [selectedClasseId]);
 
   const statutIcons = {
     PRESENT: CheckCircle,
@@ -148,46 +144,22 @@ export default function HistoriqueAppelPage() {
           <CardTitle>Filtres</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Classe
-              </label>
-              <select
-                value={selectedClasseId}
-                onChange={(e) => setSelectedClasseId(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">Toutes les classes</option>
-                {classes.map((classe) => (
-                  <option key={classe.id} value={classe.id}>
-                    {classe.nom} - {classe.niveau}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Date début
-              </label>
-              <input
-                type="date"
-                value={dateDebut}
-                onChange={(e) => setDateDebut(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Date fin
-              </label>
-              <input
-                type="date"
-                value={dateFin}
-                onChange={(e) => setDateFin(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              Classe
+            </label>
+            <select
+              value={selectedClasseId}
+              onChange={(e) => setSelectedClasseId(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary md:max-w-sm"
+            >
+              <option value="">Toutes les classes</option>
+              {classes.map((classe) => (
+                <option key={classe.id} value={classe.id}>
+                  {classe.nom} - {classe.niveau}
+                </option>
+              ))}
+            </select>
           </div>
         </CardContent>
       </Card>
