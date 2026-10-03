@@ -20,6 +20,26 @@ export const JOURS_LABELS: Record<JourSemaine, string> = {
   DIMANCHE: "Dimanche",
 };
 
+/** Ordre d'affichage emploi du temps (lundi → dimanche) */
+export const JOURS_SEMAINE: JourSemaine[] = [
+  "LUNDI",
+  "MARDI",
+  "MERCREDI",
+  "JEUDI",
+  "VENDREDI",
+  "SAMEDI",
+  "DIMANCHE",
+];
+
+export function parseHeureMinutes(heure: string): number {
+  const [h, m] = heure.split(":").map(Number);
+  return (h ?? 0) * 60 + (m ?? 0);
+}
+
+export function formatPlageHoraire(debut: string, fin: string): string {
+  return `${debut.replace(":", "h")} – ${fin.replace(":", "h")}`;
+}
+
 /** Retourne le jour Prisma (LUNDI, MARDI…) pour une date donnée */
 export function getJourFromDate(date: Date = new Date()): JourSemaine {
   return JOURS[date.getDay()];
