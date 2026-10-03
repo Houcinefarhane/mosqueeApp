@@ -89,6 +89,7 @@ model Classe {
   id           String   @id @default(cuid())
   nom          String
   niveau       String
+  salle        String?
   professeurId String?
   mosqueeId    String
   createdAt    DateTime @default(now())
