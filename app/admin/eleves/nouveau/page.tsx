@@ -14,7 +14,6 @@ export default function NouvelElevePage() {
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
-    dateNaissance: "",
     telephone: "",
     email: "",
     classeId: "",
@@ -58,7 +57,6 @@ export default function NouvelElevePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          dateNaissance: formData.dateNaissance || null,
           parentId: formData.parentId || null,
         }),
       });
@@ -106,12 +104,6 @@ export default function NouvelElevePage() {
                 required
               />
             </div>
-            <Input
-              label="Date de naissance"
-              type="date"
-              value={formData.dateNaissance}
-              onChange={(e) => setFormData({ ...formData, dateNaissance: e.target.value })}
-            />
             <Input
               label="Téléphone"
               type="tel"

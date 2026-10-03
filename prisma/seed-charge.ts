@@ -214,7 +214,6 @@ async function main() {
     id: string;
     nom: string;
     prenom: string;
-    dateNaissance: Date;
     telephone: string;
     email: string;
     classeId: string;
@@ -243,7 +242,6 @@ async function main() {
       id: eleveIds[i],
       nom: faker.person.lastName(),
       prenom: faker.person.firstName(),
-      dateNaissance: faker.date.birthdate({ min: 6, max: 16, mode: "age" }),
       telephone: faker.phone.number(),
       email: `eleve-${String(i + 1).padStart(3, "0")}@test-charge.local`,
       classeId,

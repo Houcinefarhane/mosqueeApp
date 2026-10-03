@@ -156,7 +156,6 @@ async function seed() {
         nom: "Mansouri",
         prenom: "Youssef",
         email: DEMO_ACCOUNTS.eleve.email,
-        dateNaissance: new Date("2014-05-15"),
         classeId: classe.id,
         parentId: parent.id,
         userId: eleveUser.id,
@@ -168,7 +167,6 @@ async function seed() {
       data: {
         nom: "Mansouri",
         prenom: "Amina",
-        dateNaissance: new Date("2016-09-20"),
         classeId: classe.id,
         parentId: parent.id,
         mosqueeId: mosquee.id,

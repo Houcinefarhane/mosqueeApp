@@ -11,7 +11,6 @@ import { revalidatePath, revalidateTag } from "next/cache";
 const createEleveSchema = z.object({
   nom: z.string().min(1, "Le nom est requis"),
   prenom: z.string().min(1, "Le prénom est requis"),
-  dateNaissance: z.string().nullable().optional(),
   telephone: z.string().optional(),
   email: z.string().email("Email invalide").min(1, "L'email est requis"),
   classeId: z.string().min(1, "La classe est requise"),
@@ -36,7 +35,6 @@ export async function POST(req: NextRequest) {
       data: {
         nom: data.nom,
         prenom: data.prenom,
-        dateNaissance: data.dateNaissance ? new Date(data.dateNaissance) : null,
         telephone: data.telephone || null,
         email: data.email,
         classeId: data.classeId,

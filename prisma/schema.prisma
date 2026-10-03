@@ -138,7 +138,6 @@ model Eleve {
   id            String    @id @default(cuid())
   nom           String
   prenom        String
-  dateNaissance DateTime?
   telephone     String?
   email         String?
   classeId      String

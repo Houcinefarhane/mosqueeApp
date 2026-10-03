@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { Plus, Users } from "lucide-react";
-import { formatDate } from "@/lib/utils";
 import ListSearchBar from "@/components/admin/ListSearchBar";
 import ListPagination from "@/components/admin/ListPagination";
 import {
@@ -110,9 +109,6 @@ export default async function ElevesPage({
                       Classe
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date de naissance
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Parent
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -141,13 +137,6 @@ export default async function ElevesPage({
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm text-gray-900">
                           {eleve.classe.nom}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-500">
-                          {eleve.dateNaissance
-                            ? formatDate(eleve.dateNaissance)
-                            : "-"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

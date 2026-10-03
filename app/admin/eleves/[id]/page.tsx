@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
-import { User, BookOpen, Mail, Phone, Calendar, ArrowLeft, Edit } from "lucide-react";
+import { User, BookOpen, Mail, Phone, ArrowLeft, Edit } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 export default async function EleveDetailPage({
@@ -119,15 +119,6 @@ export default async function EleveDetailPage({
                 </Link>
               </div>
             </div>
-            {eleve.dateNaissance && (
-              <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="text-sm text-gray-600">Date de naissance</p>
-                  <p className="font-semibold">{formatDate(eleve.dateNaissance)}</p>
-                </div>
-              </div>
-            )}
             {eleve.email && (
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-primary" />
