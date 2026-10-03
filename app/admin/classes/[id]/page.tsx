@@ -6,8 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { BookOpen, Users, Calendar, ArrowLeft, Edit } from "lucide-react";
-import { formatDate } from "@/lib/utils";
-
 export default async function ClasseDetailPage({
   params,
 }: {
@@ -40,7 +38,6 @@ export default async function ClasseDetailPage({
         },
       },
       eleves: {
-        take: 10,
         orderBy: [{ nom: "asc" }, { prenom: "asc" }],
         include: {
           parent: {
@@ -186,11 +183,6 @@ export default async function ClasseDetailPage({
                   </Link>
                 </div>
               ))}
-              {classe._count.eleves > 10 && (
-                <p className="text-sm text-gray-600 text-center pt-2">
-                  ... et {classe._count.eleves - 10} autre(s) élève(s)
-                </p>
-              )}
             </div>
           ) : (
             <p className="text-gray-600 text-center py-8">
