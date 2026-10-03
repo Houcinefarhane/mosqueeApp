@@ -2,13 +2,16 @@
 
 import { useState, useEffect, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import PageHeader from "@/components/layout/PageHeader";
 import AppelCompactList, {
+  AppelListSkeleton,
   type StatutPresence,
 } from "@/components/professeur/AppelCompactList";
-import { CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
+import { TOUCH_DATE_FIELD, TOUCH_FIELD } from "@/lib/ui/touch-styles";
+import { CheckCircle, XCircle, Clock, AlertCircle, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Eleve {
@@ -21,30 +24,23 @@ interface Eleve {
   };
 }
 
-const TOUCH_FIELD =
-  "min-h-11 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent";
-
-const DATE_FIELD =
-  "min-h-11 w-[9.75rem] max-w-[42vw] rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent md:w-full md:max-w-none";
-
 export default function AppelPage() {
   return (
-    <Suspense fallback={<AppelLoadingSkeleton />}>
+    <Suspense fallback={<AppelPageSkeleton />}>
       <AppelPageContent />
     </Suspense>
   );
 }
 
-function AppelLoadingSkeleton() {
+function AppelPageSkeleton() {
   return (
-    <div className="space-y-4 animate-pulse">
-      <div className="h-8 w-48 rounded-lg bg-gray-200" />
-      <div className="h-24 rounded-xl bg-gray-100" />
-      <div className="space-y-2 md:hidden">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-14 rounded-lg bg-gray-100" />
-        ))}
+    <div className="space-y-4">
+      <div className="animate-pulse space-y-2 rounded-xl border border-gray-200 p-4">
+        <div className="h-6 w-40 rounded bg-gray-200" />
+        <div className="h-4 w-56 rounded bg-gray-100" />
       </div>
+      <div className="h-28 animate-pulse rounded-xl bg-gray-100" />
+      <AppelListSkeleton rows={8} />
     </div>
   );
 }
@@ -66,6 +62,7 @@ function AppelPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isLoadingEleves, setIsLoadingEleves] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
   useEffect(() => {
@@ -94,6 +91,7 @@ function AppelPageContent() {
   useEffect(() => {
     if (selectedClasseId) {
       setIsLoadingEleves(true);
+      setSubmitError("");
       const fetchEleves = async () => {
         try {
           const response = await fetch(
@@ -110,6 +108,7 @@ function AppelPageContent() {
           setExpandedIds(new Set());
         } catch (err) {
           console.error(err);
+          setSubmitError("Impossible de charger la liste des élèves.");
         } finally {
           setIsLoadingEleves(false);
         }
@@ -133,8 +132,29 @@ function AppelPageContent() {
     };
   }, [presences]);
 
+  const selectedClasse = classes.find((c) => c.id === selectedClasseId);
+
   const handleStatutChange = (eleveId: string, statut: StatutPresence) => {
     setPresences((prev) => ({ ...prev, [eleveId]: statut }));
+  };
+
+  const handleTogglePresence = (eleveId: string) => {
+    setPresences((prev) => {
+      const current = prev[eleveId] || "PRESENT";
+      if (current === "PRESENT") return { ...prev, [eleveId]: "ABSENT" };
+      if (current === "ABSENT") return { ...prev, [eleveId]: "PRESENT" };
+      return { ...prev, [eleveId]: "PRESENT" };
+    });
+  };
+
+  const handleMarkAll = (statut: "PRESENT" | "ABSENT") => {
+    setPresences((prev) => {
+      const next = { ...prev };
+      eleves.forEach((e) => {
+        next[e.id] = statut;
+      });
+      return next;
+    });
   };
 
   const handleToggleExpand = (eleveId: string) => {
@@ -150,6 +170,7 @@ function AppelPageContent() {
     if (!selectedClasseId || eleves.length === 0) return;
 
     setIsLoading(true);
+    setSubmitError("");
 
     try {
       const response = await fetch("/api/professeur/presences", {
@@ -175,7 +196,7 @@ function AppelPageContent() {
       router.push("/professeur/appel/historique");
     } catch (err: unknown) {
       console.error(err);
-      alert(
+      setSubmitError(
         err instanceof Error
           ? err.message
           : "Erreur lors de l'enregistrement de l'appel"
@@ -186,7 +207,7 @@ function AppelPageContent() {
   };
 
   if (isLoadingData) {
-    return <AppelLoadingSkeleton />;
+    return <AppelPageSkeleton />;
   }
 
   const statutIcons = {
@@ -216,22 +237,26 @@ function AppelPageContent() {
     <div
       className={cn(
         "space-y-4 sm:space-y-6",
-        showList && "pb-28 md:pb-0"
+        showList && "pb-32 md:pb-0"
       )}
     >
-      <div>
-        <h1 className="text-xl font-bold text-foreground sm:text-2xl">
-          Faire l&apos;appel
-        </h1>
-        <p className="mt-1 text-sm text-gray-600 sm:text-base">
-          Marquez les présences des élèves
-        </p>
-      </div>
+      <PageHeader
+        title="Faire l'appel"
+        description={
+          selectedClasse
+            ? `${selectedClasse.nom} · ${eleves.length || "…"} élève(s)`
+            : "Marquez les présences en un tap"
+        }
+        breadcrumbs={[
+          { label: "Espace professeur", href: "/professeur" },
+          { label: "Appel" },
+        ]}
+      />
 
       <Card variant="elevated">
         <CardHeader className="pb-2">
           <CardTitle className="text-base sm:text-lg">
-            Paramètres de l&apos;appel
+            Paramètres
           </CardTitle>
         </CardHeader>
         <CardContent className="min-w-0 overflow-hidden">
@@ -261,82 +286,131 @@ function AppelPageContent() {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className={DATE_FIELD}
+                className={TOUCH_DATE_FIELD}
               />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {isLoadingEleves && (
-        <div className="space-y-2 md:hidden">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-14 animate-pulse rounded-lg bg-gray-100"
-            />
-          ))}
-        </div>
+      {!selectedClasseId && (
+        <Card variant="elevated">
+          <CardContent className="flex flex-col items-center px-6 py-10 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+              <ClipboardList className="h-7 w-7 text-primary" />
+            </div>
+            <p className="font-medium text-foreground">
+              Choisissez une classe pour commencer
+            </p>
+            <p className="mt-1 max-w-xs text-sm text-gray-500">
+              Tous les élèves seront marqués présents par défaut. Un tap bascule
+              absent.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {selectedClasseId && isLoadingEleves && <AppelListSkeleton rows={12} />}
+
+      {selectedClasseId && !isLoadingEleves && eleves.length === 0 && (
+        <Card variant="elevated">
+          <CardContent className="px-6 py-10 text-center">
+            <p className="font-medium text-foreground">Aucun élève dans cette classe</p>
+            <p className="mt-1 text-sm text-gray-500">
+              Vérifiez l&apos;affectation des élèves dans l&apos;administration.
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {showList && (
         <>
-          {/* Résumé mobile */}
-          <div className="flex flex-wrap gap-2 md:hidden">
-            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
-              {counts.presents} présents
-            </span>
-            <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">
-              {counts.absents} absents
-            </span>
-            {(counts.retards > 0 || counts.excuses > 0) && (
-              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                {counts.retards + counts.excuses} autres
+          {/* Barre d'actions rapides — mobile */}
+          <div className="space-y-3 md:hidden">
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex min-h-8 items-center rounded-full bg-green-100 px-3 text-xs font-semibold text-green-800">
+                {counts.presents} présents
               </span>
-            )}
+              <span className="inline-flex min-h-8 items-center rounded-full bg-red-100 px-3 text-xs font-semibold text-red-800">
+                {counts.absents} absents
+              </span>
+              {(counts.retards > 0 || counts.excuses > 0) && (
+                <span className="inline-flex min-h-8 items-center rounded-full bg-amber-100 px-3 text-xs font-semibold text-amber-800">
+                  {counts.retards + counts.excuses} autres
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="touch"
+                className="min-h-12 w-full"
+                onClick={() => handleMarkAll("PRESENT")}
+              >
+                Tout présent
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="touch"
+                className="min-h-12 w-full"
+                onClick={() => handleMarkAll("ABSENT")}
+              >
+                Tout absent
+              </Button>
+            </div>
+            <p className="text-center text-xs text-gray-500">
+              Appuyez sur un élève pour basculer présent / absent
+            </p>
           </div>
 
-          {/* Liste compacte — mobile */}
           <AppelCompactList
             eleves={eleves}
             presences={presences}
             commentaires={commentaires}
             expandedIds={expandedIds}
             onToggleExpand={handleToggleExpand}
+            onTogglePresence={handleTogglePresence}
             onStatutChange={handleStatutChange}
             onCommentChange={(id, value) =>
               setCommentaires((prev) => ({ ...prev, [id]: value }))
             }
           />
 
-          {/* Commentaire séance — replié sur mobile */}
           <Card variant="elevated" className="md:hidden">
             <button
               type="button"
               onClick={() => setShowCommentaireSeance((v) => !v)}
-              className="flex min-h-11 w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-foreground"
+              className="flex min-h-12 w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-foreground"
             >
               Commentaire de séance (optionnel)
-              {showCommentaireSeance ? (
-                <ChevronUpIcon />
-              ) : (
-                <ChevronDownIcon />
-              )}
+              <span className="text-gray-400">{showCommentaireSeance ? "▲" : "▼"}</span>
             </button>
-            {showCommentaireSeance && (
-              <CardContent className="border-t border-gray-100 pt-0">
-                <textarea
-                  placeholder="Commentaire général sur la séance"
-                  value={commentaireSeance}
-                  onChange={(e) => setCommentaireSeance(e.target.value)}
-                  className="min-h-11 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                  rows={3}
-                />
-              </CardContent>
-            )}
+            <AnimatePresence initial={false}>
+              {showCommentaireSeance && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  className="overflow-hidden"
+                >
+                  <CardContent className="border-t border-gray-100 pt-0">
+                    <textarea
+                      placeholder="Commentaire général sur la séance"
+                      value={commentaireSeance}
+                      onChange={(e) => setCommentaireSeance(e.target.value)}
+                      className="min-h-12 w-full rounded-xl border border-gray-300 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      rows={3}
+                    />
+                  </CardContent>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </Card>
 
-          {/* Vue détaillée — desktop */}
+          {/* Desktop — inchangé structurellement */}
           <Card variant="elevated" className="hidden md:block">
             <CardHeader>
               <CardTitle>Commentaire de la séance</CardTitle>
@@ -368,20 +442,17 @@ function AppelPageContent() {
                       className="rounded-lg border border-gray-200 p-4"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.15 }}
                     >
                       <div className="mb-3 flex items-center gap-3">
-                        <div
-                          className={`rounded-lg p-2 ${statutColors[statut]}`}
-                        >
+                        <div className={`rounded-lg p-2 ${statutColors[statut]}`}>
                           <Icon className="h-5 w-5" />
                         </div>
                         <div>
                           <p className="font-semibold">
                             {eleve.prenom} {eleve.nom}
                           </p>
-                          <p className="text-sm text-gray-600">
-                            {eleve.classe.nom}
-                          </p>
+                          <p className="text-sm text-gray-600">{eleve.classe.nom}</p>
                         </div>
                       </div>
 
@@ -393,7 +464,7 @@ function AppelPageContent() {
                               type="button"
                               onClick={() => handleStatutChange(eleve.id, s)}
                               className={cn(
-                                "min-h-11 rounded-lg text-sm font-medium transition-all",
+                                "min-h-11 rounded-lg text-sm font-medium transition-all duration-150",
                                 statut === s
                                   ? "bg-primary text-white"
                                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -432,25 +503,27 @@ function AppelPageContent() {
         </>
       )}
 
-      {!selectedClasseId && (
-        <Card variant="elevated">
-          <CardContent className="p-12 text-center">
-            <p className="text-gray-600">
-              Sélectionnez une classe pour commencer l&apos;appel
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Barre fixe mobile — enregistrement */}
+      {/* Barre fixe mobile */}
       {showList && (
         <div
-          className="fixed inset-x-0 z-40 border-t border-gray-200 bg-surface/95 p-3 backdrop-blur-md md:hidden"
+          className="fixed inset-x-0 z-40 border-t border-gray-200 bg-surface/95 px-3 py-3 backdrop-blur-md md:hidden"
           style={{
             bottom: "calc(4.75rem + env(safe-area-inset-bottom, 0px))",
           }}
         >
-          <p className="mb-2 text-center text-xs text-gray-600">
+          <AnimatePresence>
+            {submitError && (
+              <motion.p
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-center text-xs text-red-700"
+              >
+                {submitError}
+              </motion.p>
+            )}
+          </AnimatePresence>
+          <p className="mb-2 text-center text-xs tabular-nums text-gray-600">
             {counts.presents} présents · {counts.absents} absents
             {counts.retards + counts.excuses > 0 &&
               ` · ${counts.retards + counts.excuses} autres`}
@@ -458,51 +531,13 @@ function AppelPageContent() {
           <Button
             onClick={handleSubmit}
             isLoading={isLoading}
-            className="min-h-11 w-full text-base"
-            size="lg"
+            size="touch"
+            className="min-h-12 w-full text-base font-semibold"
           >
-            Enregistrer l&apos;appel ({eleves.length})
+            Enregistrer l&apos;appel · {eleves.length} élèves
           </Button>
         </div>
       )}
     </div>
-  );
-}
-
-function ChevronDownIcon() {
-  return (
-    <svg
-      className="h-5 w-5 text-gray-400"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      aria-hidden
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M19 9l-7 7-7-7"
-      />
-    </svg>
-  );
-}
-
-function ChevronUpIcon() {
-  return (
-    <svg
-      className="h-5 w-5 text-gray-400"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      aria-hidden
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M5 15l7-7 7 7"
-      />
-    </svg>
   );
 }
