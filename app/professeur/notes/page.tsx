@@ -2,27 +2,57 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import NotesCompactList from "@/components/professeur/NotesCompactList";
-import { ListSkeleton } from "@/components/ui/Skeleton";
+import PageHeader from "@/components/layout/PageHeader";
+import NotesCompactList, {
+  NotesListSkeleton,
+} from "@/components/professeur/NotesCompactList";
+import {
+  TOUCH_FIELD,
+  TOUCH_NUMERIC_COMPACT,
+} from "@/lib/ui/touch-styles";
 import { cn } from "@/lib/utils";
+import { FileText } from "lucide-react";
 
 interface NoteEleve {
   valeur: string;
   commentaire: string;
 }
 
-const TOUCH_FIELD =
-  "min-h-11 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent";
+interface Classe {
+  id: string;
+  nom: string;
+  niveau: string;
+}
+
+interface Eleve {
+  id: string;
+  nom: string;
+  prenom: string;
+  classe?: { nom: string };
+}
+
+function NotesPageSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="animate-pulse space-y-2 rounded-xl border border-gray-200 p-4">
+        <div className="h-6 w-44 rounded bg-gray-200" />
+        <div className="h-4 w-64 rounded bg-gray-100" />
+      </div>
+      <div className="h-36 animate-pulse rounded-xl bg-gray-100" />
+      <NotesListSkeleton rows={8} />
+    </div>
+  );
+}
 
 export default function NotesPage() {
   const router = useRouter();
-  const [classes, setClasses] = useState<any[]>([]);
+  const [classes, setClasses] = useState<Classe[]>([]);
   const [selectedClasseId, setSelectedClasseId] = useState("");
-  const [eleves, setEleves] = useState<any[]>([]);
+  const [eleves, setEleves] = useState<Eleve[]>([]);
   const [matiere, setMatiere] = useState("");
   const [noteMax, setNoteMax] = useState("20");
   const [commentaireSeance, setCommentaireSeance] = useState("");
@@ -44,7 +74,7 @@ export default function NotesPage() {
         setClasses(data);
       } catch (err) {
         console.error(err);
-        setError("Erreur lors du chargement des classes");
+        setError("Impossible de charger vos classes.");
       } finally {
         setIsLoadingData(false);
       }
@@ -56,6 +86,7 @@ export default function NotesPage() {
   useEffect(() => {
     if (selectedClasseId) {
       setIsLoadingEleves(true);
+      setError("");
       const fetchEleves = async () => {
         try {
           const response = await fetch(
@@ -65,14 +96,14 @@ export default function NotesPage() {
           setEleves(data);
 
           const initial: Record<string, NoteEleve> = {};
-          data.forEach((eleve: any) => {
+          data.forEach((eleve: Eleve) => {
             initial[eleve.id] = { valeur: "", commentaire: "" };
           });
           setNotesParEleve(initial);
           setExpandedIds(new Set());
         } catch (err) {
           console.error(err);
-          setError("Erreur lors du chargement des élèves");
+          setError("Impossible de charger la liste des élèves.");
         } finally {
           setIsLoadingEleves(false);
         }
@@ -89,6 +120,8 @@ export default function NotesPage() {
   const notesSaisies = Object.values(notesParEleve).filter(
     (n) => n.valeur.trim() !== ""
   ).length;
+
+  const selectedClasse = classes.find((c) => c.id === selectedClasseId);
 
   const handleNoteChange = (
     eleveId: string,
@@ -121,7 +154,7 @@ export default function NotesPage() {
       return;
     }
 
-    if (!matiere) {
+    if (!matiere.trim()) {
       setError("Veuillez saisir la matière");
       return;
     }
@@ -153,7 +186,7 @@ export default function NotesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           classeId: selectedClasseId,
-          matiere,
+          matiere: matiere.trim(),
           noteMax: noteMaxNumber,
           commentaireSeance: commentaireSeance || null,
           notes: notesPayload,
@@ -180,12 +213,7 @@ export default function NotesPage() {
   };
 
   if (isLoadingData) {
-    return (
-      <div className="space-y-4">
-        <div className="h-8 w-48 animate-pulse rounded-lg bg-gray-200" />
-        <ListSkeleton rows={4} />
-      </div>
-    );
+    return <NotesPageSkeleton />;
   }
 
   const showList = eleves.length > 0 && !isLoadingEleves;
@@ -194,23 +222,27 @@ export default function NotesPage() {
     <div
       className={cn(
         "space-y-4 sm:space-y-6",
-        showList && "pb-28 md:pb-0"
+        showList && "pb-32 md:pb-0"
       )}
     >
-      <div>
-        <h1 className="text-xl font-bold text-foreground sm:text-2xl">
-          Ajouter des notes
-        </h1>
-        <p className="mt-1 text-sm text-gray-600 sm:text-base">
-          Saisissez les notes de toute la classe en une seule fois
-        </p>
-      </div>
+      <PageHeader
+        title="Ajouter des notes"
+        description={
+          selectedClasse && matiere
+            ? `${matiere} · ${selectedClasse.nom} · sur ${noteMax}`
+            : selectedClasse
+              ? `${selectedClasse.nom} · saisie rapide`
+              : "Saisissez les notes de la classe"
+        }
+        breadcrumbs={[
+          { label: "Espace professeur", href: "/professeur" },
+          { label: "Notes" },
+        ]}
+      />
 
       <Card variant="elevated">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base sm:text-lg">
-            Nouvelle série de notes
-          </CardTitle>
+          <CardTitle className="text-base sm:text-lg">Paramètres</CardTitle>
         </CardHeader>
         <CardContent>
           <form
@@ -218,10 +250,11 @@ export default function NotesPage() {
               e.preventDefault();
               submitNotes();
             }}
-            className="space-y-4 sm:space-y-6"
+            className="space-y-4"
           >
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div>
+            {/* Mobile : classe pleine largeur, matière + note max côte à côte */}
+            <div className="space-y-4 md:grid md:grid-cols-3 md:gap-4">
+              <div className="min-w-0">
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">
                   Classe
                 </label>
@@ -238,38 +271,78 @@ export default function NotesPage() {
                   ))}
                 </select>
               </div>
-              <Input
-                label="Matière"
-                value={matiere}
-                onChange={(e) => setMatiere(e.target.value)}
-                required
-                placeholder="Ex: Coran, Arabe, Fiqh..."
-                className="min-h-11 text-base"
-              />
-              <Input
-                label="Note max"
-                type="number"
-                inputMode="numeric"
-                step="0.1"
-                min="0"
-                value={noteMax}
-                onChange={(e) => setNoteMax(e.target.value)}
-                required
-                className="min-h-11 text-base"
-              />
+
+              <div className="flex flex-col gap-4 sm:flex-row md:contents">
+                <div className="min-w-0 flex-1">
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                    Matière
+                  </label>
+                  <input
+                    type="text"
+                    value={matiere}
+                    onChange={(e) => setMatiere(e.target.value)}
+                    required
+                    placeholder="Coran, Arabe…"
+                    autoCapitalize="words"
+                    className={TOUCH_FIELD}
+                  />
+                </div>
+                <div className="shrink-0 sm:w-auto md:min-w-0">
+                  <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                    Note max
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    pattern="[0-9]*[.,]?[0-9]*"
+                    value={noteMax}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(",", ".");
+                      if (raw === "" || /^[0-9]*\.?[0-9]*$/.test(raw)) {
+                        setNoteMax(raw);
+                      }
+                    }}
+                    required
+                    aria-label="Note maximale"
+                    className={cn(TOUCH_NUMERIC_COMPACT, "md:w-full")}
+                  />
+                </div>
+              </div>
             </div>
 
-            {isLoadingEleves && <ListSkeleton rows={8} />}
+            {!selectedClasseId && (
+              <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-8 text-center md:hidden">
+                <FileText className="mx-auto mb-3 h-8 w-8 text-gray-300" />
+                <p className="text-sm font-medium text-gray-600">
+                  Sélectionnez une classe pour afficher la liste
+                </p>
+              </div>
+            )}
+
+            {selectedClasseId && isLoadingEleves && (
+              <NotesListSkeleton rows={12} />
+            )}
+
+            {selectedClasseId && !isLoadingEleves && eleves.length === 0 && (
+              <div className="rounded-xl border border-gray-200 px-4 py-8 text-center">
+                <p className="font-medium text-foreground">Aucun élève dans cette classe</p>
+                <p className="mt-1 text-sm text-gray-500">
+                  Vérifiez l&apos;affectation dans l&apos;administration.
+                </p>
+              </div>
+            )}
 
             {showList && (
               <>
-                <div className="md:hidden">
-                  <p className="text-sm text-gray-600">
-                    {eleves.length} élève(s) · {notesSaisies} note(s) saisie(s)
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Laissez vide si pas de note
-                  </p>
+                <div className="space-y-1 md:hidden">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex min-h-8 items-center rounded-full bg-primary/10 px-3 text-xs font-semibold text-primary-dark">
+                      {notesSaisies}/{eleves.length} notes
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      Laissez vide si pas de note
+                    </span>
+                  </div>
                 </div>
 
                 <NotesCompactList
@@ -281,31 +354,40 @@ export default function NotesPage() {
                   onNoteChange={handleNoteChange}
                 />
 
-                <Card variant="elevated" className="md:hidden">
+                <div className="md:hidden">
                   <button
                     type="button"
                     onClick={() => setShowCommentaireSeance((v) => !v)}
-                    className="flex min-h-11 w-full items-center justify-between px-4 py-3 text-left text-sm font-medium"
+                    className="flex min-h-12 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-left text-sm font-medium text-foreground"
                   >
                     Commentaire de séance (optionnel)
                     <span className="text-gray-400">
                       {showCommentaireSeance ? "▲" : "▼"}
                     </span>
                   </button>
-                  {showCommentaireSeance && (
-                    <CardContent className="border-t border-gray-100 pt-0">
-                      <textarea
-                        value={commentaireSeance}
-                        onChange={(e) => setCommentaireSeance(e.target.value)}
-                        placeholder="Commentaire général sur la séance"
-                        className="min-h-11 w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                        rows={3}
-                      />
-                    </CardContent>
-                  )}
-                </Card>
+                  <AnimatePresence initial={false}>
+                    {showCommentaireSeance && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.18 }}
+                        className="overflow-hidden"
+                      >
+                        <textarea
+                          value={commentaireSeance}
+                          onChange={(e) => setCommentaireSeance(e.target.value)}
+                          placeholder="Commentaire général sur la séance"
+                          className="mt-2 min-h-12 w-full rounded-xl border border-gray-300 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                          rows={3}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
-                <div className="hidden md:block space-y-4">
+                {/* Desktop */}
+                <div className="hidden space-y-4 md:block">
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-gray-700">
                       Commentaire de la séance (optionnel)
@@ -313,79 +395,80 @@ export default function NotesPage() {
                     <textarea
                       value={commentaireSeance}
                       onChange={(e) => setCommentaireSeance(e.target.value)}
-                      placeholder="Ajoutez un commentaire général sur la séance de notes"
+                      placeholder="Commentaire général sur la séance"
                       className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                       rows={3}
                     />
                   </div>
 
-                  <div>
-                    <p className="mb-3 text-sm text-gray-600">
-                      {eleves.length} élève(s) dans cette classe
-                    </p>
-                    <div className="space-y-3">
-                      {eleves.map((eleve) => {
-                        const note = notesParEleve[eleve.id] || {
-                          valeur: "",
-                          commentaire: "",
-                        };
+                  <p className="text-sm text-gray-600">
+                    {eleves.length} élève(s) · {notesSaisies} note(s) saisie
+                    {notesSaisies !== 1 ? "s" : ""}
+                  </p>
 
-                        return (
-                          <motion.div
-                            key={eleve.id}
-                            className="flex flex-col gap-4 rounded-lg border border-gray-200 p-4 md:flex-row md:items-center md:justify-between"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                          >
-                            <div>
-                              <p className="font-semibold">
-                                {eleve.prenom} {eleve.nom}
+                  <div className="space-y-3">
+                    {eleves.map((eleve) => {
+                      const note = notesParEleve[eleve.id] || {
+                        valeur: "",
+                        commentaire: "",
+                      };
+
+                      return (
+                        <motion.div
+                          key={eleve.id}
+                          className="flex flex-col gap-4 rounded-lg border border-gray-200 p-4 lg:flex-row lg:items-start"
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          <div className="min-w-[10rem] shrink-0">
+                            <p className="font-semibold">
+                              {eleve.prenom} {eleve.nom}
+                            </p>
+                            {eleve.classe && (
+                              <p className="text-sm text-gray-600">
+                                {eleve.classe.nom}
                               </p>
-                              {eleve.classe && (
-                                <p className="text-sm text-gray-600">
-                                  {eleve.classe.nom}
-                                </p>
-                              )}
-                            </div>
-                            <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-3">
-                              <Input
-                                label="Note"
-                                type="number"
-                                inputMode="decimal"
-                                step="0.1"
-                                min="0"
-                                value={note.valeur}
+                            )}
+                          </div>
+                          <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
+                            <Input
+                              label={`Note / ${noteMax}`}
+                              type="text"
+                              inputMode="decimal"
+                              value={note.valeur}
+                              onChange={(e) => {
+                                const raw = e.target.value.replace(",", ".");
+                                if (
+                                  raw === "" ||
+                                  /^[0-9]*\.?[0-9]*$/.test(raw)
+                                ) {
+                                  handleNoteChange(eleve.id, "valeur", raw);
+                                }
+                              }}
+                              className="min-h-11 text-base"
+                            />
+                            <div className="sm:col-span-2">
+                              <label className="mb-1 block text-xs font-medium text-gray-700">
+                                Commentaire (optionnel)
+                              </label>
+                              <textarea
+                                value={note.commentaire}
                                 onChange={(e) =>
                                   handleNoteChange(
                                     eleve.id,
-                                    "valeur",
+                                    "commentaire",
                                     e.target.value
                                   )
                                 }
-                                className="min-h-11 text-base"
+                                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                                rows={2}
                               />
-                              <div className="md:col-span-2">
-                                <label className="mb-1 block text-xs font-medium text-gray-700">
-                                  Commentaire (optionnel)
-                                </label>
-                                <textarea
-                                  value={note.commentaire}
-                                  onChange={(e) =>
-                                    handleNoteChange(
-                                      eleve.id,
-                                      "commentaire",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                                  rows={2}
-                                />
-                              </div>
                             </div>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </div>
 
                   {error && (
@@ -394,26 +477,11 @@ export default function NotesPage() {
                     </p>
                   )}
 
-                  <Button
-                    type="submit"
-                    isLoading={isLoading}
-                    size="lg"
-                    className="min-h-11"
-                  >
+                  <Button type="submit" isLoading={isLoading} size="lg">
                     Enregistrer les notes
                   </Button>
                 </div>
               </>
-            )}
-
-            {error && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="rounded-lg bg-red-50 p-3 text-sm text-red-600 md:hidden"
-              >
-                {error}
-              </motion.p>
             )}
           </form>
         </CardContent>
@@ -421,21 +489,34 @@ export default function NotesPage() {
 
       {showList && (
         <div
-          className="fixed inset-x-0 z-40 border-t border-gray-200 bg-surface/95 p-3 backdrop-blur-md md:hidden"
+          className="fixed inset-x-0 z-40 border-t border-gray-200 bg-surface/95 px-3 py-3 backdrop-blur-md md:hidden"
           style={{
             bottom: "calc(4.75rem + env(safe-area-inset-bottom, 0px))",
           }}
         >
-          <p className="mb-2 text-center text-xs text-gray-600">
-            {notesSaisies} note{notesSaisies > 1 ? "s" : ""} saisie
-            {notesSaisies !== 1 ? "s" : ""} sur {eleves.length}
+          <AnimatePresence>
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-center text-xs text-red-700"
+              >
+                {error}
+              </motion.p>
+            )}
+          </AnimatePresence>
+          <p className="mb-2 text-center text-xs tabular-nums text-gray-600">
+            {notesSaisies} note{notesSaisies !== 1 ? "s" : ""} sur{" "}
+            {eleves.length}
+            {matiere ? ` · ${matiere}` : ""}
           </p>
           <Button
             type="button"
             onClick={submitNotes}
             isLoading={isLoading}
             size="touch"
-            className="w-full"
+            className="min-h-12 w-full text-base font-semibold"
           >
             Enregistrer les notes
           </Button>
