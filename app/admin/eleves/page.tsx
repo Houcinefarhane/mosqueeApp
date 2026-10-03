@@ -58,16 +58,16 @@ export default async function ElevesPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Élèves</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-xl font-bold text-foreground sm:text-3xl">Élèves</h1>
+          <p className="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
             Gérez les élèves de votre mosquée ({total} au total)
           </p>
         </div>
-        <Link href="/admin/eleves/nouveau">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
+        <Link href="/admin/eleves/nouveau" className="shrink-0">
+          <Button size="touch" className="w-full sm:w-auto">
+            <Plus className="mr-2 h-4 w-4" />
             Nouvel élève
           </Button>
         </Link>
@@ -98,7 +98,36 @@ export default async function ElevesPage({
       ) : (
         <Card variant="elevated">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <ul className="divide-y divide-gray-100 md:hidden">
+              {eleves.map((eleve) => (
+                <li key={eleve.id} className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Users className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-foreground">
+                        {eleve.prenom} {eleve.nom}
+                      </p>
+                      {eleve.email && (
+                        <p className="truncate text-xs text-gray-500">{eleve.email}</p>
+                      )}
+                      <p className="mt-1 text-sm text-gray-600">
+                        {eleve.classe.nom}
+                        {eleve.parent
+                          ? ` · ${eleve.parent.prenom} ${eleve.parent.nom}`
+                          : " · Aucun parent"}
+                      </p>
+                    </div>
+                  </div>
+                  <Link href={`/admin/eleves/${eleve.id}`} className="mt-3 block">
+                    <Button variant="outline" size="touch" className="w-full">
+                      Voir la fiche
+                    </Button>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>

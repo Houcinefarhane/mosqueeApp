@@ -51,16 +51,16 @@ export default async function ParentsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Parents</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-xl font-bold text-foreground sm:text-3xl">Parents</h1>
+          <p className="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
             Gérez les parents et leurs enfants ({total} au total)
           </p>
         </div>
-        <Link href="/admin/parents/nouveau">
-          <Button>
-            <UserPlus className="w-4 h-4 mr-2" />
+        <Link href="/admin/parents/nouveau" className="shrink-0">
+          <Button size="touch" className="w-full sm:w-auto">
+            <UserPlus className="mr-2 h-4 w-4" />
             Nouveau parent
           </Button>
         </Link>
@@ -91,7 +91,48 @@ export default async function ParentsPage({
       ) : (
         <Card variant="elevated">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <ul className="divide-y divide-gray-100 md:hidden">
+              {parents.map((parent) => (
+                <li key={parent.id} className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Users className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-foreground">
+                        {parent.prenom} {parent.nom}
+                      </p>
+                      <div className="mt-1 flex items-center gap-2 text-sm text-gray-600">
+                        <Mail className="h-4 w-4 shrink-0 text-gray-400" />
+                        <span className="truncate">{parent.email}</span>
+                      </div>
+                      {parent.telephone && (
+                        <div className="mt-1 flex items-center gap-2 text-sm text-gray-600">
+                          <Phone className="h-4 w-4 shrink-0 text-gray-400" />
+                          {parent.telephone}
+                        </div>
+                      )}
+                      <p className="mt-2 text-sm text-gray-500">
+                        {parent._count.eleves} enfant
+                        {parent._count.eleves > 1 ? "s" : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-col gap-2">
+                    <Link href={`/admin/parents/${parent.id}`}>
+                      <Button variant="outline" size="touch" className="w-full">
+                        Voir
+                      </Button>
+                    </Link>
+                    <Link href={`/admin/parents/${parent.id}/assigner-eleves`}>
+                      <Button variant="ghost" size="touch" className="w-full">
+                        Assigner élèves
+                      </Button>
+                    </Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="hidden overflow-x-auto md:block">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>

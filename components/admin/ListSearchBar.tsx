@@ -22,16 +22,16 @@ export default function ListSearchBar({
           name="q"
           defaultValue={defaultValue}
           placeholder={placeholder}
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          className="min-h-11 w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-base focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary"
         />
       </div>
       <div className="flex gap-2">
-        <Button type="submit" variant="outline">
+        <Button type="submit" variant="outline" size="touch" className="flex-1 sm:flex-none sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm">
           Rechercher
         </Button>
         {defaultValue && (
-          <Link href={action}>
-            <Button type="button" variant="ghost">
+          <Link href={action} className="flex-1 sm:flex-none">
+            <Button type="button" variant="ghost" size="touch" className="w-full sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm">
               Effacer
             </Button>
           </Link>

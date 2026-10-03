@@ -36,14 +36,14 @@ export default function ListPagination({
       <div className="flex items-center gap-2">
         {prevHref ? (
           <Link href={prevHref}>
-            <Button variant="outline" size="sm">
-              <ChevronLeft className="w-4 h-4 mr-1" />
+            <Button variant="outline" size="touch" className="sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm">
+              <ChevronLeft className="mr-1 h-4 w-4" />
               Précédent
             </Button>
           </Link>
         ) : (
-          <Button variant="outline" size="sm" disabled>
-            <ChevronLeft className="w-4 h-4 mr-1" />
+          <Button variant="outline" size="touch" className="sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm" disabled>
+            <ChevronLeft className="mr-1 h-4 w-4" />
             Précédent
           </Button>
         )}
@@ -52,15 +52,15 @@ export default function ListPagination({
         </span>
         {nextHref ? (
           <Link href={nextHref}>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="touch" className="sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm">
               Suivant
-              <ChevronRight className="w-4 h-4 ml-1" />
+              <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           </Link>
         ) : (
-          <Button variant="outline" size="sm" disabled>
+          <Button variant="outline" size="touch" className="sm:min-h-0 sm:px-4 sm:py-2 sm:text-sm" disabled>
             Suivant
-            <ChevronRight className="w-4 h-4 ml-1" />
+            <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         )}
       </div>

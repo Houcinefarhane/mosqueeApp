@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import { FileText, MessageSquare, ArrowLeft, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { ListSkeleton } from "@/components/ui/Skeleton";
 import { fr } from "date-fns/locale/fr";
 
 interface NoteSession {
@@ -152,7 +153,7 @@ export default function HistoriqueNotesPage() {
       </Card>
 
       {isLoading ? (
-        <div className="text-center py-12">Chargement...</div>
+        <ListSkeleton rows={6} />
       ) : sessions.length === 0 ? (
         <Card variant="elevated">
           <CardContent className="p-12 text-center">

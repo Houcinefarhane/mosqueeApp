@@ -43,7 +43,7 @@ export default function BottomNav({ role }: BottomNavProps) {
                 className="flex min-h-[3.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-1.5 text-primary/60 transition-colors active:bg-surface-muted"
               >
                 <Icon className="h-5 w-5 shrink-0" />
-                <span className="max-w-full truncate text-[10px] font-medium">
+                <span className="max-w-full truncate text-[11px] font-medium leading-tight">
                   {item.label}
                 </span>
               </button>
@@ -60,7 +60,7 @@ export default function BottomNav({ role }: BottomNavProps) {
               )}
             >
               <Icon className={cn("h-5 w-5 shrink-0", active && "text-secondary-dark")} />
-              <span className="max-w-full truncate text-[10px] font-medium">{item.label}</span>
+              <span className="max-w-full truncate text-[11px] font-medium leading-tight">{item.label}</span>
             </Link>
           );
         })}

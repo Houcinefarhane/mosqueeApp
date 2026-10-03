@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import { Calendar, Users, MessageSquare, CheckCircle, XCircle, Clock, AlertCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { ListSkeleton } from "@/components/ui/Skeleton";
 import { fr } from "date-fns/locale/fr";
 
 interface Appel {
@@ -165,7 +166,7 @@ export default function HistoriqueAppelPage() {
       </Card>
 
       {isLoading ? (
-        <div className="text-center py-12">Chargement...</div>
+        <ListSkeleton rows={6} />
       ) : appels.length === 0 ? (
         <Card variant="elevated">
           <CardContent className="p-12 text-center">

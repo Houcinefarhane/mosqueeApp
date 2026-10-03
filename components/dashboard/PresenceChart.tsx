@@ -38,11 +38,6 @@ const COLORS = {
   absent: "#DC2626",
 };
 
-function formatPercent(value: number, total: number) {
-  if (total <= 0) return "0 %";
-  return `${Math.round((value / total) * 100)} %`;
-}
-
 function CustomTooltip({
   active,
   payload,
@@ -71,9 +66,6 @@ function CustomTooltip({
           </span>
           <span className="font-semibold tabular-nums text-foreground">
             {point.presents}
-            <span className="ml-1.5 text-xs font-normal text-gray-400">
-              ({formatPercent(point.presents, total)})
-            </span>
           </span>
         </div>
         <div className="flex items-center justify-between gap-6 text-sm">
@@ -86,9 +78,6 @@ function CustomTooltip({
           </span>
           <span className="font-semibold tabular-nums text-foreground">
             {point.absents}
-            <span className="ml-1.5 text-xs font-normal text-gray-400">
-              ({formatPercent(point.absents, total)})
-            </span>
           </span>
         </div>
       </div>
@@ -142,8 +131,6 @@ export default function PresenceChart({
     { presents: 0, absents: 0 }
   );
   const recorded = totals.presents + totals.absents;
-  const avgRate =
-    recorded > 0 ? Math.round((totals.presents / recorded) * 100) : 0;
   const avgPresentPerDay =
     data.length > 0 ? Math.round(totals.presents / data.length) : 0;
   const avgAbsentPerDay =
@@ -205,12 +192,6 @@ export default function PresenceChart({
                 stroke="#16A34A"
                 strokeDasharray="4 4"
                 strokeOpacity={0.45}
-                label={{
-                  value: `Moy. ${avgPresentPerDay} présents/j`,
-                  position: "insideTopRight",
-                  fill: "#16A34A",
-                  fontSize: 10,
-                }}
               />
             ) : null}
             <Tooltip
@@ -274,15 +255,15 @@ export default function PresenceChart({
             accent="red"
           />
           <SummaryStat
-            label="Taux moyen"
-            value={`${avgRate} %`}
-            hint="présence enregistrée"
+            label="Moyenne / jour"
+            value={`${avgPresentPerDay} présents`}
+            hint={`${avgAbsentPerDay} absents en moyenne`}
             accent="neutral"
           />
           <SummaryStat
-            label="Moyenne / jour"
-            value={`${avgPresentPerDay} / ${avgAbsentPerDay}`}
-            hint="présents · absents"
+            label="Total enregistré"
+            value={recorded.toLocaleString("fr-FR")}
+            hint="sur 30 jours"
             accent="neutral"
           />
         </div>
