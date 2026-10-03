@@ -22,8 +22,6 @@
     "import:amp": "tsx scripts/import-amp.ts",
     "import:profs-amp": "tsx scripts/import-profs-amp.ts",
     "create:admin-amp": "tsx scripts/create-admin-amp.ts",
-    "cleanup:test-data": "tsx scripts/cleanup-test-data.ts",
-    "cleanup:test-data:dry-run": "tsx scripts/cleanup-test-data.ts --dry-run",
     "db:setup": "npm run db:push && npm run db:seed",
     "db:docker": "docker compose up -d",
     "db:docker:down": "docker compose down",
