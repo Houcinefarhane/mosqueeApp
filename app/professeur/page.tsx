@@ -56,8 +56,6 @@ export default async function ProfesseurDashboard() {
   const totalEleves = classes.reduce((s, c) => s + c._count.eleves, 0);
   const totalPresences = presencesMois.length;
   const presents = presencesMois.filter((p) => p.statut === "PRESENT").length;
-  const tauxPresenceMois =
-    totalPresences > 0 ? Math.round((presents / totalPresences) * 100) : 0;
 
   const classesDuJour = classes.filter((c) => c.planning.length > 0);
 
@@ -97,10 +95,10 @@ export default async function ProfesseurDashboard() {
           trend="Total suivis"
         />
         <StatCard
-          title="Taux de présence (mois)"
-          value={`${tauxPresenceMois}%`}
-          trend={`${presents}/${totalPresences} séances`}
-          trendDirection={tauxPresenceMois >= 80 ? "up" : tauxPresenceMois >= 50 ? "neutral" : "down"}
+          title="Présences (mois)"
+          value={presents}
+          trend={`${totalPresences} séances enregistrées`}
+          trendDirection={presents > 0 ? "up" : "neutral"}
           icon={TrendingUp}
           variant="purple"
         />

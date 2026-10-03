@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
@@ -12,6 +13,7 @@ interface NoteEleve {
 }
 
 export default function NotesPage() {
+  const router = useRouter();
   const [classes, setClasses] = useState<any[]>([]);
   const [selectedClasseId, setSelectedClasseId] = useState("");
   const [eleves, setEleves] = useState<any[]>([]);
@@ -139,16 +141,7 @@ export default function NotesPage() {
         throw new Error(data.error || "Erreur lors de l'enregistrement");
       }
 
-      // Réinitialiser les valeurs
-      setNotesParEleve((prev) =>
-        Object.fromEntries(
-          Object.keys(prev).map((id) => [id, { valeur: "", commentaire: "" }])
-        )
-      );
-      setMatiere("");
-      setNoteMax("20");
-      setCommentaireSeance("");
-      alert("Notes enregistrées avec succès !");
+      router.push("/professeur/notes/historique");
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Erreur lors de l'enregistrement des notes");

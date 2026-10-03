@@ -172,7 +172,7 @@ function AppelPageContent() {
         throw new Error(data.error || "Erreur lors de l'enregistrement");
       }
 
-      router.push("/professeur");
+      router.push("/professeur/appel/historique");
     } catch (err: unknown) {
       console.error(err);
       alert(

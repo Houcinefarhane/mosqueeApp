@@ -255,8 +255,13 @@ export default function HistoriqueNotesPage() {
                         <h4 className="font-semibold mb-3">Détails des notes</h4>
                         <div className="space-y-2">
                           {session.notes.map((note) => {
-                            const pourcentage = (note.valeur / note.noteMax) * 100;
-                            const couleur = pourcentage >= 80 ? "text-green-600" : pourcentage >= 60 ? "text-yellow-600" : "text-red-600";
+                            const ratio = note.noteMax > 0 ? note.valeur / note.noteMax : 0;
+                            const couleur =
+                              ratio >= 0.8
+                                ? "text-green-600"
+                                : ratio >= 0.6
+                                  ? "text-yellow-600"
+                                  : "text-red-600";
 
                             return (
                               <div
@@ -273,14 +278,9 @@ export default function HistoriqueNotesPage() {
                                     </p>
                                   )}
                                 </div>
-                                <div className="text-right">
-                                  <span className={`font-bold ${couleur}`}>
-                                    {note.valeur} / {note.noteMax}
-                                  </span>
-                                  <span className="text-xs text-gray-500 block">
-                                    ({pourcentage.toFixed(0)}%)
-                                  </span>
-                                </div>
+                                <span className={`font-bold ${couleur}`}>
+                                  {note.valeur} / {note.noteMax}
+                                </span>
                               </div>
                             );
                           })}
