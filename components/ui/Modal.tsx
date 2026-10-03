@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TOUCH_TARGET } from "@/lib/ui/touch-styles";
 
 interface ModalProps {
   open: boolean;
@@ -60,7 +61,10 @@ export default function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+            className={cn(
+              TOUCH_TARGET,
+              "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            )}
             aria-label="Fermer"
           >
             <X className="h-4 w-4" />

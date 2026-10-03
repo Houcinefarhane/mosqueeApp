@@ -2,6 +2,7 @@
 
 import { SelectHTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/utils";
+import { TOUCH_CONTROL } from "@/lib/ui/touch-styles";
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
@@ -14,19 +15,16 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="mb-1.5 block text-sm font-medium text-gray-700">
             {label}
-            {props.required && <span className="text-red-500 ml-1">*</span>}
+            {props.required && <span className="ml-1 text-red-500">*</span>}
           </label>
         )}
         <select
           ref={ref}
           className={cn(
-            "w-full px-4 py-2.5 border border-gray-300 rounded-lg",
-            "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
-            "transition-all duration-200",
-            "disabled:bg-gray-100 disabled:cursor-not-allowed",
-            "bg-white",
+            TOUCH_CONTROL,
+            "bg-white disabled:cursor-not-allowed disabled:bg-gray-100",
             error && "border-red-500 focus:ring-red-500",
             className
           )}
@@ -38,9 +36,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {error && (
-          <p className="mt-1 text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       </div>
     );
   }
