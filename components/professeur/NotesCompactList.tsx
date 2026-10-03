@@ -34,7 +34,7 @@ export default function NotesCompactList({
   onNoteChange,
 }: NotesCompactListProps) {
   return (
-    <ul className="overflow-hidden rounded-xl border border-gray-200 bg-white md:hidden">
+    <ul className="overflow-hidden rounded-lg border border-gray-200 bg-white md:hidden">
       {eleves.map((eleve, index) => {
         const note = notesParEleve[eleve.id] || { valeur: "", commentaire: "" };
         const expanded = expandedIds.has(eleve.id);
@@ -43,17 +43,17 @@ export default function NotesCompactList({
         return (
           <motion.li
             key={eleve.id}
-            initial={{ opacity: 0, y: 6 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.15, delay: Math.min(index * 0.015, 0.3) }}
+            transition={{ duration: 0.12, delay: Math.min(index * 0.01, 0.2) }}
             className={cn(
               "border-b border-gray-100 last:border-b-0",
               hasNote ? "bg-primary/[0.04]" : "bg-white"
             )}
           >
-            <div className="flex min-h-12 items-stretch">
-              <div className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2">
-                <p className="min-w-0 flex-1 truncate text-[15px] font-semibold leading-tight text-foreground">
+            <div className="flex min-h-11 items-stretch">
+              <div className="flex min-w-0 flex-1 items-center gap-2 px-2.5 py-1">
+                <p className="min-w-0 flex-1 truncate text-sm font-medium leading-tight text-foreground">
                   {eleve.prenom} {eleve.nom}
                 </p>
 
@@ -73,14 +73,14 @@ export default function NotesCompactList({
                     placeholder="—"
                     aria-label={`Note de ${eleve.prenom} ${eleve.nom} sur ${noteMax}`}
                     className={cn(
-                      "min-h-12 w-[4.75rem] rounded-xl border px-2 pr-7 text-center text-lg font-semibold tabular-nums transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary",
+                      "min-h-10 w-[3.75rem] rounded-lg border py-1.5 pl-1.5 pr-6 text-center text-base font-semibold tabular-nums transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary",
                       hasNote
                         ? "border-primary/40 bg-white text-primary-dark"
                         : "border-gray-300 bg-gray-50/80 text-foreground"
                     )}
                   />
                   <span
-                    className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-medium text-gray-400"
+                    className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-400"
                     aria-hidden
                   >
                     /{noteMax}
@@ -93,7 +93,7 @@ export default function NotesCompactList({
                 onClick={() => onToggleExpand(eleve.id)}
                 className={cn(
                   TOUCH_TARGET,
-                  "shrink-0 text-gray-400 active:bg-black/5",
+                  "w-10 min-w-10 shrink-0 text-gray-400 active:bg-black/5",
                   note.commentaire.trim() && !expanded && "text-primary"
                 )}
                 aria-label={
@@ -104,9 +104,9 @@ export default function NotesCompactList({
                 aria-expanded={expanded}
               >
                 {expanded ? (
-                  <ChevronUp className="h-5 w-5" />
+                  <ChevronUp className="h-4 w-4" />
                 ) : (
-                  <ChevronDown className="h-5 w-5" />
+                  <ChevronDown className="h-4 w-4" />
                 )}
               </button>
             </div>
@@ -117,17 +117,17 @@ export default function NotesCompactList({
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.18, ease: "easeInOut" }}
+                  transition={{ duration: 0.15, ease: "easeInOut" }}
                   className="overflow-hidden border-t border-gray-200/80 bg-white/90"
                 >
-                  <div className="px-3 py-3">
+                  <div className="px-2.5 py-2">
                     <textarea
                       placeholder="Commentaire (optionnel)"
                       value={note.commentaire}
                       onChange={(e) =>
                         onNoteChange(eleve.id, "commentaire", e.target.value)
                       }
-                      className="min-h-12 w-full rounded-xl border border-gray-300 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="min-h-10 w-full rounded-lg border border-gray-300 px-2.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
                       rows={2}
                     />
                   </div>
@@ -143,15 +143,15 @@ export default function NotesCompactList({
 
 export function NotesListSkeleton({ rows = 10 }: { rows?: number }) {
   return (
-    <ul className="overflow-hidden rounded-xl border border-gray-200 bg-white md:hidden">
+    <ul className="overflow-hidden rounded-lg border border-gray-200 bg-white md:hidden">
       {Array.from({ length: rows }).map((_, i) => (
         <li
           key={i}
-          className="flex min-h-12 animate-pulse items-center gap-2 border-b border-gray-100 px-3 py-2 last:border-b-0"
+          className="flex min-h-11 animate-pulse items-center gap-2 border-b border-gray-100 px-2.5 py-1 last:border-b-0"
         >
-          <div className="h-4 flex-1 rounded bg-gray-200" />
-          <div className="h-12 w-[4.75rem] shrink-0 rounded-xl bg-gray-200" />
-          <div className="h-12 w-12 shrink-0 rounded-xl bg-gray-100" />
+          <div className="h-3.5 flex-1 rounded bg-gray-200" />
+          <div className="h-10 w-[3.75rem] shrink-0 rounded-lg bg-gray-200" />
+          <div className="h-8 w-8 shrink-0 rounded-lg bg-gray-100" />
         </li>
       ))}
     </ul>

@@ -221,8 +221,8 @@ export default function NotesPage() {
   return (
     <div
       className={cn(
-        "space-y-4 sm:space-y-6",
-        showList && "pb-32 md:pb-0"
+        "space-y-3 sm:space-y-6",
+        showList && "pb-24 md:pb-0"
       )}
     >
       <PageHeader
@@ -241,8 +241,8 @@ export default function NotesPage() {
       />
 
       <Card variant="elevated">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base sm:text-lg">Paramètres</CardTitle>
+        <CardHeader className="pb-1 sm:pb-2">
+          <CardTitle className="text-sm sm:text-lg">Paramètres</CardTitle>
         </CardHeader>
         <CardContent>
           <form
@@ -250,12 +250,11 @@ export default function NotesPage() {
               e.preventDefault();
               submitNotes();
             }}
-            className="space-y-4"
+            className="space-y-3"
           >
-            {/* Mobile : classe pleine largeur, matière + note max côte à côte */}
-            <div className="space-y-4 md:grid md:grid-cols-3 md:gap-4">
+            <div className="space-y-2.5 md:grid md:grid-cols-3 md:gap-4 md:space-y-0">
               <div className="min-w-0">
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-xs font-medium text-gray-600 sm:text-sm sm:text-gray-700">
                   Classe
                 </label>
                 <select
@@ -272,9 +271,9 @@ export default function NotesPage() {
                 </select>
               </div>
 
-              <div className="flex flex-col gap-4 sm:flex-row md:contents">
+              <div className="flex gap-2 md:contents">
                 <div className="min-w-0 flex-1">
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">
+                  <label className="mb-1 block text-xs font-medium text-gray-600 sm:text-sm sm:text-gray-700">
                     Matière
                   </label>
                   <input
@@ -287,9 +286,9 @@ export default function NotesPage() {
                     className={TOUCH_FIELD}
                   />
                 </div>
-                <div className="shrink-0 sm:w-auto md:min-w-0">
-                  <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                    Note max
+                <div className="shrink-0 md:min-w-0">
+                  <label className="mb-1 block text-xs font-medium text-gray-600 sm:text-sm sm:text-gray-700">
+                    / max
                   </label>
                   <input
                     type="text"
@@ -334,16 +333,9 @@ export default function NotesPage() {
 
             {showList && (
               <>
-                <div className="space-y-1 md:hidden">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex min-h-8 items-center rounded-full bg-primary/10 px-3 text-xs font-semibold text-primary-dark">
-                      {notesSaisies}/{eleves.length} notes
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      Laissez vide si pas de note
-                    </span>
-                  </div>
-                </div>
+                <p className="text-[11px] text-gray-500 md:hidden">
+                  {notesSaisies}/{eleves.length} notes · vide = ignoré
+                </p>
 
                 <NotesCompactList
                   eleves={eleves}
@@ -358,7 +350,7 @@ export default function NotesPage() {
                   <button
                     type="button"
                     onClick={() => setShowCommentaireSeance((v) => !v)}
-                    className="flex min-h-12 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 text-left text-sm font-medium text-foreground"
+                    className="flex min-h-10 w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2 text-left text-xs font-medium text-foreground"
                   >
                     Commentaire de séance (optionnel)
                     <span className="text-gray-400">
@@ -378,7 +370,7 @@ export default function NotesPage() {
                           value={commentaireSeance}
                           onChange={(e) => setCommentaireSeance(e.target.value)}
                           placeholder="Commentaire général sur la séance"
-                          className="mt-2 min-h-12 w-full rounded-xl border border-gray-300 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                          className="mt-2 min-h-10 w-full rounded-lg border border-gray-300 px-2.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
                           rows={3}
                         />
                       </motion.div>
@@ -489,7 +481,7 @@ export default function NotesPage() {
 
       {showList && (
         <div
-          className="fixed inset-x-0 z-40 border-t border-gray-200 bg-surface/95 px-3 py-3 backdrop-blur-md md:hidden"
+          className="fixed inset-x-0 z-40 border-t border-gray-200 bg-surface/95 px-3 py-2 backdrop-blur-md md:hidden"
           style={{
             bottom: "calc(4.75rem + env(safe-area-inset-bottom, 0px))",
           }}
@@ -506,9 +498,8 @@ export default function NotesPage() {
               </motion.p>
             )}
           </AnimatePresence>
-          <p className="mb-2 text-center text-xs tabular-nums text-gray-600">
-            {notesSaisies} note{notesSaisies !== 1 ? "s" : ""} sur{" "}
-            {eleves.length}
+          <p className="mb-1.5 text-center text-[11px] tabular-nums text-gray-500">
+            {notesSaisies}/{eleves.length}
             {matiere ? ` · ${matiere}` : ""}
           </p>
           <Button
@@ -516,7 +507,7 @@ export default function NotesPage() {
             onClick={submitNotes}
             isLoading={isLoading}
             size="touch"
-            className="min-h-12 w-full text-base font-semibold"
+            className="w-full font-semibold"
           >
             Enregistrer les notes
           </Button>

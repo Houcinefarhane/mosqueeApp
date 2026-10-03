@@ -93,37 +93,37 @@ export default async function ParentsPage({
           <CardContent className="p-0">
             <ul className="divide-y divide-gray-100 md:hidden">
               {parents.map((parent) => (
-                <li key={parent.id} className="p-4">
-                  <div className="flex items-start gap-3">
-                    <Users className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                <li key={parent.id} className="p-3">
+                  <div className="flex items-start gap-2">
+                    <Users className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-foreground">
+                      <p className="text-sm font-semibold text-foreground">
                         {parent.prenom} {parent.nom}
                       </p>
-                      <div className="mt-1 flex items-center gap-2 text-sm text-gray-600">
-                        <Mail className="h-4 w-4 shrink-0 text-gray-400" />
+                      <div className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-600">
+                        <Mail className="h-3.5 w-3.5 shrink-0 text-gray-400" />
                         <span className="truncate">{parent.email}</span>
                       </div>
                       {parent.telephone && (
-                        <div className="mt-1 flex items-center gap-2 text-sm text-gray-600">
-                          <Phone className="h-4 w-4 shrink-0 text-gray-400" />
+                        <div className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-600">
+                          <Phone className="h-3.5 w-3.5 shrink-0 text-gray-400" />
                           {parent.telephone}
                         </div>
                       )}
-                      <p className="mt-2 text-sm text-gray-500">
+                      <p className="mt-1 text-xs text-gray-500">
                         {parent._count.eleves} enfant
                         {parent._count.eleves > 1 ? "s" : ""}
                       </p>
                     </div>
                   </div>
-                  <div className="mt-3 flex flex-col gap-2">
+                  <div className="mt-2 flex flex-col gap-1.5">
                     <Link href={`/admin/parents/${parent.id}`}>
-                      <Button variant="outline" size="touch" className="w-full">
+                      <Button variant="outline" className="w-full">
                         Voir
                       </Button>
                     </Link>
                     <Link href={`/admin/parents/${parent.id}/assigner-eleves`}>
-                      <Button variant="ghost" size="touch" className="w-full">
+                      <Button variant="ghost" className="w-full">
                         Assigner élèves
                       </Button>
                     </Link>

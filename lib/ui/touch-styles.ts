@@ -1,36 +1,33 @@
 /**
- * Design tokens tactile — mobile-first (48px actions fréquentes, 44px minimum).
- * Utilisés par components/ui/* et pages prof/admin mobile.
+ * Design tokens tactile — mobile compact (44px min, text-sm).
  */
 
-/** Feedback immédiat au tap (<100ms perçu) */
 export const TOUCH_FEEDBACK =
   "transition-all duration-150 active:scale-[0.98]";
 
-/** Champs formulaire pleine largeur — 48px mobile, compact desktop */
+/** Champs formulaire — 44px mobile, compact desktop */
 export const TOUCH_CONTROL =
-  "min-h-12 w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-150 md:min-h-0 md:rounded-lg md:py-2.5 md:text-sm";
+  "min-h-11 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-150 md:min-h-0 md:rounded-lg md:py-2.5 md:px-4";
 
-/** Alias explicite (pages prof appel/notes) */
 export const TOUCH_FIELD = TOUCH_CONTROL;
 
-/** Champ recherche avec icône gauche */
 export const TOUCH_SEARCH =
-  "min-h-12 w-full rounded-xl border border-gray-300 py-3 pl-10 pr-4 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-150 md:min-h-0 md:rounded-lg md:py-2.5 md:text-sm";
+  "min-h-11 w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-150 md:min-h-0 md:py-2.5 md:pl-10 md:pr-4";
 
-/** Date compacte mobile (évite débordement iOS Safari) */
 export const TOUCH_DATE_FIELD =
-  "min-h-12 w-[9.75rem] max-w-[42vw] rounded-xl border border-gray-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent md:w-full md:max-w-none";
+  "min-h-11 w-[9rem] max-w-[40vw] rounded-lg border border-gray-300 px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent md:w-full md:max-w-none";
 
-/** Champ numérique compact (note max, etc.) */
 export const TOUCH_NUMERIC_COMPACT =
-  "min-h-12 w-[5.5rem] max-w-[28vw] shrink-0 rounded-xl border border-gray-300 px-3 py-3 text-base tabular-nums focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent md:w-full md:max-w-none";
+  "min-h-11 w-[4.5rem] max-w-[26vw] shrink-0 rounded-lg border border-gray-300 px-2.5 py-2 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent md:w-full md:max-w-none";
 
-/** Zone de tap fréquente — 48×48px */
+/** Zone de tap — 44×44px minimum */
 export const TOUCH_TARGET =
-  "inline-flex min-h-12 min-w-12 items-center justify-center rounded-xl transition-all duration-150 active:scale-[0.97]";
+  "inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg transition-all duration-150 active:scale-[0.97]";
 
-/** Variantes Button qui doivent rester 48px sur mobile même en size="sm" */
+/** Pastille statut dans une ligne compacte */
+export const TOUCH_BADGE =
+  "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full";
+
 export const TOUCH_EMPHASIS_VARIANTS = new Set([
   "primary",
   "secondary",

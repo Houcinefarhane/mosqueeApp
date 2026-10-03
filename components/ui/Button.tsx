@@ -39,18 +39,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizes = {
-      /** Secondaire desktop — 44px mobile min */
-      sm: "gap-1.5 px-3 py-2.5 text-sm min-h-11 rounded-lg md:min-h-0 md:py-1.5",
-      /** Défaut responsive : 48px mobile, compact md+ */
-      md: "gap-2 px-4 py-3 text-base min-h-12 rounded-xl md:min-h-0 md:rounded-lg md:py-2 md:text-sm",
-      lg: "gap-2 px-6 py-3 text-base min-h-12 rounded-xl md:rounded-lg md:py-2.5",
-      /** Toujours 48px — barres d'action fixes mobile */
-      touch: "gap-2 px-4 py-3 text-base min-h-12 rounded-xl",
+      sm: "gap-1.5 px-3 py-2 text-xs min-h-9 rounded-lg md:min-h-0 md:py-1.5 md:text-sm",
+      md: "gap-1.5 px-3 py-2 text-sm min-h-11 rounded-lg md:min-h-0 md:px-4 md:py-2",
+      lg: "gap-2 px-5 py-2.5 text-sm min-h-11 rounded-lg md:py-2.5 md:text-base",
+      touch: "gap-1.5 px-3 py-2 text-sm min-h-11 rounded-lg",
     };
 
     const emphasisMobile =
       size === "sm" && TOUCH_EMPHASIS_VARIANTS.has(variant)
-        ? "min-h-12 py-3 md:min-h-0 md:py-1.5"
+        ? "min-h-11 py-2 md:min-h-0 md:py-1.5"
         : null;
 
     return (

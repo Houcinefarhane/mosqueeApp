@@ -236,8 +236,8 @@ function AppelPageContent() {
   return (
     <div
       className={cn(
-        "space-y-4 sm:space-y-6",
-        showList && "pb-32 md:pb-0"
+        "space-y-3 sm:space-y-6",
+        showList && "pb-24 md:pb-0"
       )}
     >
       <PageHeader
@@ -254,15 +254,13 @@ function AppelPageContent() {
       />
 
       <Card variant="elevated">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base sm:text-lg">
-            Paramètres
-          </CardTitle>
+        <CardHeader className="pb-1 sm:pb-2">
+          <CardTitle className="text-sm sm:text-lg">Paramètres</CardTitle>
         </CardHeader>
         <CardContent className="min-w-0 overflow-hidden">
-          <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
+          <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-4">
             <div className="min-w-0">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-xs font-medium text-gray-600 sm:text-sm sm:text-gray-700">
                 Classe
               </label>
               <select
@@ -279,7 +277,7 @@ function AppelPageContent() {
               </select>
             </div>
             <div className="shrink-0 md:min-w-0">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-xs font-medium text-gray-600 sm:text-sm sm:text-gray-700">
                 Date
               </label>
               <input
@@ -326,43 +324,36 @@ function AppelPageContent() {
       {showList && (
         <>
           {/* Barre d'actions rapides — mobile */}
-          <div className="space-y-3 md:hidden">
-            <div className="flex flex-wrap gap-2">
-              <span className="inline-flex min-h-8 items-center rounded-full bg-green-100 px-3 text-xs font-semibold text-green-800">
-                {counts.presents} présents
+          <div className="flex flex-wrap items-center gap-1.5 md:hidden">
+            <span className="rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-semibold text-green-800">
+              {counts.presents} prés.
+            </span>
+            <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-800">
+              {counts.absents} abs.
+            </span>
+            {(counts.retards > 0 || counts.excuses > 0) && (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                +{counts.retards + counts.excuses}
               </span>
-              <span className="inline-flex min-h-8 items-center rounded-full bg-red-100 px-3 text-xs font-semibold text-red-800">
-                {counts.absents} absents
-              </span>
-              {(counts.retards > 0 || counts.excuses > 0) && (
-                <span className="inline-flex min-h-8 items-center rounded-full bg-amber-100 px-3 text-xs font-semibold text-amber-800">
-                  {counts.retards + counts.excuses} autres
-                </span>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-2">
+            )}
+            <div className="ml-auto flex gap-1">
               <Button
                 type="button"
                 variant="outline"
-                size="touch"
-                className="min-h-12 w-full"
+                size="sm"
                 onClick={() => handleMarkAll("PRESENT")}
               >
-                Tout présent
+                Tous ✓
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                size="touch"
-                className="min-h-12 w-full"
+                size="sm"
                 onClick={() => handleMarkAll("ABSENT")}
               >
-                Tout absent
+                Tous ✗
               </Button>
             </div>
-            <p className="text-center text-xs text-gray-500">
-              Appuyez sur un élève pour basculer présent / absent
-            </p>
           </div>
 
           <AppelCompactList
@@ -382,7 +373,7 @@ function AppelPageContent() {
             <button
               type="button"
               onClick={() => setShowCommentaireSeance((v) => !v)}
-              className="flex min-h-12 w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-foreground"
+              className="flex min-h-10 w-full items-center justify-between px-3 py-2 text-left text-xs font-medium text-foreground"
             >
               Commentaire de séance (optionnel)
               <span className="text-gray-400">{showCommentaireSeance ? "▲" : "▼"}</span>
@@ -401,7 +392,7 @@ function AppelPageContent() {
                       placeholder="Commentaire général sur la séance"
                       value={commentaireSeance}
                       onChange={(e) => setCommentaireSeance(e.target.value)}
-                      className="min-h-12 w-full rounded-xl border border-gray-300 px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="min-h-10 w-full rounded-lg border border-gray-300 px-2.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
                       rows={3}
                     />
                   </CardContent>
@@ -506,7 +497,7 @@ function AppelPageContent() {
       {/* Barre fixe mobile */}
       {showList && (
         <div
-          className="fixed inset-x-0 z-40 border-t border-gray-200 bg-surface/95 px-3 py-3 backdrop-blur-md md:hidden"
+          className="fixed inset-x-0 z-40 border-t border-gray-200 bg-surface/95 px-3 py-2 backdrop-blur-md md:hidden"
           style={{
             bottom: "calc(4.75rem + env(safe-area-inset-bottom, 0px))",
           }}
@@ -523,18 +514,18 @@ function AppelPageContent() {
               </motion.p>
             )}
           </AnimatePresence>
-          <p className="mb-2 text-center text-xs tabular-nums text-gray-600">
-            {counts.presents} présents · {counts.absents} absents
+          <p className="mb-1.5 text-center text-[11px] tabular-nums text-gray-500">
+            {counts.presents} prés. · {counts.absents} abs.
             {counts.retards + counts.excuses > 0 &&
-              ` · ${counts.retards + counts.excuses} autres`}
+              ` · +${counts.retards + counts.excuses}`}
           </p>
           <Button
             onClick={handleSubmit}
             isLoading={isLoading}
             size="touch"
-            className="min-h-12 w-full text-base font-semibold"
+            className="w-full font-semibold"
           >
-            Enregistrer l&apos;appel · {eleves.length} élèves
+            Enregistrer · {eleves.length} élèves
           </Button>
         </div>
       )}

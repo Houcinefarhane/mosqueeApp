@@ -100,17 +100,17 @@ export default async function ElevesPage({
           <CardContent className="p-0">
             <ul className="divide-y divide-gray-100 md:hidden">
               {eleves.map((eleve) => (
-                <li key={eleve.id} className="p-4">
-                  <div className="flex items-start gap-3">
-                    <Users className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                <li key={eleve.id} className="p-3">
+                  <div className="flex items-start gap-2">
+                    <Users className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-foreground">
+                      <p className="text-sm font-semibold text-foreground">
                         {eleve.prenom} {eleve.nom}
                       </p>
                       {eleve.email && (
-                        <p className="truncate text-xs text-gray-500">{eleve.email}</p>
+                        <p className="truncate text-[11px] text-gray-500">{eleve.email}</p>
                       )}
-                      <p className="mt-1 text-sm text-gray-600">
+                      <p className="mt-0.5 text-xs text-gray-600">
                         {eleve.classe.nom}
                         {eleve.parent
                           ? ` · ${eleve.parent.prenom} ${eleve.parent.nom}`
@@ -118,8 +118,8 @@ export default async function ElevesPage({
                       </p>
                     </div>
                   </div>
-                  <Link href={`/admin/eleves/${eleve.id}`} className="mt-3 block">
-                    <Button variant="outline" size="touch" className="w-full">
+                  <Link href={`/admin/eleves/${eleve.id}`} className="mt-2 block">
+                    <Button variant="outline" className="w-full">
                       Voir la fiche
                     </Button>
                   </Link>
