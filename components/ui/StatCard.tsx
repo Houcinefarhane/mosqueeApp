@@ -72,27 +72,44 @@ export default function StatCard({
     trendDirection === "up"
       ? TrendingUp
       : trendDirection === "down"
-      ? TrendingDown
-      : Minus;
+        ? TrendingDown
+        : Minus;
 
   const content = (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl border border-primary/8 bg-gradient-to-br p-4 shadow-card transition-all sm:p-5",
+        "relative overflow-hidden rounded-lg border border-primary/8 bg-gradient-to-br shadow-card transition-all",
+        "p-2 sm:rounded-xl sm:p-5",
         styles.bg,
-        href && "cursor-pointer hover:-translate-y-0.5 hover:shadow-elevated"
+        href && "cursor-pointer active:scale-[0.98] sm:hover:-translate-y-0.5 sm:hover:shadow-elevated"
       )}
     >
       <div
         className={cn(
-          "absolute inset-x-0 top-0 z-10 h-[4px] rounded-t-xl",
+          "absolute inset-x-0 top-0 z-10 h-[2px] rounded-t-lg sm:h-[4px] sm:rounded-t-xl",
           borderColor?.replace("border-", "bg-") ?? styles.border
         )}
       />
-      <div className="flex items-start justify-between gap-3">
+
+      {/* Mobile — compact centré */}
+      <div className="flex flex-col items-center gap-0.5 text-center sm:hidden">
+        <Icon
+          className={cn("h-3.5 w-3.5", iconColor ?? styles.iconColor)}
+          aria-hidden
+        />
+        <p className="max-w-full truncate text-base font-bold tabular-nums leading-none text-foreground">
+          {value}
+        </p>
+        <p className="line-clamp-2 text-[10px] font-medium leading-tight text-gray-500">
+          {title}
+        </p>
+      </div>
+
+      {/* Desktop */}
+      <div className="hidden items-start justify-between gap-3 sm:flex">
         <div className="min-w-0 flex-1">
           <p className="text-sm text-gray-600">{title}</p>
-          <p className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <p className="mt-1 text-2xl font-bold tracking-tight text-foreground lg:text-3xl">
             {value}
           </p>
           {trendText && (

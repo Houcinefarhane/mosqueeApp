@@ -143,7 +143,7 @@ export default async function AdminDashboard() {
         <MosqueeBanner nom={mosquee.nom} code={mosquee.id} />
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-1.5 sm:gap-4 xl:grid-cols-4">
         <StatCard
           title="Élèves"
           value={elevesCount}

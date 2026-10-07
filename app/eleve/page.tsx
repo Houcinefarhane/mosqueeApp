@@ -96,14 +96,14 @@ export default async function EleveDashboard() {
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       <PageHeader
         title="Tableau de bord"
         description={`Bienvenue, ${session.user.name}`}
         breadcrumbs={[{ label: "Espace élève" }, { label: "Tableau de bord" }]}
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
         <StatCard
           title="Ma classe"
           value={eleve.classe.nom}
