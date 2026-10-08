@@ -94,6 +94,14 @@ async function enablePushRegistration(router: ReturnType<typeof useRouter>) {
     }
   );
 
+  await PushNotifications.addListener("pushNotificationReceived", (n) => {
+    const title = n.title ?? "MadrasApp";
+    const body = n.body ?? "";
+    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+      new Notification(title, { body });
+    }
+  });
+
   const perm = await PushNotifications.checkPermissions();
   if (perm.receive === "granted") {
     await PushNotifications.register();

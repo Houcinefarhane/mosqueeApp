@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    fireMessagePush(data.receiverId, receiver.role, data.objet);
+    await fireMessagePush(data.receiverId, receiver.role, data.objet);
 
     return NextResponse.json(message, { status: 201 });
   } catch (error) {

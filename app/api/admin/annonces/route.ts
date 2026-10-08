@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     revalidatePath("/admin");
     revalidateTag("annonces");
 
-    fireAnnoncePush(session.user.mosqueeId, titre);
+    await fireAnnoncePush(session.user.mosqueeId, titre);
 
     return NextResponse.json(annonce, { status: 201 });
   } catch (error: any) {

@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
 
     for (const p of data.presences) {
       if (p.statut === "ABSENT" || p.statut === "RETARD") {
-        fireAbsencePushForEleve(p.eleveId, p.statut);
+        await fireAbsencePushForEleve(p.eleveId, p.statut);
       }
     }
 
