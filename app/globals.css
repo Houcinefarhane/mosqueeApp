@@ -12,34 +12,13 @@
   --filet: #eadfcb;
   --sable: #f3ebdd;
 
-  --color-nuit: #1e110a;
-  --color-brun: #3b2216;
-  --color-brun-doux: #6b4528;
-  --color-or: #c8962e;
-  --color-or-clair: #e6c072;
-  --color-blanc: #ffffff;
-  --color-filet: #eadfcb;
-  --color-sable: #f3ebdd;
-
-  --foreground: var(--color-brun);
-  --background: var(--color-blanc);
-  --surface: var(--color-blanc);
-  --surface-muted: var(--color-sable);
-  --sidebar: var(--color-brun);
-  --sidebar-hover: var(--color-nuit);
-  --accent-gold: var(--color-or);
-}
-
-.dark {
-  --color-blanc: #2a1810;
-  --color-sable: #352018;
-  --color-filet: #5c4030;
-  --color-brun-doux: #c4a882;
-
-  --foreground: #f3ebdd;
-  --background: var(--color-nuit);
-  --surface: var(--color-blanc);
-  --surface-muted: var(--color-sable);
+  --foreground: var(--brun);
+  --background: var(--blanc);
+  --surface: var(--blanc);
+  --surface-muted: var(--sable);
+  --sidebar: var(--brun);
+  --sidebar-hover: var(--nuit);
+  --accent-gold: var(--or);
 }
 
 * {
@@ -96,24 +75,15 @@ a {
 }
 
 @layer utilities {
-  .focus-ring:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px rgb(200 150 46 / 0.45);
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-or/50 focus:ring-offset-1;
   }
 
   .app-background {
-    background-color: var(--background);
+    background-color: var(--blanc);
     background-image: radial-gradient(
       ellipse 80% 50% at 50% -20%,
       rgb(200 150 46 / 0.08),
-      transparent
-    );
-  }
-
-  .dark .app-background {
-    background-image: radial-gradient(
-      ellipse 80% 50% at 50% -20%,
-      rgb(200 150 46 / 0.12),
       transparent
     );
   }
@@ -123,7 +93,7 @@ a {
   }
 
   .page-title {
-    @apply font-display text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl;
+    @apply font-display text-2xl font-extrabold tracking-tight text-brun sm:text-3xl;
   }
 }
 

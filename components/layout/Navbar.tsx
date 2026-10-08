@@ -7,7 +7,6 @@ import { LogOut, ChevronDown, Menu } from "lucide-react";
 import { ROLE_LABELS } from "@/lib/constants/status";
 import { cn } from "@/lib/utils";
 import { useMobileNav } from "@/components/layout/MobileNavContext";
-import ThemeToggle from "@/components/layout/ThemeToggle";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -92,11 +91,10 @@ export default function Navbar() {
               <div className="hidden border-b border-surface-muted px-4 py-2 sm:block">
                 <p className="truncate text-xs text-primary/60">{session.user.email}</p>
               </div>
-              <ThemeToggle variant="menu" />
               <button
                 type="button"
                 onClick={() => signOut({ callbackUrl: "/auth/login" })}
-                className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-950/40"
+                className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50"
               >
                 <LogOut className="h-4 w-4" />
                 Déconnexion

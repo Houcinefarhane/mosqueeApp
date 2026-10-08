@@ -4,7 +4,7 @@ import { ArrowLeft, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const backBase =
-  "inline-flex min-h-11 max-w-full items-center gap-2 rounded-2xl border border-filet bg-sable px-3.5 py-2 text-sm font-semibold text-foreground transition-[transform,background-color] hover:bg-filet/60 active:scale-[0.98]";
+  "inline-flex min-h-11 max-w-full items-center gap-2 rounded-2xl border border-filet bg-sable px-3.5 py-2 text-sm font-semibold text-brun transition-[transform,background-color] hover:bg-filet/60 active:scale-[0.98]";
 
 const createBase =
   "inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-2xl bg-or px-4 py-2.5 text-sm font-semibold text-nuit shadow-sm transition-[transform,background-color] hover:bg-or-clair active:scale-[0.98]";
@@ -56,7 +56,7 @@ type HeaderSecondaryLinkProps = {
 };
 
 const outlineBase =
-  "inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-2xl border border-filet bg-blanc px-4 py-2.5 text-sm font-semibold text-foreground transition-[transform,background-color] hover:bg-sable active:scale-[0.98]";
+  "inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-2xl border border-filet bg-blanc px-4 py-2.5 text-sm font-semibold text-brun transition-[transform,background-color] hover:bg-sable active:scale-[0.98]";
 
 type HeaderOutlineLinkProps = {
   href: string;
