@@ -17,6 +17,7 @@ const config: CapacitorConfig = {
     androidScheme: "https",
     iosScheme: "https",
     cleartext: false,
+    errorPath: "offline.html",
   },
   android: {
     appendUserAgent: " MadrasApp-Mobile",

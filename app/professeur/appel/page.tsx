@@ -201,11 +201,14 @@ function AppelPageContent() {
         router.push("/professeur/appel/historique");
       }, 900);
     } catch (err: unknown) {
-      console.error(err);
+      const offline =
+        typeof navigator !== "undefined" && !navigator.onLine;
       setSubmitError(
-        err instanceof Error
-          ? err.message
-          : "Erreur lors de l'enregistrement de l'appel"
+        offline
+          ? "Appel non enregistré, réessayez dès que le réseau revient."
+          : err instanceof Error
+            ? err.message
+            : "Erreur lors de l'enregistrement de l'appel"
       );
     } finally {
       setIsLoading(false);

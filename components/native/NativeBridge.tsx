@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { isNativePlatform } from "@/lib/native/is-native";
 import PushConsentModal from "@/components/native/PushConsentModal";
+import OfflineOverlay from "@/components/native/OfflineOverlay";
 
 export default function NativeBridge() {
   const { status } = useSession();
