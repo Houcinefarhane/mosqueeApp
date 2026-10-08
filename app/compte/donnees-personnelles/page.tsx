@@ -67,7 +67,8 @@ export default function DonneesPersonnellesPage() {
       const data = await res.json().catch(() => ({}));
       if (res.status === 403 && data.code === "ADMIN_CONTACT") {
         toast.error(
-          `Compte admin : contactez ${data.contactEmail ?? "le support"}.`
+          data.error ??
+            "Compte admin : demandez la suppression sur place auprès de l'administration de la mosquée."
         );
         return;
       }
@@ -96,8 +97,8 @@ export default function DonneesPersonnellesPage() {
             <Shield className="h-5 w-5 shrink-0 text-or" aria-hidden />
             <p className="text-sm text-brun-doux">
               Les notes, présences et dossiers élèves sont aussi traités par votre
-              mosquée (responsable de traitement). Pour ces données, contactez
-              l&apos;administration de votre établissement en complément.
+              mosquée (responsable de traitement). Pour ces données, rendez-vous
+              directement à la mosquée auprès de l&apos;administration.
             </p>
           </div>
           <p className="text-xs text-brun-doux">
@@ -135,7 +136,7 @@ export default function DonneesPersonnellesPage() {
           </h2>
           <p className="text-sm text-brun-doux">
             {role === "ADMIN"
-              ? "Les comptes administrateur de mosquée ne peuvent pas être supprimés en self-service. Contactez le support pour une demande d'effacement de l'espace mosquée."
+              ? "Les comptes administrateur de mosquée ne peuvent pas être supprimés en self-service. Pour une demande d'effacement de l'espace mosquée, adressez-vous directement à l'administration sur place."
               : role === "PROFESSEUR"
                 ? "Votre compte sera désactivé et anonymisé. Les données pédagogiques déjà enregistrées (notes, présences) peuvent être conservées par la mosquée."
                 : "Votre compte et vos messages seront supprimés. Les dossiers élèves restent gérés par la mosquée."}

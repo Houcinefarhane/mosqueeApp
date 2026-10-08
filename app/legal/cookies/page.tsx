@@ -31,7 +31,7 @@ export default function CookiesPage() {
           Votre choix est enregistré dans le stockage local de votre navigateur
           (clé <code className="rounded bg-sable px-1">madras-cookie-consent</code>
           ). Vous pouvez le modifier en effaçant les données du site ou en
-          contactant le support.
+          vous rendant à la mosquée auprès de l&apos;administration.
         </p>
       </section>
 

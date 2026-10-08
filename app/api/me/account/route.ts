@@ -19,12 +19,12 @@ export async function DELETE() {
   } catch (err) {
     if (err instanceof AccountDeletionError) {
       if (err.code === "ADMIN_CONTACT") {
-        const { contactEmail } = getLegalConfig();
+        const { contactNotice } = getLegalConfig();
         return NextResponse.json(
           {
             error: err.message,
             code: err.code,
-            contactEmail,
+            contactNotice,
           },
           { status: 403 }
         );

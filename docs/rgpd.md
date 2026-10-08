@@ -14,11 +14,11 @@ Ce document complète les pages légales (`/legal/*`) et la page **Mes données*
 
 Chaque mosquée utilisant MadrasApp reste responsable des données de ses élèves et familles.
 
-1. **Identité** — Renseigner sur Vercel (ou `.env`) : `LEGAL_PUBLISHER_NAME`, `LEGAL_PUBLISHER_ADDRESS`, `LEGAL_CONTACT_EMAIL`, éventuellement `LEGAL_DPO_EMAIL`.
+1. **Identité** — Renseigner sur Vercel (ou `.env`) : `LEGAL_PUBLISHER_NAME`, `LEGAL_PUBLISHER_ADDRESS`. Les utilisateurs sont orientés vers l'administration de la mosquée sur place (pas d'e-mail de contact applicatif).
 2. **Registre des traitements** — Documenter : gestion scolaire, messagerie, notes, présences, comptes utilisateurs ; bases légales (exécution du contrat / intérêt légitime / consentement pour analytics).
 3. **Sous-traitants** — DPA avec **Vercel** (hébergement) et **Neon** (base de données) ; conserver les preuves de signature.
 4. **Durées de conservation** — Définir une politique interne (ex. dossiers élèves X ans après départ) et l’appliquer via vos processus admin.
-5. **Droits des personnes** — Les utilisateurs peuvent exporter/supprimer via l’app ; pour les dossiers élèves gérés par l’admin, prévoir une procédure manuelle (email DPO/contact).
+5. **Droits des personnes** — Les utilisateurs peuvent exporter/supprimer via l’app ; pour les dossiers élèves gérés par l’admin, prévoir une procédure en mosquée (accueil / direction).
 6. **Sécurité** — Mots de passe forts, accès limités par rôle, sauvegardes Neon, pas de partage des codes mosquée/élève.
 
 ## Variables d’environnement

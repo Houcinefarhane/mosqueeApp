@@ -23,7 +23,7 @@ export async function deleteUserAccount(userId: string) {
   if (user.role === "ADMIN") {
     throw new AccountDeletionError(
       "ADMIN_CONTACT",
-      "La suppression d'un compte administrateur de mosquée doit être demandée par e-mail afin de garantir la continuité des données de l'établissement."
+      "La suppression d'un compte administrateur de mosquée doit être demandée sur place auprès de l'administration de la mosquée, afin de garantir la continuité des données de l'établissement."
     );
   }
 

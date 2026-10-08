@@ -17,10 +17,7 @@ export default function MentionsLegalesPage() {
           <br />
           {legal.publisherAddress}
           <br />
-          E-mail :{" "}
-          <a href={`mailto:${legal.contactEmail}`} className="text-or">
-            {legal.contactEmail}
-          </a>
+          {legal.contactNotice}
         </p>
       </section>
 

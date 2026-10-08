@@ -20,15 +20,14 @@ export default function ConfidentialitePage() {
         <p>
           <strong>{legal.appName}</strong> est un logiciel de gestion pour les
           écoles coraniques des mosquées. L&apos;éditeur de la plateforme est{" "}
-          <strong>{legal.publisherName}</strong>, joignable à{" "}
-          <a href={`mailto:${legal.contactEmail}`} className="text-or">
-            {legal.contactEmail}
-          </a>
-          . Contact DPO / vie privée :{" "}
-          <a href={`mailto:${legal.dpoEmail}`} className="text-or">
-            {legal.dpoEmail}
-          </a>
-          .
+          <strong>{legal.publisherName}</strong>
+          {legal.publisherAddress ? (
+            <>
+              , situé au{" "}
+              <span className="whitespace-pre-line">{legal.publisherAddress}</span>
+            </>
+          ) : null}
+          . {legal.contactNotice}
         </p>
         <p>
           Chaque <strong>mosquée ou association</strong> qui crée un espace sur{" "}
