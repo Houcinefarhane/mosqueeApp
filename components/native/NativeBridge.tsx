@@ -72,6 +72,19 @@ export default function NativeBridge() {
 async function enablePushRegistration(router: ReturnType<typeof useRouter>) {
   const { PushNotifications } = await import("@capacitor/push-notifications");
   const { Capacitor } = await import("@capacitor/core");
+  const { ANDROID_PUSH_CHANNEL_ID } = await import(
+    "@/lib/push/android-channel"
+  );
+
+  if (Capacitor.getPlatform() === "android") {
+    await PushNotifications.createChannel({
+      id: ANDROID_PUSH_CHANNEL_ID,
+      name: "Alertes MadrasApp",
+      description: "Annonces, messages et absences",
+      importance: 5,
+      visibility: 1,
+    });
+  }
 
   await PushNotifications.removeAllListeners();
 

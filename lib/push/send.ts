@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { PushKind } from "@/lib/push/preferences";
 import { filterUsersByPushPreference } from "@/lib/push/preferences";
+import { ANDROID_PUSH_CHANNEL_ID } from "@/lib/push/android-channel";
 
 export type PushPayload = {
   title: string;
@@ -64,7 +65,10 @@ export async function notifyUsers(
             data: {
               route: payload.route,
             },
-            android: { priority: "high" },
+            android: {
+              priority: "high",
+              notification: { channelId: ANDROID_PUSH_CHANNEL_ID },
+            },
             apns: { payload: { aps: { sound: "default" } } },
           });
         } catch (err: unknown) {
@@ -72,6 +76,9 @@ export async function notifyUsers(
             err && typeof err === "object" && "code" in err
               ? String((err as { code: string }).code)
               : "";
+          if (process.env.NODE_ENV === "production") {
+            console.warn("[push] send failed", { kind, code: code || "unknown" });
+          }
           if (
             code.includes("registration-token-not-registered") ||
             code.includes("invalid-registration-token")

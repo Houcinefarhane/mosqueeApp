@@ -4,4 +4,5 @@
     <string name="title_activity_main">MadrasApp</string>
     <string name="package_name">fr.madrasapp.mobile</string>
     <string name="custom_url_scheme">fr.madrasapp.mobile</string>
+    <string name="default_notification_channel_id">madrasapp_alerts</string>
 </resources>
