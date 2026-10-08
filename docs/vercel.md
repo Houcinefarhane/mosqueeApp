@@ -31,7 +31,8 @@ Dans **Vercel Dashboard** → Project → **Settings** → **Environment Variabl
 
 | Variable | Valeur | Environnements |
 |----------|--------|----------------|
-| `DATABASE_URL` | Connection string Neon (Pooled) | Production, Preview, Development |
+| `DATABASE_URL` | Connection string Neon (**Pooled**, host `-pooler`) | Production, Preview, Development |
+| `DIRECT_DATABASE_URL` | Connection string Neon (**Direct**, sans pooler) — requis pour `migrate deploy` | Production, Preview, Development |
 | `NEXTAUTH_SECRET` | `openssl rand -base64 32` | Production, Preview, Development |
 | `NEXTAUTH_URL` | `https://votre-projet.vercel.app` | Production |
 | `NEXT_PUBLIC_APP_URL` | Même URL que NEXTAUTH_URL | Production, Preview |
