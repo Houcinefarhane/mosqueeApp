@@ -151,6 +151,9 @@ function AppelPageContent() {
   }, [date]);
 
   const handleTogglePresence = (eleveId: string) => {
+    void import("@/lib/native/haptics").then(({ lightTapHaptic }) =>
+      lightTapHaptic()
+    );
     setUiPresences((prev) => ({
       ...prev,
       [eleveId]: nextAppelStatut(prev[eleveId] ?? "EN_ATTENTE"),

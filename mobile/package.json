@@ -13,9 +13,16 @@
     "assets": "npx @capacitor/assets generate --iconBackgroundColor '#C8962E' --iconBackgroundColorDark '#1E110A' --splashBackgroundColor '#1E110A' --splashBackgroundColorDark '#1E110A'"
   },
   "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "^8.0.2",
     "@capacitor/android": "^7.2.0",
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/browser": "^7.0.5",
     "@capacitor/core": "^7.2.0",
+    "@capacitor/haptics": "^7.0.5",
     "@capacitor/ios": "^7.2.0",
+    "@capacitor/keyboard": "^7.0.6",
+    "@capacitor/network": "^7.0.4",
+    "@capacitor/preferences": "^7.0.4",
     "@capacitor/push-notifications": "^7.0.1",
     "@capacitor/splash-screen": "^7.0.1",
     "@capacitor/status-bar": "^7.0.1"

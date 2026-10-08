@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { isNativePlatform } from "@/lib/native/is-native";
 import PushConsentModal from "@/components/native/PushConsentModal";
 import OfflineOverlay from "@/components/native/OfflineOverlay";
+import NativeSystemBridge from "@/components/native/NativeSystemBridge";
 
 export default function NativeBridge() {
   const { status } = useSession();
@@ -54,12 +55,18 @@ export default function NativeBridge() {
 
   if (!isNativePlatform()) return null;
 
-  return showPushConsent ? (
-    <PushConsentModal
-      onAccept={() => void handleAcceptPush()}
-      onDecline={() => void handleDeclinePush()}
-    />
-  ) : null;
+  return (
+    <>
+      <NativeSystemBridge />
+      <OfflineOverlay />
+      {showPushConsent ? (
+        <PushConsentModal
+          onAccept={() => void handleAcceptPush()}
+          onDecline={() => void handleDeclinePush()}
+        />
+      ) : null}
+    </>
+  );
 }
 
 async function enablePushRegistration(router: ReturnType<typeof useRouter>) {
