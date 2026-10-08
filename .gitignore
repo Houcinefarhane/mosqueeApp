@@ -21,6 +21,15 @@
 
 # local IDE / agent config
 .claude/
+.cursor/
+
+# promo / local tooling (not part of the app)
+/promo-video/
+scripts/cleanup-test-data.ts
+
+# caches
+**/.cache/
+*.pack
 
 # debug
 npm-debug.log*
@@ -28,9 +37,10 @@ yarn-debug.log*
 yarn-error.log*
 .dev-server.log
 
-# local env files
-.env*.local
-.env
+# local env files (keep examples)
+.env*
+!.env.example
+!**/.env.example
 
 # vercel
 .vercel
