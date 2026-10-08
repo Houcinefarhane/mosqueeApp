@@ -55,6 +55,15 @@ Les URLs sont aussi calculées dans `getLegalConfig().urls` (voir `lib/legal/con
 - [ ] Test : bandeau cookies « Tout refuser » / « Tout accepter » même visibilité.
 - [ ] Registre des traitements mosquée + DPA Vercel/Neon archivés (`docs/registre-traitements-modele.md`).
 
+## Liens profonds (Universal Links / App Links)
+
+- Fichiers servis par Next : `public/.well-known/apple-app-site-association` et `assetlinks.json`.
+- Remplacer `TEAMID` et l’empreinte SHA-256 Android par les valeurs réelles avant validation des liens.
+- Xcode : capability **Associated Domains** + fichier `App.entitlements` (`applinks:madrasa-app-pi.vercel.app`).
+- Android : intent-filter `autoVerify` déjà dans `AndroidManifest.xml`.
+
+Fiche stores (textes FR, captures, comptes démo) : [`docs/store-listing.md`](store-listing.md).
+
 ## App native (Capacitor)
 
 Projet **`mobile/`** à la racine du dépôt :

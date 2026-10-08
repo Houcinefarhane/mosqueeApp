@@ -32,7 +32,7 @@ cd ../.. && npm run sync
 
 ### Icônes et splash
 
-Copier une icône 1024×1024 PNG dans `resources/icon.png` (ou exporter depuis `../app/icon.svg`), puis :
+Sources vectorielles dans `assets/icon.svg` et `assets/splash.svg`, puis :
 
 ```bash
 npm run assets
