@@ -153,8 +153,8 @@ export default async function ProfesseurDashboard() {
               classes.map((classe) => (
                 <Link
                   key={classe.id}
-                  href="/professeur/classes"
-                  className="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3 transition-colors hover:bg-gray-50"
+                  href={`/professeur/classes/${classe.id}`}
+                  className="flex items-center justify-between rounded-lg border border-filet px-4 py-3 transition-colors hover:bg-sable"
                 >
                   <div>
                     <p className="text-sm font-medium">{classe.nom}</p>

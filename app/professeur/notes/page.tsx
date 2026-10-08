@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
@@ -51,9 +51,19 @@ function NotesPageSkeleton() {
 }
 
 export default function NotesPage() {
+  return (
+    <Suspense fallback={<NotesPageSkeleton />}>
+      <NotesPageContent />
+    </Suspense>
+  );
+}
+
+function NotesPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const classeIdFromUrl = searchParams.get("classeId") ?? "";
   const [classes, setClasses] = useState<Classe[]>([]);
-  const [selectedClasseId, setSelectedClasseId] = useState("");
+  const [selectedClasseId, setSelectedClasseId] = useState(classeIdFromUrl);
   const [eleves, setEleves] = useState<Eleve[]>([]);
   const [matiere, setMatiere] = useState("");
   const [noteMax, setNoteMax] = useState("20");
@@ -74,6 +84,9 @@ export default function NotesPage() {
         const response = await fetch("/api/professeur/classes");
         const data = await response.json();
         setClasses(data);
+        if (classeIdFromUrl && data.some((c: Classe) => c.id === classeIdFromUrl)) {
+          setSelectedClasseId(classeIdFromUrl);
+        }
       } catch (err) {
         console.error(err);
         setError("Impossible de charger vos classes.");
@@ -83,7 +96,7 @@ export default function NotesPage() {
     };
 
     fetchClasses();
-  }, []);
+  }, [classeIdFromUrl]);
 
   useEffect(() => {
     if (selectedClasseId) {
