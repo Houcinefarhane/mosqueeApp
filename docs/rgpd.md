@@ -27,7 +27,7 @@ Ce document complète les pages légales et la checklist stores (`docs/app-store
 
 Migration `20260408140000_privacy_consent` : champs `User.privacyPolicy*` et table `PrivacyConsentLog`.
 
-Déploiement : `npm run db:migrate:deploy` (Vercel build).
+Déploiement : `prisma migrate deploy` (Vercel). Base créée initialement avec `db push` : voir `docs/prisma-neon-baseline.md`.
 
 ## Limites
 
