@@ -70,3 +70,59 @@ export function getMonthBounds(date: Date = new Date()) {
 export function getMonthStart(date: Date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
 }
+
+/** Jours affichés dans la grille hebdomadaire (lun. → sam., dim. si cours) */
+export function getWeekDisplayDays(
+  events: { jour: string }[]
+): JourSemaine[] {
+  const hasSunday = events.some((e) => e.jour === "DIMANCHE");
+  const base: JourSemaine[] = [
+    "LUNDI",
+    "MARDI",
+    "MERCREDI",
+    "JEUDI",
+    "VENDREDI",
+    "SAMEDI",
+  ];
+  return hasSunday ? [...base, "DIMANCHE"] : base;
+}
+
+const JOUR_ABBR: Record<JourSemaine, string> = {
+  LUNDI: "Lun",
+  MARDI: "Mar",
+  MERCREDI: "Mer",
+  JEUDI: "Jeu",
+  VENDREDI: "Ven",
+  SAMEDI: "Sam",
+  DIMANCHE: "Dim",
+};
+
+export function getJourAbbr(jour: JourSemaine): string {
+  return JOUR_ABBR[jour];
+}
+
+/** Bornes horaires pour la grille (minutes depuis minuit), avec marge */
+export function getWeeklyTimeBounds(
+  events: { heureDebut: string; heureFin: string }[]
+): { startMinutes: number; endMinutes: number } {
+  if (events.length === 0) {
+    return { startMinutes: 8 * 60, endMinutes: 18 * 60 };
+  }
+  let min = Infinity;
+  let max = -Infinity;
+  for (const e of events) {
+    min = Math.min(min, parseHeureMinutes(e.heureDebut));
+    max = Math.max(max, parseHeureMinutes(e.heureFin));
+  }
+  const startMinutes = Math.max(0, Math.floor(min / 60) * 60 - 30);
+  const endMinutes = Math.min(24 * 60, Math.ceil(max / 60) * 60 + 30);
+  return { startMinutes, endMinutes };
+}
+
+export function formatHeureCourte(heure: string): string {
+  const [h, m] = heure.split(":");
+  const hour = parseInt(h ?? "0", 10);
+  const mins = m ?? "00";
+  if (mins === "00") return `${hour}h`;
+  return `${hour}h${mins}`;
+}
