@@ -1,0 +1,27 @@
+{
+  "name": "madrasapp-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Coque iOS / Android MadrasApp (WebView → site Vercel)",
+  "scripts": {
+    "config:check": "node scripts/check-env.js",
+    "sync": "npm run config:check && npx cap sync",
+    "open:ios": "npx cap open ios",
+    "open:android": "npx cap open android",
+    "run:ios": "npx cap run ios",
+    "run:android": "npx cap run android",
+    "assets": "npx @capacitor/assets generate --iconBackgroundColor '#C8962E' --iconBackgroundColorDark '#1E110A' --splashBackgroundColor '#1E110A' --splashBackgroundColorDark '#1E110A'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/ios": "^7.2.0",
+    "@capacitor/splash-screen": "^7.0.1",
+    "@capacitor/status-bar": "^7.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.2.0",
+    "dotenv": "^16.4.7",
+    "typescript": "^5.7.3"
+  }
+}

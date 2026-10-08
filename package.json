@@ -25,7 +25,11 @@
     "db:setup": "npm run db:push && npm run db:seed",
     "db:docker": "docker compose up -d",
     "db:docker:down": "docker compose down",
-    "db:docker:logs": "docker logs madrasa-postgres -f --tail 50"
+    "db:docker:logs": "docker logs madrasa-postgres -f --tail 50",
+    "mobile:install": "cd mobile && npm install",
+    "mobile:sync": "cd mobile && npm run sync",
+    "mobile:ios": "cd mobile && npm run open:ios",
+    "mobile:android": "cd mobile && npm run open:android"
   },
   "dependencies": {
     "@prisma/client": "^5.19.1",

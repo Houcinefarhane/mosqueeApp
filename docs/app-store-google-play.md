@@ -53,11 +53,16 @@ Les URLs sont aussi calculées dans `getLegalConfig().urls` (voir `lib/legal/con
 - [ ] Test : bandeau cookies « Tout refuser » / « Tout accepter » même visibilité.
 - [ ] Registre des traitements mosquée + DPA Vercel/Neon archivés (`docs/registre-traitements-modele.md`).
 
-## App native (futur)
+## App native (Capacitor)
 
-Pour une app React Native / Capacitor :
+Projet **`mobile/`** à la racine du dépôt :
 
-- Reprendre les mêmes URLs web pour les policies.
-- Écran « Confidentialité » avec WebView ou liens externes.
-- Bouton « Supprimer mon compte » → deep link `/compte/donnees-personnelles`.
-- Ne pas intégrer Firebase Analytics sans consentement équivalent.
+```bash
+cd mobile && cp .env.example .env && npm install && npx cap add ios && npx cap add android && npm run sync
+```
+
+Guide complet : [`mobile/README.md`](../mobile/README.md).
+
+- L’app charge l’URL Vercel (ex. `https://madrasa-app-pi.vercel.app`).
+- Les pages légales et le pied de page in-app restent ceux du site web.
+- Ne pas intégrer d’analytics natifs sans consentement équivalent au bandeau cookies.
