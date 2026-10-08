@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { FileText, User } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { NOTE_SCORE_CLASS } from "@/lib/ui/note-score";
 
 export default async function NotesPage() {
   const session = await getServerSession(authOptions);
@@ -56,33 +57,27 @@ export default async function NotesPage() {
               <div className="space-y-3">
                 {eleve.notes.map((note) => {
                   const pourcentage = (note.valeur / note.noteMax) * 100;
-                  const couleur =
-                    pourcentage >= 80
-                      ? "text-green-600"
-                      : pourcentage >= 60
-                      ? "text-yellow-600"
-                      : "text-red-600";
 
                   return (
                     <div
                       key={note.id}
-                      className="p-4 border border-gray-200 rounded-lg"
+                      className="rounded-2xl border border-filet p-4"
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <p className="font-semibold text-lg">{note.matiere}</p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-brun-doux">
                             Par {note.professeur.prenom} {note.professeur.nom}
                           </p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-brun-doux/80 mt-1">
                             {formatDate(note.createdAt)}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className={`text-2xl font-bold ${couleur}`}>
+                          <p className={NOTE_SCORE_CLASS}>
                             {note.valeur}/{note.noteMax}
                           </p>
-                          <p className={`text-sm ${couleur}`}>
+                          <p className="text-sm tabular-nums text-brun-doux">
                             {pourcentage.toFixed(0)}%
                           </p>
                         </div>

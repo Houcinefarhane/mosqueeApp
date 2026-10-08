@@ -2,9 +2,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
 import Link from "next/link";
-import { Plus, Bell, User } from "lucide-react";
+import Button from "@/components/ui/Button";
+import PageHeader from "@/components/layout/PageHeader";
+import { HeaderCreateLink } from "@/components/layout/HeaderActions";
+import { Bell, User } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 
 export default async function AnnoncesPage() {
@@ -28,18 +30,15 @@ export default async function AnnoncesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Annonces</h1>
-          <p className="text-gray-600 mt-2">Gérez les annonces pour les parents</p>
-        </div>
-        <Link href="/admin/annonces/nouvelle">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
+      <PageHeader
+        title="Annonces"
+        description="Gérez les annonces pour les parents"
+        action={
+          <HeaderCreateLink href="/admin/annonces/nouvelle">
             Nouvelle annonce
-          </Button>
-        </Link>
-      </div>
+          </HeaderCreateLink>
+        }
+      />
 
       <div className="space-y-4">
         {annonces.map((annonce) => (

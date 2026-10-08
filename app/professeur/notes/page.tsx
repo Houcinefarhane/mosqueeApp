@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import PageHeader from "@/components/layout/PageHeader";
+import { HeaderOutlineLink } from "@/components/layout/HeaderActions";
+import { History } from "lucide-react";
 import NotesCompactList, {
   NotesListSkeleton,
 } from "@/components/professeur/NotesCompactList";
@@ -238,6 +240,11 @@ export default function NotesPage() {
           { label: "Espace professeur", href: "/professeur" },
           { label: "Notes" },
         ]}
+        action={
+          <HeaderOutlineLink href="/professeur/notes/historique" icon={History}>
+            Historique
+          </HeaderOutlineLink>
+        }
       />
 
       <Card variant="elevated">

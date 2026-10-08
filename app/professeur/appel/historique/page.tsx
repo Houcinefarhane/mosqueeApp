@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
-import { Calendar, Users, MessageSquare, CheckCircle, XCircle, Clock, AlertCircle, ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import PageHeader from "@/components/layout/PageHeader";
+import { Calendar, Users, MessageSquare, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ListSkeleton } from "@/components/ui/Skeleton";
 import { fr } from "date-fns/locale/fr";
@@ -127,18 +126,11 @@ export default function HistoriqueAppelPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Historique des appels</h1>
-          <p className="text-gray-600 mt-2">Consultez l&apos;historique de tous vos appels</p>
-        </div>
-        <Link href="/professeur/appel">
-          <Button variant="outline">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour à l&apos;appel
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        title="Historique des appels"
+        description="Consultez l'historique de tous vos appels"
+        back={{ href: "/professeur/appel", label: "Retour à l'appel" }}
+      />
 
       <Card variant="elevated">
         <CardHeader>

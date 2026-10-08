@@ -2,11 +2,14 @@
 
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "react-hot-toast";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
+      <ThemeProvider>
       {children}
+      </ThemeProvider>
       <Toaster
         position="top-right"
         toastOptions={{
@@ -19,7 +22,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             fontSize: "0.875rem",
           },
           success: {
-            iconTheme: { primary: "#16A34A", secondary: "#fff" },
+            iconTheme: { primary: "#C8962E", secondary: "#1E110A" },
           },
           error: {
             iconTheme: { primary: "#DC2626", secondary: "#fff" },

@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
-import { FileText, MessageSquare, ArrowLeft, TrendingUp } from "lucide-react";
-import Link from "next/link";
+import PageHeader from "@/components/layout/PageHeader";
+import { FileText, MessageSquare, TrendingUp } from "lucide-react";
+import { NOTE_SCORE_INLINE_CLASS } from "@/lib/ui/note-score";
 import { format } from "date-fns";
 import { ListSkeleton } from "@/components/ui/Skeleton";
 import { fr } from "date-fns/locale/fr";
@@ -100,18 +100,11 @@ export default function HistoriqueNotesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Historique des notes</h1>
-          <p className="text-gray-600 mt-2">Consultez l&apos;historique de toutes vos sessions de notes</p>
-        </div>
-        <Link href="/professeur/notes">
-          <Button variant="outline">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour aux notes
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        title="Historique des notes"
+        description="Consultez l'historique de toutes vos sessions de notes"
+        back={{ href: "/professeur/notes", label: "Retour aux notes" }}
+      />
 
       <Card variant="elevated">
         <CardHeader>
@@ -229,36 +222,26 @@ export default function HistoriqueNotesPage() {
                       >
                         <h4 className="font-semibold mb-3">Détails des notes</h4>
                         <div className="space-y-2">
-                          {session.notes.map((note) => {
-                            const ratio = note.noteMax > 0 ? note.valeur / note.noteMax : 0;
-                            const couleur =
-                              ratio >= 0.8
-                                ? "text-green-600"
-                                : ratio >= 0.6
-                                  ? "text-yellow-600"
-                                  : "text-red-600";
-
-                            return (
+                          {session.notes.map((note) => (
                               <div
                                 key={note.id}
-                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                                className="flex items-center justify-between rounded-2xl bg-sable p-3"
                               >
                                 <div className="flex-1">
                                   <span className="font-medium">
                                     {note.eleve.prenom} {note.eleve.nom}
                                   </span>
                                   {note.commentaire && (
-                                    <p className="text-xs text-gray-500 italic mt-1">
+                                    <p className="text-xs italic text-brun-doux mt-1">
                                       {note.commentaire}
                                     </p>
                                   )}
                                 </div>
-                                <span className={`font-bold ${couleur}`}>
+                                <span className={NOTE_SCORE_INLINE_CLASS}>
                                   {note.valeur} / {note.noteMax}
                                 </span>
                               </div>
-                            );
-                          })}
+                            ))}
                         </div>
                       </motion.div>
                     )}

@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,36 +10,36 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        nuit: "#1E110A",
+        nuit: "var(--color-nuit)",
         brun: {
-          DEFAULT: "#3B2216",
-          doux: "#6B4528",
+          DEFAULT: "var(--color-brun)",
+          doux: "var(--color-brun-doux)",
         },
         or: {
-          DEFAULT: "#C8962E",
-          clair: "#E6C072",
+          DEFAULT: "var(--color-or)",
+          clair: "var(--color-or-clair)",
         },
-        blanc: "#FFFFFF",
-        filet: "#EADFCB",
-        sable: "#F3EBDD",
+        blanc: "var(--color-blanc)",
+        filet: "var(--color-filet)",
+        sable: "var(--color-sable)",
         /* Alias legacy → nouvelle identité */
         primary: {
-          DEFAULT: "#3B2216",
-          light: "#6B4528",
-          dark: "#1E110A",
+          DEFAULT: "var(--color-brun)",
+          light: "var(--color-brun-doux)",
+          dark: "var(--color-nuit)",
         },
         secondary: {
-          DEFAULT: "#C8962E",
-          light: "#E6C072",
+          DEFAULT: "var(--color-or)",
+          light: "var(--color-or-clair)",
           dark: "#A67B24",
         },
-        background: "#FFFFFF",
+        background: "var(--background)",
         surface: {
-          DEFAULT: "#FFFFFF",
-          muted: "#F3EBDD",
-          warm: "#F3EBDD",
+          DEFAULT: "var(--surface)",
+          muted: "var(--surface-muted)",
+          warm: "var(--surface-muted)",
         },
-        foreground: "#3B2216",
+        foreground: "var(--foreground)",
         success: "#C8962E",
         danger: "#6B4528",
       },

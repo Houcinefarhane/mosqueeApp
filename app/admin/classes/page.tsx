@@ -4,7 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
-import { Plus, BookOpen, Users } from "lucide-react";
+import PageHeader from "@/components/layout/PageHeader";
+import { HeaderCreateLink } from "@/components/layout/HeaderActions";
+import { BookOpen, Users } from "lucide-react";
 
 export default async function ClassesPage() {
   const session = await getServerSession(authOptions);
@@ -32,20 +34,15 @@ export default async function ClassesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Classes</h1>
-          <p className="text-gray-600 mt-2">
-            {classes.length} classe(s) • {totalEleves} élève(s) au total
-          </p>
-        </div>
-        <Link href="/admin/classes/nouvelle">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
+      <PageHeader
+        title="Classes"
+        description={`${classes.length} classe(s) · ${totalEleves} élève(s) au total`}
+        action={
+          <HeaderCreateLink href="/admin/classes/nouvelle">
             Nouvelle classe
-          </Button>
-        </Link>
-      </div>
+          </HeaderCreateLink>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {classes.map((classe) => (

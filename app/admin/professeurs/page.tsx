@@ -4,7 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
-import { Plus, Users, Mail, Phone } from "lucide-react";
+import PageHeader from "@/components/layout/PageHeader";
+import { HeaderCreateLink } from "@/components/layout/HeaderActions";
+import { Users, Mail, Phone } from "lucide-react";
 
 export default async function ProfesseursPage() {
   const session = await getServerSession(authOptions);
@@ -27,18 +29,15 @@ export default async function ProfesseursPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Professeurs</h1>
-          <p className="text-gray-600 mt-2">Gérez les professeurs de votre mosquée</p>
-        </div>
-        <Link href="/admin/professeurs/nouveau">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
+      <PageHeader
+        title="Professeurs"
+        description="Gérez les professeurs de votre mosquée"
+        action={
+          <HeaderCreateLink href="/admin/professeurs/nouveau">
             Nouveau professeur
-          </Button>
-        </Link>
-      </div>
+          </HeaderCreateLink>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {professeurs.map((professeur) => (
