@@ -1,31 +1,35 @@
 # Conformité RGPD — MadrasApp
 
-Ce document complète les pages légales (`/legal/*`) et la page **Mes données** (`/compte/donnees-personnelles`).
+Ce document complète les pages légales et la checklist stores (`docs/app-store-google-play.md`).
 
-## Ce que le code couvre
+## Couverture produit (code)
 
-- Politique de confidentialité, mentions légales, politique cookies (pages statiques + variables `LEGAL_*`).
-- Consentement obligatoire à l’inscription (tous les parcours).
-- Bandeau cookies : analytics Vercel **uniquement** après acceptation « Tout accepter ».
-- Export JSON des données du compte connecté (`GET /api/me/data-export`).
-- Suppression de compte (`DELETE /api/me/account`) — règles selon le rôle (admin : contact requis).
+| Exigence | Implémentation |
+|----------|----------------|
+| Information | `/legal/confidentialite`, mentions, cookies |
+| Consentement inscription | Case + API Zod + journal `PrivacyConsentLog` |
+| Mineurs (compte élève) | Case âge ≥ 15 ans ou accord représentant légal + journal |
+| Cookies CNIL | Bandeau « Tout refuser » / « Tout accepter » (même niveau) ; retrait via « Gérer les cookies » |
+| Analytics | Vercel Analytics uniquement après consentement |
+| Droits | Export JSON, suppression compte, page publique suppression |
+| Privacy Choices (stores) | `/legal/vos-choix` |
+| Lien in-app | Pied de page connecté + menu « Mes données (RGPD) » |
 
-## Checklist côté mosquée (responsable de traitement)
+## À faire côté organisation (obligatoire pour une conformité complète)
 
-Chaque mosquée utilisant MadrasApp reste responsable des données de ses élèves et familles.
+1. Renseigner `LEGAL_PUBLISHER_NAME`, `LEGAL_PUBLISHER_ADDRESS`, `NEXT_PUBLIC_APP_URL` en production.
+2. Registre des traitements mosquée : `docs/registre-traitements-modele.md`.
+3. DPA signés Vercel + Neon (archives).
+4. Procédure incident / violation de données (72 h CNIL si applicable).
+5. Durées de conservation dossiers élèves (politique interne mosquée).
 
-1. **Identité** — Renseigner sur Vercel (ou `.env`) : `LEGAL_PUBLISHER_NAME`, `LEGAL_PUBLISHER_ADDRESS`. Les utilisateurs sont orientés vers l'administration de la mosquée sur place (pas d'e-mail de contact applicatif).
-2. **Registre des traitements** — Documenter : gestion scolaire, messagerie, notes, présences, comptes utilisateurs ; bases légales (exécution du contrat / intérêt légitime / consentement pour analytics).
-3. **Sous-traitants** — DPA avec **Vercel** (hébergement) et **Neon** (base de données) ; conserver les preuves de signature.
-4. **Durées de conservation** — Définir une politique interne (ex. dossiers élèves X ans après départ) et l’appliquer via vos processus admin.
-5. **Droits des personnes** — Les utilisateurs peuvent exporter/supprimer via l’app ; pour les dossiers élèves gérés par l’admin, prévoir une procédure en mosquée (accueil / direction).
-6. **Sécurité** — Mots de passe forts, accès limités par rôle, sauvegardes Neon, pas de partage des codes mosquée/élève.
+## Base de données
 
-## Variables d’environnement
+Migration `20260408140000_privacy_consent` : champs `User.privacyPolicy*` et table `PrivacyConsentLog`.
 
-Voir `.env.example` section `LEGAL_*`.
+Déploiement : `npm run db:migrate:deploy` (Vercel build).
 
-## Limites connues
+## Limites
 
-- Pas de journal d’audit des consentements en base (case cochée validée côté API à l’inscription).
-- Les admins ne peuvent pas auto-supprimer le compte mosquée via l’UI (protection des données de toute la structure).
+- Comptes créés par l'admin sans passer par l'inscription publique : consentement à documenter côté mosquée (papier / accueil).
+- La conformité juridique finale dépend du contexte de chaque mosquée ; ce package vise les exigences techniques et documentaires App Store / Play Store.

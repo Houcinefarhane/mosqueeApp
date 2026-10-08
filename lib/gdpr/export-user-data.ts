@@ -13,6 +13,17 @@ export async function exportUserPersonalData(userId: string) {
       mosqueeId: true,
       createdAt: true,
       updatedAt: true,
+      privacyPolicyAcceptedAt: true,
+      privacyPolicyVersion: true,
+      parentalConsentAt: true,
+      privacyConsentLogs: {
+        select: {
+          kind: true,
+          policyVersion: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "asc" },
+      },
       mosquee: {
         select: { nom: true, adresse: true, email: true, telephone: true },
       },
@@ -79,6 +90,12 @@ export async function exportUserPersonalData(userId: string) {
       role: user.role,
       creeLe: user.createdAt,
       modifieLe: user.updatedAt,
+      consentements: {
+        politiqueAccepteeLe: user.privacyPolicyAcceptedAt,
+        politiqueVersion: user.privacyPolicyVersion,
+        accordParentalLe: user.parentalConsentAt,
+        journal: user.privacyConsentLogs,
+      },
     },
     mosquee: user.mosquee,
     dossierEleve: user.eleve,
@@ -89,6 +106,6 @@ export async function exportUserPersonalData(userId: string) {
       recus: user.messagesReceived,
     },
     note:
-      "Les notes, présences et autres données pédagogiques liées à votre enfant ou à vos classes sont traitées par votre mosquée (responsable de traitement). Pour les exercer, contactez également l'administration de votre école coranique.",
+      "Les notes, présences et autres données pédagogiques sont traitées par votre mosquée (responsable de traitement). Pour les exercer, rendez-vous à l'administration sur place.",
   };
 }

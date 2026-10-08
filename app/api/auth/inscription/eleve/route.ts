@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { privacyConsentSchema } from "@/lib/legal/consent";
+import {
+  parentalGuardianConsentSchema,
+  privacyConsentSchema,
+} from "@/lib/legal/consent";
+import { recordUserConsents } from "@/lib/legal/record-consent";
 
 const inscriptionEleveSchema = z.object({
   nom: z.string().min(1, "Le nom est requis"),
@@ -12,6 +16,7 @@ const inscriptionEleveSchema = z.object({
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
   codeEleve: z.string().min(1, "Le code élève est requis"),
   acceptPrivacyPolicy: privacyConsentSchema,
+  confirmParentalGuardian: parentalGuardianConsentSchema,
 });
 
 export async function POST(req: NextRequest) {
@@ -87,6 +92,8 @@ export async function POST(req: NextRequest) {
       where: { id: eleve.id },
       data: { userId: user.id },
     });
+
+    await recordUserConsents(user.id, { includeParentalGuardian: true });
 
     return NextResponse.json(
       {

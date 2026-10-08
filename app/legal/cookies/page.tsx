@@ -24,8 +24,9 @@ export default function CookiesPage() {
           Si vous cliquez sur « Tout accepter » dans le bandeau cookies, nous
           activons <strong>Vercel Analytics</strong> : pages vues, type
           d&apos;appareil, pays (données agrégées, sans profilage publicitaire).
-          Vous pouvez choisir « Refuser la mesure » : l&apos;outil n&apos;est
-          pas chargé.
+          Vous pouvez choisir « Tout refuser » : l&apos;outil n&apos;est pas
+          chargé. Les boutons « Tout refuser » et « Tout accepter » sont au même
+          niveau (recommandation CNIL).
         </p>
         <p>
           Votre choix est enregistré dans le stockage local de votre navigateur

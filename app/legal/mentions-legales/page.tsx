@@ -48,9 +48,10 @@ export default function MentionsLegalesPage() {
           Données personnelles
         </h2>
         <p>
-          Voir la politique de confidentialité accessible depuis la page de
-          connexion ou l&apos;URL /legal/confidentialite.
+          Politique : /legal/confidentialite · Choix RGPD : /legal/vos-choix ·
+          Suppression de compte : /legal/suppression-compte
         </p>
+        <p className="text-sm">{legal.contactNotice}</p>
       </section>
     </LegalPageShell>
   );

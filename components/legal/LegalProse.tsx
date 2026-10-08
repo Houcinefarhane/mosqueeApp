@@ -28,18 +28,28 @@ export function LegalPageShell({
         <article className="legal-prose space-y-4 text-sm leading-relaxed text-brun-doux sm:text-base">
           {children}
         </article>
-        <footer className="mt-12 border-t border-filet pt-6 text-xs text-brun-doux">
-          <Link href="/legal/confidentialite" className="hover:underline">
-            Confidentialité
-          </Link>
-          {" · "}
-          <Link href="/legal/mentions-legales" className="hover:underline">
-            Mentions légales
-          </Link>
-          {" · "}
-          <Link href="/legal/cookies" className="hover:underline">
-            Cookies
-          </Link>
+        <footer className="mt-12 space-y-2 border-t border-filet pt-6 text-xs text-brun-doux">
+          <p>
+            <Link href="/legal/confidentialite" className="hover:underline">
+              Confidentialité
+            </Link>
+            {" · "}
+            <Link href="/legal/vos-choix" className="hover:underline">
+              Vos choix (RGPD)
+            </Link>
+            {" · "}
+            <Link href="/legal/suppression-compte" className="hover:underline">
+              Suppression de compte
+            </Link>
+            {" · "}
+            <Link href="/legal/mentions-legales" className="hover:underline">
+              Mentions légales
+            </Link>
+            {" · "}
+            <Link href="/legal/cookies" className="hover:underline">
+              Cookies
+            </Link>
+          </p>
         </footer>
       </main>
     </div>

@@ -9,7 +9,11 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowLeft, GraduationCap } from "lucide-react";
 import PrivacyConsentField from "@/components/legal/PrivacyConsentField";
-import { PRIVACY_CONSENT_MESSAGE } from "@/lib/legal/consent";
+import ParentalGuardianConsentField from "@/components/legal/ParentalGuardianConsentField";
+import {
+  PARENTAL_CONSENT_MESSAGE,
+  PRIVACY_CONSENT_MESSAGE,
+} from "@/lib/legal/consent";
 
 export default function InscriptionElevePage() {
   const router = useRouter();
@@ -25,6 +29,7 @@ export default function InscriptionElevePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [acceptPrivacyPolicy, setAcceptPrivacyPolicy] = useState(false);
+  const [confirmParentalGuardian, setConfirmParentalGuardian] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +50,11 @@ export default function InscriptionElevePage() {
       return;
     }
 
+    if (!confirmParentalGuardian) {
+      setError(PARENTAL_CONSENT_MESSAGE);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -59,6 +69,7 @@ export default function InscriptionElevePage() {
           password: formData.password,
           codeEleve: formData.codeEleve,
           acceptPrivacyPolicy: true,
+          confirmParentalGuardian: true,
         }),
       });
 
@@ -171,6 +182,11 @@ export default function InscriptionElevePage() {
               <PrivacyConsentField
                 checked={acceptPrivacyPolicy}
                 onChange={setAcceptPrivacyPolicy}
+              />
+
+              <ParentalGuardianConsentField
+                checked={confirmParentalGuardian}
+                onChange={setConfirmParentalGuardian}
               />
 
               {error && (

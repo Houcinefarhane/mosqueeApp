@@ -3,6 +3,7 @@ import { prisma, withRetry } from "@/lib/prisma";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { privacyConsentSchema } from "@/lib/legal/consent";
+import { recordUserConsents } from "@/lib/legal/record-consent";
 
 const inscriptionSchema = z.object({
   nomMosquee: z.string().min(1, "Le nom de la mosquée est requis"),
@@ -68,6 +69,8 @@ export async function POST(req: NextRequest) {
         return { mosquee, admin };
       });
     });
+
+    await recordUserConsents(result.admin.id);
 
     // Ne pas retourner le mot de passe
     const { password, ...adminWithoutPassword } = result.admin;

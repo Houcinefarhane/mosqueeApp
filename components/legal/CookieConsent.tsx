@@ -49,18 +49,19 @@ export default function CookieConsent({ onChoice }: CookieConsentProps) {
             </Link>
           </p>
         </div>
-        <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:gap-3">
           <Button
             type="button"
             variant="outline"
-            className="min-h-11"
+            className="min-h-11 flex-1 sm:min-w-[9.5rem]"
             onClick={() => save("essential")}
           >
-            Refuser la mesure
+            Tout refuser
           </Button>
           <Button
             type="button"
-            className="min-h-11"
+            variant="outline"
+            className="min-h-11 flex-1 sm:min-w-[9.5rem]"
             onClick={() => save("analytics")}
           >
             Tout accepter

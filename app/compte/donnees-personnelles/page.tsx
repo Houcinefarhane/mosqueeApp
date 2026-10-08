@@ -9,6 +9,7 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { Download, Shield, Trash2 } from "lucide-react";
+import CookiePreferencesControl from "@/components/legal/CookiePreferencesControl";
 
 export default function DonneesPersonnellesPage() {
   const { data: session, status } = useSession();
@@ -126,6 +127,24 @@ export default function DonneesPersonnellesPage() {
             <Download className="h-4 w-4" />
             Télécharger mes données
           </Button>
+        </CardContent>
+      </Card>
+
+      <Card variant="elevated">
+        <CardContent className="space-y-4 p-5">
+          <h2 className="font-display text-lg font-extrabold text-foreground">
+            Cookies et mesure d&apos;audience
+          </h2>
+          <p className="text-sm text-brun-doux">
+            Retirez ou accordez à nouveau le consentement aux statistiques
+            Vercel Analytics (sans affecter la connexion).
+          </p>
+          <CookiePreferencesControl />
+          <p className="text-xs text-brun-doux">
+            <Link href="/legal/vos-choix" className="text-or hover:underline">
+              Vos choix de confidentialité (lien public stores)
+            </Link>
+          </p>
         </CardContent>
       </Card>
 

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { privacyConsentSchema } from "@/lib/legal/consent";
+import { recordUserConsents } from "@/lib/legal/record-consent";
 
 const inscriptionProfesseurSchema = z.object({
   nom: z.string().min(1, "Le nom est requis"),
@@ -63,6 +64,8 @@ export async function POST(req: NextRequest) {
         mosqueeId: mosquee.id,
       },
     });
+
+    await recordUserConsents(user.id);
 
     return NextResponse.json(
       {

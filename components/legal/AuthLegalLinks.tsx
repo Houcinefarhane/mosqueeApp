@@ -14,6 +14,10 @@ export default function AuthLegalLinks() {
       <Link href="/legal/cookies" className="underline-offset-2 hover:underline">
         Cookies
       </Link>
+      {" · "}
+      <Link href="/legal/suppression-compte" className="underline-offset-2 hover:underline">
+        Suppression compte
+      </Link>
     </p>
   );
 }

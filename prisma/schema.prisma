@@ -66,8 +66,12 @@ model User {
   mosqueeId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  privacyPolicyAcceptedAt DateTime?
+  privacyPolicyVersion    String?
+  parentalConsentAt       DateTime?
 
   mosquee   Mosquee    @relation(fields: [mosqueeId], references: [id], onDelete: Cascade)
+  privacyConsentLogs PrivacyConsentLog[]
   classes   Classe[]   // Classes enseignées par ce professeur
   eleves    Eleve[]    @relation("ParentEleves") // Enfants de ce parent
   eleve     Eleve?     @relation("EleveUser") // Compte élève lié
@@ -83,6 +87,20 @@ model User {
   @@index([mosqueeId])
   @@index([email])
   @@index([role])
+}
+
+/// Journal des consentements (preuve RGPD).
+model PrivacyConsentLog {
+  id            String   @id @default(cuid())
+  userId        String
+  kind          String
+  policyVersion String
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([kind])
 }
 
 model Classe {

@@ -10,46 +10,64 @@ export default function ConfidentialitePage() {
   return (
     <LegalPageShell title="Politique de confidentialité">
       <p className="text-xs text-brun-doux">
-        Dernière mise à jour : {legal.lastUpdated}
+        Dernière mise à jour : {legal.lastUpdated} · Version :{" "}
+        {legal.privacyPolicyVersion}
       </p>
 
       <section className="space-y-3">
         <h2 className="font-display text-lg font-extrabold text-foreground">
-          1. Qui sommes-nous ?
+          1. Responsables et éditeur
         </h2>
         <p>
-          <strong>{legal.appName}</strong> est un logiciel de gestion pour les
-          écoles coraniques des mosquées. L&apos;éditeur de la plateforme est{" "}
-          <strong>{legal.publisherName}</strong>
-          {legal.publisherAddress ? (
-            <>
-              , situé au{" "}
-              <span className="whitespace-pre-line">{legal.publisherAddress}</span>
-            </>
-          ) : null}
-          . {legal.contactNotice}
+          <strong>{legal.appName}</strong> est une application de gestion pour
+          les écoles coraniques des mosquées.
         </p>
         <p>
-          Chaque <strong>mosquée ou association</strong> qui crée un espace sur{" "}
-          {legal.appName} agit en qualité de{" "}
-          <strong>responsable de traitement</strong> pour les données des
-          élèves, parents et enseignants qu&apos;elle y enregistre (notes,
-          présences, planning, etc.). {legal.publisherName} agit en qualité de{" "}
-          <strong>sous-traitant</strong> pour l&apos;hébergement et la mise à
-          disposition de l&apos;outil.
+          <strong>Éditeur / développeur</strong> (entité à faire figurer sur les
+          stores) : {legal.publisherName}, {legal.publisherAddress}.{" "}
+          {legal.contactNotice}
+        </p>
+        <p>
+          Chaque <strong>mosquée ou association</strong> qui ouvre un espace
+          agit en <strong>responsable de traitement</strong> pour les données
+          des élèves, parents et enseignants (notes, présences, planning,
+          messagerie scolaire). {legal.publisherName} agit en{" "}
+          <strong>sous-traitant technique</strong> pour l&apos;hébergement et
+          la mise à disposition de l&apos;outil.
         </p>
       </section>
 
       <section className="space-y-3">
         <h2 className="font-display text-lg font-extrabold text-foreground">
-          2. Données traitées
+          2. Données collectées
         </h2>
         <ul className="list-disc space-y-1 pl-5">
-          <li>Identité et contact : nom, prénom, e-mail, téléphone</li>
-          <li>Compte : identifiants de connexion (mot de passe chiffré)</li>
-          <li>Données scolaires : classe, notes, présences, devoirs, messages</li>
-          <li>Données techniques : journaux serveur, mesure d&apos;audience si vous y consentez</li>
+          <li>
+            <strong>Compte</strong> : nom, prénom, adresse e-mail, téléphone
+            (optionnel), mot de passe (stocké hashé), rôle, identifiant mosquée.
+          </li>
+          <li>
+            <strong>Données scolaires</strong> : classe, notes, présences,
+            devoirs, appels, planning, annonces.
+          </li>
+          <li>
+            <strong>Messagerie</strong> : objet, contenu, date, expéditeur /
+            destinataire.
+          </li>
+          <li>
+            <strong>Technique</strong> : journaux serveur (sécurité), mesure
+            d&apos;audience agrégée (Vercel Analytics) uniquement si vous
+            acceptez les cookies de mesure.
+          </li>
+          <li>
+            <strong>Consentements</strong> : date et version de la politique
+            acceptée à l&apos;inscription ; pour les comptes élèves,
+            confirmation d&apos;accord parental ou d&apos;âge ≥ 15 ans.
+          </li>
         </ul>
+        <p className="text-sm">
+          Nous ne vendons pas vos données. Pas de publicité comportementale.
+        </p>
       </section>
 
       <section className="space-y-3">
@@ -59,71 +77,119 @@ export default function ConfidentialitePage() {
         <ul className="list-disc space-y-1 pl-5">
           <li>
             <strong>Gestion de l&apos;école coranique</strong> (exécution du
-            contrat / mission d&apos;intérêt éducatif) : emploi du temps, appels,
-            notes, communication avec les familles.
+            contrat / mission éducative) : emploi du temps, appels, notes,
+            communication avec les familles.
           </li>
           <li>
-            <strong>Sécurité du service</strong> (intérêt légitime) : authentification,
-            prévention des abus.
+            <strong>Sécurité</strong> (intérêt légitime) : authentification,
+            prévention des abus, journaux techniques.
           </li>
           <li>
             <strong>Mesure d&apos;audience</strong> (consentement) : statistiques
-            anonymisées via Vercel Analytics, uniquement si vous acceptez les
-            cookies de mesure.
+            anonymisées via Vercel Analytics, chargées seulement après « Tout
+            accepter » sur le bandeau cookies.
           </li>
         </ul>
       </section>
 
       <section className="space-y-3">
         <h2 className="font-display text-lg font-extrabold text-foreground">
-          4. Durées de conservation
+          4. Mineurs
         </h2>
         <p>
-          Les comptes utilisateurs sont conservés tant que la mosquée maintient
-          l&apos;accès. Les données pédagogiques peuvent être conservées par la
-          mosquée selon ses obligations légales et réglementaires. Les journaux
-          techniques sont conservés pour une durée limitée (généralement 12 mois
-          maximum).
+          L&apos;application peut être utilisée par des élèves mineurs dans le
+          cadre scolaire. Pour les <strong>comptes élèves</strong>, l&apos;inscription
+          exige l&apos;acceptation de la présente politique et une confirmation
+          que l&apos;utilisateur a <strong>15 ans ou plus</strong> ou l&apos;accord
+          de son représentant légal, conformément à l&apos;article 45 de la loi
+          « Informatique et Libertés ». L&apos;inscription peut aussi être
+          validée en mosquée par l&apos;administration.
+        </p>
+        <p>
+          MadrasApp <strong>n&apos;est pas</strong> une application « Kids
+          Category » Apple : elle s&apos;adresse à un écosystème scolaire encadré
+          par la mosquée. Les analytics tiers ne sont pas activés sans
+          consentement explicite.
         </p>
       </section>
 
       <section className="space-y-3">
         <h2 className="font-display text-lg font-extrabold text-foreground">
-          5. Destinataires et hébergement
+          5. Sous-traitants et hébergement
         </h2>
-        <p>
-          Données hébergées via {legal.hostingProvider} ({legal.hostingRegion}).
-          Base de données PostgreSQL (ex. Neon). Sous-traitants techniques
-          listés dans les conditions de vos prestataurs (Vercel, Neon, etc.).
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-display text-lg font-extrabold text-foreground">
-          6. Vos droits (RGPD)
-        </h2>
-        <p>Vous disposez des droits d&apos;accès, rectification, effacement, limitation, opposition et portabilité.</p>
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <strong>Compte connecté</strong> : export et suppression depuis{" "}
-            <Link href="/compte/donnees-personnelles" className="text-or underline-offset-2 hover:underline">
-              Mes données personnelles
+            <strong>{legal.hostingProvider}</strong> — hébergement applicatif (
+            {legal.hostingRegion}). Contrat de sous-traitance (DPA) disponible
+            auprès de l&apos;hébergeur.
+          </li>
+          <li>
+            <strong>{legal.databaseProvider}</strong> — base de données
+            PostgreSQL chiffrée en transit (TLS).
+          </li>
+          <li>
+            <strong>Vercel Analytics</strong> (optionnel) — uniquement après
+            consentement cookies.
+          </li>
+        </ul>
+        <p>
+          Les données sont transmises en <strong>HTTPS</strong>. Les mots de
+          passe sont hashés (bcrypt).
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-display text-lg font-extrabold text-foreground">
+          6. Durées de conservation et suppression
+        </h2>
+        <p>
+          Comptes actifs : conservation tant que la mosquée maintient
+          l&apos;accès. Compte utilisateur : suppression immédiate via{" "}
+          <Link
+            href="/compte/donnees-personnelles"
+            className="text-or underline-offset-2 hover:underline"
+          >
+            Mes données personnelles
+          </Link>{" "}
+          ou selon{" "}
+          <Link
+            href="/legal/suppression-compte"
+            className="text-or underline-offset-2 hover:underline"
+          >
+            ces instructions
+          </Link>
+          . Données pédagogiques : durées définies par la mosquée (responsable
+          de traitement). Journaux techniques : durée limitée (rotation).
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-display text-lg font-extrabold text-foreground">
+          7. Vos droits (RGPD)
+        </h2>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>
+            Accès, portabilité, effacement (compte) :{" "}
+            <Link
+              href="/legal/vos-choix"
+              className="text-or underline-offset-2 hover:underline"
+            >
+              Vos choix de confidentialité
             </Link>
             .
           </li>
           <li>
-            <strong>Données scolaires</strong> : contactez l&apos;administration
-            de votre mosquée (responsable de traitement).
+            Données scolaires : {legal.contactNotice}
           </li>
           <li>
-            <strong>Réclamation</strong> : CNIL —{" "}
+            Réclamation :{" "}
             <a
               href="https://www.cnil.fr"
               className="text-or underline-offset-2 hover:underline"
               target="_blank"
               rel="noopener noreferrer"
             >
-              www.cnil.fr
+              CNIL
             </a>
             .
           </li>
@@ -132,13 +198,26 @@ export default function ConfidentialitePage() {
 
       <section className="space-y-3">
         <h2 className="font-display text-lg font-extrabold text-foreground">
-          7. Sécurité
+          8. Cookies
         </h2>
         <p>
-          Mots de passe hashés, connexions chiffrées (HTTPS), accès restreint par
-          rôle (admin, professeur, parent, élève). Mesures organisationnelles
-          complémentaires à définir par chaque mosquée (mots de passe forts,
-          sensibilisation).
+          Voir{" "}
+          <Link href="/legal/cookies" className="text-or hover:underline">
+            politique cookies
+          </Link>
+          . Retrait du consentement : bouton « Gérer les cookies » en bas de
+          l&apos;application ou sur la page Vos choix.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-display text-lg font-extrabold text-foreground">
+          9. Modifications
+        </h2>
+        <p>
+          En cas de changement substantiel, la version ({legal.privacyPolicyVersion}
+          ) sera mise à jour. Une nouvelle acceptation pourra être demandée à
+          la connexion si nécessaire.
         </p>
       </section>
     </LegalPageShell>
