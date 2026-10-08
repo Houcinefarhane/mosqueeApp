@@ -44,6 +44,7 @@ export const config = {
     "/professeur/:path*",
     "/parent/:path*",
     "/eleve/:path*",
+    "/compte/:path*",
   ],
   // Exclure les routes d'API et d'authentification
   exclude: ["/api/:path*", "/auth/:path*"],

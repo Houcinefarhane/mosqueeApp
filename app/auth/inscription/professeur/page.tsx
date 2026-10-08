@@ -8,6 +8,8 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowLeft, GraduationCap } from "lucide-react";
+import PrivacyConsentField from "@/components/legal/PrivacyConsentField";
+import { PRIVACY_CONSENT_MESSAGE } from "@/lib/legal/consent";
 
 export default function InscriptionProfesseurPage() {
   const router = useRouter();
@@ -22,6 +24,7 @@ export default function InscriptionProfesseurPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [acceptPrivacyPolicy, setAcceptPrivacyPolicy] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +40,11 @@ export default function InscriptionProfesseurPage() {
       return;
     }
 
+    if (!acceptPrivacyPolicy) {
+      setError(PRIVACY_CONSENT_MESSAGE);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -48,6 +56,7 @@ export default function InscriptionProfesseurPage() {
           prenom: formData.prenom,
           email: formData.email,
           telephone: formData.telephone || undefined,
+          acceptPrivacyPolicy: true,
           password: formData.password,
           codeMosquee: formData.codeMosquee,
         }),
@@ -157,6 +166,11 @@ export default function InscriptionProfesseurPage() {
                   setFormData({ ...formData, confirmPassword: e.target.value })
                 }
                 required
+              />
+
+              <PrivacyConsentField
+                checked={acceptPrivacyPolicy}
+                onChange={setAcceptPrivacyPolicy}
               />
 
               {error && (

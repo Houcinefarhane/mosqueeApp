@@ -2,11 +2,13 @@
 
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "react-hot-toast";
+import AnalyticsWithConsent from "@/components/legal/AnalyticsWithConsent";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       {children}
+      <AnalyticsWithConsent />
       <Toaster
         position="top-right"
         toastOptions={{

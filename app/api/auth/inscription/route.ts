@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma, withRetry } from "@/lib/prisma";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { privacyConsentSchema } from "@/lib/legal/consent";
 
 const inscriptionSchema = z.object({
   nomMosquee: z.string().min(1, "Le nom de la mosquée est requis"),
@@ -14,6 +15,7 @@ const inscriptionSchema = z.object({
   telephone: z.string().optional(),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
   confirmPassword: z.string(),
+  acceptPrivacyPolicy: privacyConsentSchema,
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Les mots de passe ne correspondent pas",
   path: ["confirmPassword"],

@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Figtree } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -50,7 +49,6 @@ export default function RootLayout({
         className={`${fontDisplay.variable} ${fontBody.variable} font-body antialiased`}
       >
         <Providers>{children}</Providers>
-        <Analytics />
       </body>
     </html>
   );

@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Logo from "@/components/brand/Logo";
-import { LogOut, ChevronDown, Menu } from "lucide-react";
+import { LogOut, ChevronDown, Menu, Shield } from "lucide-react";
+import Link from "next/link";
 import { ROLE_LABELS } from "@/lib/constants/status";
 import { cn } from "@/lib/utils";
 import { useMobileNav } from "@/components/layout/MobileNavContext";
@@ -91,6 +92,14 @@ export default function Navbar() {
               <div className="hidden border-b border-surface-muted px-4 py-2 sm:block">
                 <p className="truncate text-xs text-primary/60">{session.user.email}</p>
               </div>
+              <Link
+                href="/compte/donnees-personnelles"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-brun transition-colors hover:bg-sable"
+              >
+                <Shield className="h-4 w-4 text-or" />
+                Mes données (RGPD)
+              </Link>
               <button
                 type="button"
                 onClick={() => signOut({ callbackUrl: "/auth/login" })}

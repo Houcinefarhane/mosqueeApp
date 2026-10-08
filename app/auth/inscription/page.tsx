@@ -9,6 +9,8 @@ import Button from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import Link from "next/link";
 import Logo from "@/components/brand/Logo";
+import PrivacyConsentField from "@/components/legal/PrivacyConsentField";
+import { PRIVACY_CONSENT_MESSAGE } from "@/lib/legal/consent";
 
 export default function InscriptionPage() {
   const router = useRouter();
@@ -29,6 +31,7 @@ export default function InscriptionPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [codeMosquee, setCodeMosquee] = useState<string | null>(null);
+  const [acceptPrivacyPolicy, setAcceptPrivacyPolicy] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,13 +47,18 @@ export default function InscriptionPage() {
       return;
     }
 
+    if (!acceptPrivacyPolicy) {
+      setError(PRIVACY_CONSENT_MESSAGE);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const response = await fetch("/api/auth/inscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, acceptPrivacyPolicy: true }),
       });
 
       if (!response.ok) {
@@ -214,6 +222,11 @@ export default function InscriptionPage() {
                   />
                 </div>
               </div>
+
+              <PrivacyConsentField
+                checked={acceptPrivacyPolicy}
+                onChange={setAcceptPrivacyPolicy}
+              />
 
               {error && (
                 <motion.p

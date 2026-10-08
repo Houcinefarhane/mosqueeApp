@@ -8,6 +8,8 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowLeft, UserPlus } from "lucide-react";
+import PrivacyConsentField from "@/components/legal/PrivacyConsentField";
+import { PRIVACY_CONSENT_MESSAGE } from "@/lib/legal/consent";
 
 export default function InscriptionParentPage() {
   const router = useRouter();
@@ -22,6 +24,7 @@ export default function InscriptionParentPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [acceptPrivacyPolicy, setAcceptPrivacyPolicy] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +37,11 @@ export default function InscriptionParentPage() {
 
     if (formData.password.length < 6) {
       setError("Le mot de passe doit contenir au moins 6 caractères");
+      return;
+    }
+
+    if (!acceptPrivacyPolicy) {
+      setError(PRIVACY_CONSENT_MESSAGE);
       return;
     }
 
@@ -50,6 +58,7 @@ export default function InscriptionParentPage() {
           telephone: formData.telephone || undefined,
           password: formData.password,
           codeMosquee: formData.codeMosquee,
+          acceptPrivacyPolicy: true,
         }),
       });
 
@@ -157,6 +166,11 @@ export default function InscriptionParentPage() {
                   setFormData({ ...formData, confirmPassword: e.target.value })
                 }
                 required
+              />
+
+              <PrivacyConsentField
+                checked={acceptPrivacyPolicy}
+                onChange={setAcceptPrivacyPolicy}
               />
 
               {error && (
