@@ -15,24 +15,24 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="mb-1.5 block text-sm font-medium text-gray-700">
+          <label className="mb-1.5 block text-sm font-semibold text-brun">
             {label}
-            {required && <span className="ml-1 text-red-500">*</span>}
+            {required && <span className="ml-1 text-brun-doux">*</span>}
           </label>
         )}
         <input
           ref={ref}
           className={cn(
             TOUCH_CONTROL,
-            "disabled:cursor-not-allowed disabled:bg-gray-100",
-            error && "border-red-500 focus:ring-red-500",
+            "disabled:cursor-not-allowed disabled:bg-sable",
+            error && "border-brun-doux focus:ring-brun-doux/40",
             className
           )}
           {...props}
         />
-        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-1 text-sm text-brun-doux">{error}</p>}
         {helperText && !error && (
-          <p className="mt-1 text-sm text-gray-500">{helperText}</p>
+          <p className="mt-1 text-sm text-brun-doux">{helperText}</p>
         )}
       </div>
     );

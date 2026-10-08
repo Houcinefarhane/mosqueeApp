@@ -9,32 +9,32 @@ const VARIANT_STYLES: Record<
   { iconColor: string; iconBg: string; border: string; accent: string; bg: string }
 > = {
   green: {
-    iconColor: "text-primary",
-    iconBg: "bg-primary/10",
-    border: "bg-primary",
-    accent: "text-primary",
-    bg: "from-surface-muted/90 to-surface",
+    iconColor: "text-or",
+    iconBg: "bg-or/15",
+    border: "bg-or",
+    accent: "text-brun",
+    bg: "from-sable/50 to-blanc",
   },
   gold: {
-    iconColor: "text-secondary-dark",
-    iconBg: "bg-secondary/15",
-    border: "bg-secondary",
-    accent: "text-secondary-dark",
-    bg: "from-secondary/10 to-surface",
+    iconColor: "text-or",
+    iconBg: "bg-or/15",
+    border: "bg-or",
+    accent: "text-brun-doux",
+    bg: "from-or/10 to-blanc",
   },
   blue: {
-    iconColor: "text-blue-700",
-    iconBg: "bg-blue-100/80",
-    border: "bg-blue-500",
-    accent: "text-blue-600",
-    bg: "from-blue-50/90 to-white",
+    iconColor: "text-brun",
+    iconBg: "bg-sable",
+    border: "bg-brun",
+    accent: "text-brun-doux",
+    bg: "from-sable/80 to-blanc",
   },
   purple: {
-    iconColor: "text-violet-700",
-    iconBg: "bg-violet-100/80",
-    border: "bg-violet-500",
-    accent: "text-violet-600",
-    bg: "from-violet-50/90 to-white",
+    iconColor: "text-brun-doux",
+    iconBg: "bg-sable",
+    border: "bg-brun-doux",
+    accent: "text-brun-doux",
+    bg: "from-sable/60 to-blanc",
   },
 };
 
@@ -78,47 +78,42 @@ export default function StatCard({
   const content = (
     <div
       className={cn(
-        "relative overflow-hidden rounded-lg border border-primary/8 bg-gradient-to-br shadow-card transition-all",
-        "p-2 sm:rounded-xl sm:p-5",
+        "relative overflow-hidden rounded-3xl border border-filet bg-gradient-to-br transition-all",
+        "p-3 sm:p-5",
         styles.bg,
-        href && "cursor-pointer active:scale-[0.98] sm:hover:-translate-y-0.5 sm:hover:shadow-elevated"
+        href && "cursor-pointer active:scale-[0.98] sm:hover:-translate-y-0.5"
       )}
     >
       <div
         className={cn(
-          "absolute inset-x-0 top-0 z-10 h-[2px] rounded-t-lg sm:h-[4px] sm:rounded-t-xl",
+          "absolute inset-x-0 top-0 h-1 rounded-t-3xl",
           borderColor?.replace("border-", "bg-") ?? styles.border
         )}
       />
 
-      {/* Mobile — compact centré */}
       <div className="flex flex-col items-center gap-0.5 text-center sm:hidden">
         <Icon
-          className={cn("h-3.5 w-3.5", iconColor ?? styles.iconColor)}
+          className={cn("h-4 w-4", iconColor ?? styles.iconColor)}
           aria-hidden
         />
-        <p className="max-w-full truncate text-base font-bold tabular-nums leading-none text-foreground">
+        <p className="font-display text-lg font-extrabold tabular-nums leading-none text-brun">
           {value}
         </p>
-        <p className="line-clamp-2 text-[10px] font-medium leading-tight text-gray-500">
+        <p className="label-caps line-clamp-2 !text-[10px] !tracking-[0.1em] text-brun-doux">
           {title}
         </p>
       </div>
 
-      {/* Desktop */}
       <div className="hidden items-start justify-between gap-3 sm:flex">
         <div className="min-w-0 flex-1">
-          <p className="text-sm text-gray-600">{title}</p>
-          <p className="mt-1 text-2xl font-bold tracking-tight text-foreground lg:text-3xl">
+          <p className="label-caps mb-1">{title}</p>
+          <p className="font-display text-2xl font-extrabold tabular-nums tracking-tight text-brun lg:text-3xl">
             {value}
           </p>
           {trendText && (
             <p
               className={cn(
-                "mt-1.5 flex items-center gap-1 text-xs font-medium",
-                trendDirection === "up" && "text-emerald-600",
-                trendDirection === "down" && "text-red-500",
-                trendDirection === "neutral" && "text-gray-400"
+                "mt-1.5 flex items-center gap-1 text-xs font-medium text-brun-doux"
               )}
             >
               <TrendIcon className="h-3 w-3 shrink-0" />
@@ -128,7 +123,7 @@ export default function StatCard({
         </div>
         <div
           className={cn(
-            "shrink-0 rounded-xl p-3 ring-1 ring-black/[0.04]",
+            "shrink-0 rounded-2xl p-3",
             iconBg ?? styles.iconBg
           )}
         >

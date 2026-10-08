@@ -40,10 +40,10 @@ export default function Navbar() {
 
   return (
     <header
-      className="sticky top-0 z-50 border-b border-primary-dark/40 bg-gradient-to-r from-primary-dark via-primary to-primary-light shadow-md"
+      className="sticky top-0 z-50 border-b border-nuit/30 bg-brun"
       style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
-      <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-transparent via-secondary/70 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-transparent via-or/80 to-transparent" />
       <div className="flex h-14 items-center justify-between gap-2 px-3 sm:h-16 sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           <button
@@ -71,7 +71,7 @@ export default function Navbar() {
               </p>
               <p className="text-xs text-secondary-light/80">{roleLabel}</p>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-sm font-bold text-primary-dark ring-2 ring-white/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-or text-sm font-bold text-nuit ring-2 ring-white/20">
               {initials}
             </div>
             <ChevronDown

@@ -193,7 +193,7 @@ export default function Sidebar({ role }: SidebarProps) {
     <>
       <aside
         className={cn(
-          "fixed left-0 z-40 w-[min(18rem,85vw)] shrink-0 border-r border-primary-dark/60 bg-gradient-to-b from-primary-dark to-[#2a1812] shadow-xl transition-transform duration-300 lg:sticky lg:top-16 lg:z-auto lg:h-[calc(100vh-4rem)] lg:w-60 lg:translate-x-0",
+          "fixed left-0 z-40 w-[min(18rem,85vw)] shrink-0 border-r border-nuit/40 bg-brun transition-transform duration-300 lg:sticky lg:top-16 lg:z-auto lg:h-[calc(100vh-4rem)] lg:w-60 lg:translate-x-0",
           "top-14 h-[calc(100dvh-3.5rem)] sm:top-16 sm:h-[calc(100dvh-4rem)]",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
@@ -219,7 +219,7 @@ export default function Sidebar({ role }: SidebarProps) {
               {sectionIndex > 0 && (
                 <div className="mb-1.5 mt-1 border-t border-white/10" aria-hidden="true" />
               )}
-              <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-secondary/60">
+              <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-or/70">
                 {section.label}
               </p>
               <div className="space-y-0.5">
@@ -238,22 +238,22 @@ export default function Sidebar({ role }: SidebarProps) {
                       className={cn(
                         "relative flex w-full min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all",
                         active
-                          ? "bg-white/12 text-white shadow-sm ring-1 ring-white/10"
-                          : "text-white/65 hover:bg-white/8 hover:text-white"
+                          ? "bg-or/15 text-blanc ring-1 ring-or/40"
+                          : "text-blanc/70 hover:bg-blanc/10 hover:text-blanc"
                       )}
                     >
                       {active && (
-                        <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-secondary" />
+                        <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-or" />
                       )}
                       <Icon
                         className={cn(
                           "h-[18px] w-[18px] shrink-0",
-                          active ? "text-secondary-light" : "text-white/40"
+                          active ? "text-or-clair" : "text-blanc/45"
                         )}
                       />
                       <span className="flex-1 truncate">{item.label}</span>
                       {item.badge === "messages" && unreadCount > 0 && (
-                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary px-1.5 text-[10px] font-bold text-primary-dark">
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-or px-1.5 text-[10px] font-bold text-nuit">
                           {unreadCount > 99 ? "99+" : unreadCount}
                         </span>
                       )}

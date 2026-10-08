@@ -96,3 +96,9 @@ a {
     @apply font-display text-2xl font-extrabold tracking-tight text-brun sm:text-3xl;
   }
 }
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}

@@ -24,30 +24,28 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles = cn(
-      "inline-flex items-center justify-center font-medium focus-ring disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
+      "inline-flex items-center justify-center font-semibold focus-ring disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 rounded-2xl",
       TOUCH_FEEDBACK
     );
 
     const variants = {
-      primary: "bg-primary text-white hover:bg-primary-dark",
-      secondary:
-        "bg-secondary text-primary-dark hover:bg-secondary-dark hover:text-white",
-      outline:
-        "border border-secondary/40 bg-surface text-foreground hover:border-primary hover:bg-surface-muted hover:text-primary",
-      ghost: "text-primary/70 hover:bg-surface-muted hover:text-primary",
-      danger: "bg-danger text-white hover:bg-red-700",
+      primary: "bg-or text-nuit hover:bg-or-clair",
+      secondary: "bg-brun text-blanc hover:bg-nuit",
+      outline: "border border-filet bg-blanc text-brun hover:bg-sable",
+      ghost: "border border-filet bg-transparent text-brun-doux hover:bg-sable hover:text-brun",
+      danger: "bg-brun-doux text-blanc hover:bg-brun",
     };
 
     const sizes = {
-      sm: "gap-1.5 px-3 py-2 text-xs min-h-9 rounded-lg md:min-h-0 md:py-1.5 md:text-sm",
-      md: "gap-1.5 px-3 py-2 text-sm min-h-11 rounded-lg md:min-h-0 md:px-4 md:py-2",
-      lg: "gap-2 px-5 py-2.5 text-sm min-h-11 rounded-lg md:py-2.5 md:text-base",
-      touch: "gap-1.5 px-3 py-2 text-sm min-h-11 rounded-lg",
+      sm: "gap-1.5 px-3 py-2 text-xs min-h-10 md:min-h-0",
+      md: "gap-1.5 px-4 py-2.5 text-sm min-h-12 md:min-h-11",
+      lg: "gap-2 px-5 py-3 text-sm min-h-12 md:text-base",
+      touch: "gap-1.5 px-4 py-2.5 text-sm min-h-12",
     };
 
     const emphasisMobile =
       size === "sm" && TOUCH_EMPHASIS_VARIANTS.has(variant)
-        ? "min-h-11 py-2 md:min-h-0 md:py-1.5"
+        ? "min-h-12 md:min-h-0"
         : null;
 
     return (
