@@ -8,6 +8,8 @@ import { FileText, MessageSquare, TrendingUp } from "lucide-react";
 import { NOTE_SCORE_INLINE_CLASS } from "@/lib/ui/note-score";
 import { format } from "date-fns";
 import { ListSkeleton } from "@/components/ui/Skeleton";
+import HistoriqueDeleteButton from "@/components/professeur/HistoriqueDeleteButton";
+import toast from "react-hot-toast";
 import { fr } from "date-fns/locale/fr";
 
 interface NoteSession {
@@ -44,6 +46,7 @@ export default function HistoriqueNotesPage() {
   const [matiere, setMatiere] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState<NoteSession | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -91,6 +94,38 @@ export default function HistoriqueNotesPage() {
 
     fetchSessions();
   }, [selectedClasseId, matiere]);
+
+  const handleDeleteSession = async (session: NoteSession) => {
+    const dateLabel = format(new Date(session.date), "d MMMM yyyy", { locale: fr });
+    if (
+      !confirm(
+        `Supprimer la session ${session.matiere} du ${dateLabel} (${session.classe.nom}) ? Toutes les notes de cette séance seront effacées.`
+      )
+    ) {
+      return;
+    }
+
+    setDeletingId(session.id);
+    try {
+      const response = await fetch(
+        `/api/professeur/notes-sessions/${session.id}`,
+        { method: "DELETE" }
+      );
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Suppression impossible");
+      }
+      toast.success("Session de notes supprimée");
+      setSessions((prev) => prev.filter((s) => s.id !== session.id));
+      if (selectedSession?.id === session.id) setSelectedSession(null);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Erreur lors de la suppression"
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const getMoyenne = (session: NoteSession) => {
     if (session.notes.length === 0) return 0;
@@ -171,8 +206,8 @@ export default function HistoriqueNotesPage() {
                   onClick={() => setSelectedSession(selectedSession?.id === session.id ? null : session)}
                 >
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <div className="p-2 bg-primary/10 rounded-lg">
                             <Icon className="w-5 h-5 text-primary" />
@@ -211,6 +246,11 @@ export default function HistoriqueNotesPage() {
                           </div>
                         </div>
                       </div>
+                      <HistoriqueDeleteButton
+                        label={`Supprimer la session ${session.matiere}`}
+                        disabled={deletingId === session.id}
+                        onDelete={() => handleDeleteSession(session)}
+                      />
                     </div>
 
                     {selectedSession?.id === session.id && (

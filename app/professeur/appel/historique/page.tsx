@@ -7,6 +7,8 @@ import PageHeader from "@/components/layout/PageHeader";
 import { Calendar, Users, MessageSquare, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ListSkeleton } from "@/components/ui/Skeleton";
+import HistoriqueDeleteButton from "@/components/professeur/HistoriqueDeleteButton";
+import toast from "react-hot-toast";
 import { fr } from "date-fns/locale/fr";
 
 interface Appel {
@@ -39,6 +41,7 @@ export default function HistoriqueAppelPage() {
   const [selectedClasseId, setSelectedClasseId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAppel, setSelectedAppel] = useState<Appel | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -87,6 +90,37 @@ export default function HistoriqueAppelPage() {
 
     fetchAppels();
   }, [selectedClasseId]);
+
+  const handleDeleteAppel = async (appel: Appel) => {
+    const dateLabel = format(new Date(appel.date), "d MMMM yyyy", { locale: fr });
+    if (
+      !confirm(
+        `Supprimer l'appel du ${dateLabel} (${appel.classe.nom}) ? Les présences enregistrées ce jour seront effacées.`
+      )
+    ) {
+      return;
+    }
+
+    setDeletingId(appel.id);
+    try {
+      const response = await fetch(`/api/professeur/appels/${appel.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Suppression impossible");
+      }
+      toast.success("Appel supprimé");
+      setAppels((prev) => prev.filter((a) => a.id !== appel.id));
+      if (selectedAppel?.id === appel.id) setSelectedAppel(null);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Erreur lors de la suppression"
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const statutIcons = {
     PRESENT: CheckCircle,
@@ -183,8 +217,8 @@ export default function HistoriqueAppelPage() {
                   onClick={() => setSelectedAppel(selectedAppel?.id === appel.id ? null : appel)}
                 >
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <div className="p-2 bg-primary/10 rounded-lg">
                             <Icon className="w-5 h-5 text-primary" />
@@ -239,6 +273,11 @@ export default function HistoriqueAppelPage() {
                           )}
                         </div>
                       </div>
+                      <HistoriqueDeleteButton
+                        label={`Supprimer l'appel du ${format(new Date(appel.date), "d MMMM yyyy", { locale: fr })}`}
+                        disabled={deletingId === appel.id}
+                        onDelete={() => handleDeleteAppel(appel)}
+                      />
                     </div>
 
                     {selectedAppel?.id === appel.id && (
