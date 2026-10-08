@@ -1,5 +1,5 @@
 /**
- * Données de démo MadrasaApp
+ * Données de démo MadrasApp
  * Mot de passe commun : demo123
  *
  * Usage :
@@ -54,7 +54,7 @@ async function deleteDemoData() {
 
 function printCredentials(mosqueeId: string, eleveId?: string) {
   console.log("\n╔══════════════════════════════════════════════════════╗");
-  console.log("║           COMPTES DE DÉMO — MadrasaApp               ║");
+  console.log("║           COMPTES DE DÉMO — MadrasApp               ║");
   console.log("╠══════════════════════════════════════════════════════╣");
   console.log("║  Mot de passe pour tous : demo123                    ║");
   console.log("╠══════════════════════════════════════════════════════╣");
@@ -75,7 +75,7 @@ function printCredentials(mosqueeId: string, eleveId?: string) {
 async function seed() {
   const force = process.argv.includes("--force");
 
-  console.log("🌱 Seed MadrasaApp — données de démo\n");
+  console.log("🌱 Seed MadrasApp — données de démo\n");
 
   const existingAdmin = await prisma.user.findUnique({
     where: { email: DEMO_ACCOUNTS.admin.email },
@@ -252,7 +252,7 @@ async function seed() {
     // Annonce
     await tx.annonce.create({
       data: {
-        titre: "Bienvenue sur MadrasaApp !",
+        titre: "Bienvenue sur MadrasApp !",
         contenu: "Ceci est une annonce de démonstration. Les cours reprennent samedi à 10h.",
         auteurId: admin.id,
         mosqueeId: mosquee.id,

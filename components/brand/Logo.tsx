@@ -54,7 +54,7 @@ export default function Logo({
             onDark ? "text-blanc" : "text-brun"
           )}
         >
-          Madrasa
+          Madras
           <span className="text-or">App</span>
         </span>
       )}

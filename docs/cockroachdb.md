@@ -1,6 +1,6 @@
-# CockroachDB — Guide MadrasaApp
+# CockroachDB — Guide MadrasApp
 
-MadrasaApp utilise **CockroachDB** via Prisma (`provider = "cockroachdb"`).
+MadrasApp utilise **CockroachDB** via Prisma (`provider = "cockroachdb"`).
 
 | Environnement | Usage | Commande |
 |---------------|-------|----------|

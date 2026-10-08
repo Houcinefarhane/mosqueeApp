@@ -27,8 +27,8 @@ const fontBody = Figtree({
 
 export const metadata: Metadata = {
   title: {
-    default: "MadrasaApp",
-    template: "%s | MadrasaApp",
+    default: "MadrasApp",
+    template: "%s | MadrasApp",
   },
   description:
     "Application de gestion pour les écoles coraniques des mosquées françaises",

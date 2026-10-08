@@ -1,5 +1,5 @@
 /**
- * Seed de charge MadrasaApp — données massives pour tests de performance
+ * Seed de charge MadrasApp — données massives pour tests de performance
  *
  * Usage :
  *   npm run db:seed-charge
@@ -116,7 +116,7 @@ async function deletePreviousChargeData() {
 
 async function main() {
   const totalStart = performance.now();
-  console.log("\n🚀 Seed de charge MadrasaApp\n");
+  console.log("\n🚀 Seed de charge MadrasApp\n");
   console.log(`   Marqueur : ${TEST_MARKER}`);
   console.log(`   Mot de passe : ${TEST_PASSWORD}\n`);
 

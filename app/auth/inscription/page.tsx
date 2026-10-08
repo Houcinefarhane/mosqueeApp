@@ -108,7 +108,7 @@ export default function InscriptionPage() {
               Créer un compte mosquée
             </CardTitle>
             <CardDescription className="text-center">
-              Inscrivez votre mosquée sur MadrasaApp
+              Inscrivez votre mosquée sur MadrasApp
             </CardDescription>
           </CardHeader>
           <CardContent>

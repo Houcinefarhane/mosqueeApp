@@ -1,6 +1,6 @@
 {
-  "name": "MadrasaApp",
-  "short_name": "MadrasaApp",
+  "name": "MadrasApp",
+  "short_name": "MadrasApp",
   "description": "Gestion d'école coranique",
   "start_url": "/",
   "display": "standalone",

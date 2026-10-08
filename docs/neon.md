@@ -1,6 +1,6 @@
-# Neon PostgreSQL — Guide MadrasaApp
+# Neon PostgreSQL — Guide MadrasApp
 
-MadrasaApp utilise **Neon** (PostgreSQL serverless) via Prisma (`provider = "postgresql"`).
+MadrasApp utilise **Neon** (PostgreSQL serverless) via Prisma (`provider = "postgresql"`).
 
 ---
 

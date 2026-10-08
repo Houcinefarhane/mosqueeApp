@@ -1,4 +1,4 @@
-# MadrasaApp
+# MadrasApp
 
 Application web de gestion pour les écoles coraniques des mosquées françaises — un « Pronote » adapté aux madrasas.
 

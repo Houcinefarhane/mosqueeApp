@@ -1,4 +1,4 @@
-# Déploiement Vercel — MadrasaApp
+# Déploiement Vercel — MadrasApp
 
 ## Prérequis
 
