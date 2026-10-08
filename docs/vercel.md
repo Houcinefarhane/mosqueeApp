@@ -55,6 +55,18 @@ vercel --prod
 
 ---
 
+## Web Analytics (Vercel)
+
+Le projet inclut `@vercel/analytics` (`<Analytics />` dans `app/layout.tsx`).
+
+1. **Vercel Dashboard** → ton projet → **Analytics** → **Enable**
+2. Redéploie si le dernier déploiement date d’avant l’ajout du package
+3. Les visites apparaissent sous **Analytics** (pages vues, referrers, pays, etc.)
+
+En local, le script ne envoie pas de données en production ; tu peux tester sur l’URL de preview ou production.
+
+---
+
 ## Build Vercel
 
 ```
@@ -74,3 +86,4 @@ Région : **Paris (cdg1)** — `vercel.json`.
 - [ ] `NEXTAUTH_SECRET` et URLs configurés
 - [ ] `npm run db:push` + seed exécutés sur Neon
 - [ ] Build Vercel vert ✅
+- [ ] **Analytics** activé dans le dashboard Vercel
