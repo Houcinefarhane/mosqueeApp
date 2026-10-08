@@ -16,6 +16,27 @@
 
 Sans ces variables, l'app fonctionne ; seuls les envois push sont ignorés.
 
+### Format de `FIREBASE_PRIVATE_KEY` sur Vercel
+
+- Coller **uniquement** le champ `private_key` du JSON (pas tout le fichier).
+- Soit **plusieurs lignes** (de `-----BEGIN PRIVATE KEY-----` à `-----END PRIVATE KEY-----`).
+- Soit **une ligne** avec `\n` entre les morceaux (comme dans le JSON).
+- **Redeploy** obligatoire après modification.
+
+### Test serveur (sur votre Mac)
+
+Ajoutez les 3 `FIREBASE_*` dans `.env` (copiés depuis Vercel), puis :
+
+```bash
+npx tsx scripts/test-push-user.ts fatiha.elbasssal.eleve@test.local
+```
+
+Si « Firebase configuré: oui » et pas de notif sur le téléphone → rebuild l’app Android (Run ▶).
+
+### Logs Vercel
+
+Après un appel / une annonce, cherchez `[push]` dans les logs de la fonction (init échouée, send failed, 0 message envoyé).
+
 ## 3. iOS — APNs
 
 1. Firebase → Cloud Messaging → Apple → uploader la **clé APNs** (.p8) ou certificat.
