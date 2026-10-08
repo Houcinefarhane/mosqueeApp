@@ -3,16 +3,21 @@
 import { useState, useEffect, Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import PageHeader from "@/components/layout/PageHeader";
 import AppelCompactList, {
   AppelListSkeleton,
-  type StatutPresence,
 } from "@/components/professeur/AppelCompactList";
 import { TOUCH_DATE_FIELD, TOUCH_FIELD } from "@/lib/ui/touch-styles";
-import { CheckCircle, XCircle, Clock, AlertCircle, ClipboardList } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  type AppelUiStatut,
+  nextAppelStatut,
+  toApiStatut,
+} from "@/lib/constants/appel-ui";
+import { ListSkeleton } from "@/components/ui/Skeleton";
 
 interface Eleve {
   id: string;
@@ -35,11 +40,8 @@ export default function AppelPage() {
 function AppelPageSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="animate-pulse space-y-2 rounded-xl border border-gray-200 p-4">
-        <div className="h-6 w-40 rounded bg-gray-200" />
-        <div className="h-4 w-56 rounded bg-gray-100" />
-      </div>
-      <div className="h-28 animate-pulse rounded-xl bg-gray-100" />
+      <ListSkeleton rows={1} />
+      <div className="h-32 rounded-3xl bg-sable animate-pulse" />
       <AppelListSkeleton rows={8} />
     </div>
   );
@@ -54,12 +56,15 @@ function AppelPageContent() {
   >([]);
   const [selectedClasseId, setSelectedClasseId] = useState(classeIdFromUrl);
   const [eleves, setEleves] = useState<Eleve[]>([]);
-  const [presences, setPresences] = useState<Record<string, StatutPresence>>({});
+  const [uiPresences, setUiPresences] = useState<Record<string, AppelUiStatut>>(
+    {}
+  );
   const [commentaires, setCommentaires] = useState<Record<string, string>>({});
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [pulseId, setPulseId] = useState<string | null>(null);
   const [showCommentaireSeance, setShowCommentaireSeance] = useState(false);
   const [commentaireSeance, setCommentaireSeance] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isLoadingEleves, setIsLoadingEleves] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -92,6 +97,7 @@ function AppelPageContent() {
     if (selectedClasseId) {
       setIsLoadingEleves(true);
       setSubmitError("");
+      setSubmitSuccess(false);
       const fetchEleves = async () => {
         try {
           const response = await fetch(
@@ -99,13 +105,12 @@ function AppelPageContent() {
           );
           const data = await response.json();
           setEleves(data);
-          const initialPresences: Record<string, StatutPresence> = {};
+          const initial: Record<string, AppelUiStatut> = {};
           data.forEach((eleve: Eleve) => {
-            initialPresences[eleve.id] = "PRESENT";
+            initial[eleve.id] = "EN_ATTENTE";
           });
-          setPresences(initialPresences);
+          setUiPresences(initial);
           setCommentaires({});
-          setExpandedIds(new Set());
         } catch (err) {
           console.error(err);
           setSubmitError("Impossible de charger la liste des élèves.");
@@ -117,57 +122,55 @@ function AppelPageContent() {
       fetchEleves();
     } else {
       setEleves([]);
-      setPresences({});
+      setUiPresences({});
       setIsLoadingEleves(false);
     }
   }, [selectedClasseId]);
 
   const counts = useMemo(() => {
-    const values = Object.values(presences);
+    const values = Object.values(uiPresences);
     return {
       presents: values.filter((s) => s === "PRESENT").length,
       absents: values.filter((s) => s === "ABSENT").length,
-      retards: values.filter((s) => s === "RETARD").length,
-      excuses: values.filter((s) => s === "EXCUSE").length,
+      treated: values.filter((s) => s !== "EN_ATTENTE").length,
     };
-  }, [presences]);
+  }, [uiPresences]);
 
   const selectedClasse = classes.find((c) => c.id === selectedClasseId);
+  const progress =
+    eleves.length > 0 ? counts.treated / eleves.length : 0;
 
-  const handleStatutChange = (eleveId: string, statut: StatutPresence) => {
-    setPresences((prev) => ({ ...prev, [eleveId]: statut }));
-  };
+  const sessionSubtitle = useMemo(() => {
+    const d = new Date(date + "T12:00:00");
+    const jour = d.toLocaleDateString("fr-FR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+    return `${jour} · séance du jour`;
+  }, [date]);
 
   const handleTogglePresence = (eleveId: string) => {
-    setPresences((prev) => {
-      const current = prev[eleveId] || "PRESENT";
-      if (current === "PRESENT") return { ...prev, [eleveId]: "ABSENT" };
-      if (current === "ABSENT") return { ...prev, [eleveId]: "PRESENT" };
-      return { ...prev, [eleveId]: "PRESENT" };
-    });
+    setUiPresences((prev) => ({
+      ...prev,
+      [eleveId]: nextAppelStatut(prev[eleveId] ?? "EN_ATTENTE"),
+    }));
+    setPulseId(eleveId);
+    window.setTimeout(() => setPulseId(null), 320);
   };
 
-  const handleMarkAll = (statut: "PRESENT" | "ABSENT") => {
-    setPresences((prev) => {
+  const handleMarkAllPresent = () => {
+    setUiPresences((prev) => {
       const next = { ...prev };
       eleves.forEach((e) => {
-        next[e.id] = statut;
+        next[e.id] = "PRESENT";
       });
       return next;
     });
   };
 
-  const handleToggleExpand = (eleveId: string) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(eleveId)) next.delete(eleveId);
-      else next.add(eleveId);
-      return next;
-    });
-  };
-
   const handleSubmit = async () => {
-    if (!selectedClasseId || eleves.length === 0) return;
+    if (!selectedClasseId || eleves.length === 0 || submitSuccess) return;
 
     setIsLoading(true);
     setSubmitError("");
@@ -182,7 +185,7 @@ function AppelPageContent() {
           commentaireSeance: commentaireSeance || null,
           presences: eleves.map((eleve) => ({
             eleveId: eleve.id,
-            statut: presences[eleve.id] || "PRESENT",
+            statut: toApiStatut(uiPresences[eleve.id] ?? "EN_ATTENTE"),
             commentaire: commentaires[eleve.id] || null,
           })),
         }),
@@ -193,7 +196,10 @@ function AppelPageContent() {
         throw new Error(data.error || "Erreur lors de l'enregistrement");
       }
 
-      router.push("/professeur/appel/historique");
+      setSubmitSuccess(true);
+      window.setTimeout(() => {
+        router.push("/professeur/appel/historique");
+      }, 900);
     } catch (err: unknown) {
       console.error(err);
       setSubmitError(
@@ -210,99 +216,62 @@ function AppelPageContent() {
     return <AppelPageSkeleton />;
   }
 
-  const statutIcons = {
-    PRESENT: CheckCircle,
-    ABSENT: XCircle,
-    RETARD: Clock,
-    EXCUSE: AlertCircle,
-  };
-
-  const statutColors = {
-    PRESENT: "text-green-600 bg-green-50",
-    ABSENT: "text-red-600 bg-red-50",
-    RETARD: "text-yellow-600 bg-yellow-50",
-    EXCUSE: "text-blue-600 bg-blue-50",
-  };
-
-  const statutLabels = {
-    PRESENT: "Présent",
-    ABSENT: "Absent",
-    RETARD: "Retard",
-    EXCUSE: "Excusé",
-  };
-
   const showList = eleves.length > 0 && !isLoadingEleves;
 
   return (
-    <div
-      className={cn(
-        "space-y-3 sm:space-y-6",
-        showList && "pb-24 md:pb-0"
-      )}
-    >
+    <div className={cn("space-y-4 sm:space-y-6", showList && "pb-28 md:pb-0")}>
       <PageHeader
-        title="Faire l'appel"
-        description={
+        label={
           selectedClasse
-            ? `${selectedClasse.nom} · ${eleves.length || "…"} élève(s)`
-            : "Marquez les présences en un tap"
+            ? `${selectedClasse.nom} · ${selectedClasse.niveau}`
+            : "Appel"
         }
+        title="Faire l'appel"
+        description={selectedClasse ? sessionSubtitle : "Marquez les présences en un tap"}
         breadcrumbs={[
           { label: "Espace professeur", href: "/professeur" },
           { label: "Appel" },
         ]}
       />
 
-      <Card variant="elevated">
-        <CardHeader className="pb-1 sm:pb-2">
-          <CardTitle className="text-sm sm:text-lg">Paramètres</CardTitle>
-        </CardHeader>
-        <CardContent className="min-w-0 overflow-hidden">
-          <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-4">
-            <div className="min-w-0">
-              <label className="mb-1 block text-xs font-medium text-gray-600 sm:text-sm sm:text-gray-700">
-                Classe
-              </label>
-              <select
-                value={selectedClasseId}
-                onChange={(e) => setSelectedClasseId(e.target.value)}
-                className={TOUCH_FIELD}
-              >
-                <option value="">Sélectionnez une classe</option>
-                {classes.map((classe) => (
-                  <option key={classe.id} value={classe.id}>
-                    {classe.nom} - {classe.niveau}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="shrink-0 md:min-w-0">
-              <label className="mb-1 block text-xs font-medium text-gray-600 sm:text-sm sm:text-gray-700">
-                Date
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className={TOUCH_DATE_FIELD}
-              />
-            </div>
+      <Card>
+        <CardContent className="grid gap-3 pt-4 md:grid-cols-2">
+          <div>
+            <label className="label-caps mb-1.5 block">Classe</label>
+            <select
+              value={selectedClasseId}
+              onChange={(e) => setSelectedClasseId(e.target.value)}
+              className={TOUCH_FIELD}
+            >
+              <option value="">Sélectionnez une classe</option>
+              {classes.map((classe) => (
+                <option key={classe.id} value={classe.id}>
+                  {classe.nom} — {classe.niveau}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label-caps mb-1.5 block">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={TOUCH_DATE_FIELD}
+            />
           </div>
         </CardContent>
       </Card>
 
       {!selectedClasseId && (
-        <Card variant="elevated">
-          <CardContent className="flex flex-col items-center px-6 py-10 text-center">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-              <ClipboardList className="h-7 w-7 text-primary" />
+        <Card>
+          <CardContent className="flex flex-col items-center py-12 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-sable">
+              <ClipboardList className="h-7 w-7 text-or" />
             </div>
-            <p className="font-medium text-foreground">
-              Choisissez une classe pour commencer
-            </p>
-            <p className="mt-1 max-w-xs text-sm text-gray-500">
-              Tous les élèves seront marqués présents par défaut. Un tap bascule
-              absent.
+            <p className="font-semibold text-brun">Choisissez une classe</p>
+            <p className="mt-1 max-w-xs text-sm text-brun-doux">
+              Tapez chaque ligne pour faire défiler le statut : en attente, présent, absent…
             </p>
           </CardContent>
         </Card>
@@ -311,72 +280,68 @@ function AppelPageContent() {
       {selectedClasseId && isLoadingEleves && <AppelListSkeleton rows={12} />}
 
       {selectedClasseId && !isLoadingEleves && eleves.length === 0 && (
-        <Card variant="elevated">
-          <CardContent className="px-6 py-10 text-center">
-            <p className="font-medium text-foreground">Aucun élève dans cette classe</p>
-            <p className="mt-1 text-sm text-gray-500">
-              Vérifiez l&apos;affectation des élèves dans l&apos;administration.
-            </p>
+        <Card>
+          <CardContent className="py-10 text-center">
+            <p className="font-semibold text-brun">Aucun élève dans cette classe</p>
           </CardContent>
         </Card>
       )}
 
       {showList && (
         <>
-          {/* Barre d'actions rapides — mobile */}
-          <div className="flex flex-wrap items-center gap-1.5 md:hidden">
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-semibold text-green-800">
-              {counts.presents} prés.
-            </span>
-            <span className="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-800">
-              {counts.absents} abs.
-            </span>
-            {(counts.retards > 0 || counts.excuses > 0) && (
-              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
-                +{counts.retards + counts.excuses}
-              </span>
-            )}
-            <div className="ml-auto flex gap-1">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => handleMarkAll("PRESENT")}
-              >
-                Tous ✓
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => handleMarkAll("ABSENT")}
-              >
-                Tous ✗
-              </Button>
+          <div className="overflow-hidden rounded-3xl bg-brun p-4 text-blanc sm:p-5">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="label-caps !text-or-clair/90 mb-1">Présents</p>
+                <p className="font-display text-4xl font-extrabold tabular-nums leading-none sm:text-5xl">
+                  {counts.presents}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="label-caps !text-or-clair/90 mb-1">Absents</p>
+                <p className="font-display text-4xl font-extrabold tabular-nums leading-none sm:text-5xl">
+                  {counts.absents}
+                </p>
+              </div>
             </div>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-nuit/40">
+              <motion.div
+                className="h-full rounded-full bg-or"
+                initial={false}
+                animate={{ width: `${Math.round(progress * 100)}%` }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+              />
+            </div>
+            <p className="mt-2 text-center text-xs text-blanc/75 tabular-nums">
+              {counts.treated} / {eleves.length} élèves traités
+            </p>
+          </div>
+
+          <div className="flex justify-end md:hidden">
+            <Button type="button" variant="secondary" size="sm" onClick={handleMarkAllPresent}>
+              Tous présents
+            </Button>
           </div>
 
           <AppelCompactList
             eleves={eleves}
-            presences={presences}
+            uiPresences={uiPresences}
             commentaires={commentaires}
-            expandedIds={expandedIds}
-            onToggleExpand={handleToggleExpand}
             onTogglePresence={handleTogglePresence}
-            onStatutChange={handleStatutChange}
             onCommentChange={(id, value) =>
               setCommentaires((prev) => ({ ...prev, [id]: value }))
             }
+            pulseId={pulseId}
           />
 
-          <Card variant="elevated" className="md:hidden">
+          <Card className="md:hidden">
             <button
               type="button"
               onClick={() => setShowCommentaireSeance((v) => !v)}
-              className="flex min-h-10 w-full items-center justify-between px-3 py-2 text-left text-xs font-medium text-foreground"
+              className="flex min-h-12 w-full items-center justify-between px-4 text-sm font-semibold text-brun"
             >
-              Commentaire de séance (optionnel)
-              <span className="text-gray-400">{showCommentaireSeance ? "▲" : "▼"}</span>
+              Commentaire de séance
+              <span className="text-brun-doux">{showCommentaireSeance ? "▲" : "▼"}</span>
             </button>
             <AnimatePresence initial={false}>
               {showCommentaireSeance && (
@@ -384,120 +349,55 @@ function AppelPageContent() {
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.18 }}
-                  className="overflow-hidden"
+                  className="overflow-hidden border-t border-filet px-4 pb-4"
                 >
-                  <CardContent className="border-t border-gray-100 pt-0">
-                    <textarea
-                      placeholder="Commentaire général sur la séance"
-                      value={commentaireSeance}
-                      onChange={(e) => setCommentaireSeance(e.target.value)}
-                      className="min-h-10 w-full rounded-lg border border-gray-300 px-2.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
-                      rows={3}
-                    />
-                  </CardContent>
+                  <textarea
+                    placeholder="Commentaire général (optionnel)"
+                    value={commentaireSeance}
+                    onChange={(e) => setCommentaireSeance(e.target.value)}
+                    className={cn(TOUCH_FIELD, "mt-3 min-h-[5rem] text-sm")}
+                    rows={3}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
           </Card>
 
-          {/* Desktop — inchangé structurellement */}
-          <Card variant="elevated" className="hidden md:block">
-            <CardHeader>
-              <CardTitle>Commentaire de la séance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <textarea
-                placeholder="Ajoutez un commentaire général sur la séance (optionnel)"
-                value={commentaireSeance}
-                onChange={(e) => setCommentaireSeance(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                rows={3}
-              />
-            </CardContent>
-          </Card>
-
-          <Card variant="elevated" className="hidden md:block">
-            <CardHeader>
-              <CardTitle>Liste des élèves ({eleves.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {eleves.map((eleve) => {
-                  const statut = presences[eleve.id] || "PRESENT";
-                  const Icon = statutIcons[statut];
-
-                  return (
-                    <motion.div
-                      key={eleve.id}
-                      className="rounded-lg border border-gray-200 p-4"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      <div className="mb-3 flex items-center gap-3">
-                        <div className={`rounded-lg p-2 ${statutColors[statut]}`}>
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="font-semibold">
-                            {eleve.prenom} {eleve.nom}
-                          </p>
-                          <p className="text-sm text-gray-600">{eleve.classe.nom}</p>
-                        </div>
-                      </div>
-
-                      <div className="mb-3 grid grid-cols-2 gap-2 md:grid-cols-4">
-                        {(Object.keys(statutIcons) as StatutPresence[]).map(
-                          (s) => (
-                            <button
-                              key={s}
-                              type="button"
-                              onClick={() => handleStatutChange(eleve.id, s)}
-                              className={cn(
-                                "min-h-11 rounded-lg text-sm font-medium transition-all duration-150",
-                                statut === s
-                                  ? "bg-primary text-white"
-                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                              )}
-                            >
-                              {statutLabels[s]}
-                            </button>
-                          )
-                        )}
-                      </div>
-
-                      <textarea
-                        placeholder="Commentaire (optionnel)"
-                        value={commentaires[eleve.id] || ""}
-                        onChange={(e) =>
-                          setCommentaires({
-                            ...commentaires,
-                            [eleve.id]: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                        rows={2}
-                      />
-                    </motion.div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-6 flex justify-end">
-                <Button onClick={handleSubmit} isLoading={isLoading} size="lg">
-                  Enregistrer l&apos;appel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Desktop — liste + enregistrer */}
+          <div className="hidden md:block">
+            <div className="mb-4 flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={handleMarkAllPresent}>
+                Tous présents
+              </Button>
+            </div>
+            <Card>
+              <CardContent className="pt-4">
+                <textarea
+                  placeholder="Commentaire de séance (optionnel)"
+                  value={commentaireSeance}
+                  onChange={(e) => setCommentaireSeance(e.target.value)}
+                  className={cn(TOUCH_FIELD, "min-h-[5rem]")}
+                  rows={3}
+                />
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    onClick={handleSubmit}
+                    isLoading={isLoading}
+                    disabled={submitSuccess}
+                    size="lg"
+                  >
+                    {submitSuccess ? "✓ Appel enregistré" : "Enregistrer l'appel"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </>
       )}
 
-      {/* Barre fixe mobile */}
       {showList && (
         <div
-          className="fixed inset-x-0 z-40 border-t border-gray-200 bg-surface/95 px-3 py-2 backdrop-blur-md md:hidden"
+          className="fixed inset-x-0 z-40 border-t border-filet bg-blanc/95 px-3 py-2 backdrop-blur-md md:hidden"
           style={{
             bottom: "calc(4.75rem + env(safe-area-inset-bottom, 0px))",
           }}
@@ -508,24 +408,20 @@ function AppelPageContent() {
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-center text-xs text-red-700"
+                className="mb-2 rounded-2xl bg-sable px-3 py-2 text-center text-xs text-brun-doux"
               >
                 {submitError}
               </motion.p>
             )}
           </AnimatePresence>
-          <p className="mb-1.5 text-center text-[11px] tabular-nums text-gray-500">
-            {counts.presents} prés. · {counts.absents} abs.
-            {counts.retards + counts.excuses > 0 &&
-              ` · +${counts.retards + counts.excuses}`}
-          </p>
           <Button
             onClick={handleSubmit}
             isLoading={isLoading}
+            disabled={submitSuccess}
             size="touch"
-            className="w-full font-semibold"
+            className="min-h-[58px] w-full text-base"
           >
-            Enregistrer · {eleves.length} élèves
+            {submitSuccess ? "✓ Appel enregistré" : "Enregistrer l'appel"}
           </Button>
         </div>
       )}
