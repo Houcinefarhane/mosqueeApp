@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useMobileNav } from "@/components/layout/MobileNavContext";
+import Logo from "@/components/brand/Logo";
 import {
   LayoutDashboard,
   Users,
@@ -198,8 +199,11 @@ export default function Sidebar({ role }: SidebarProps) {
         )}
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
+        <div className="hidden border-b border-white/10 px-4 py-4 lg:block">
+          <Logo size={32} withWordmark onDark />
+        </div>
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 lg:hidden">
-          <p className="text-sm font-medium text-white">Navigation</p>
+          <Logo size={28} withWordmark onDark />
           <button
             type="button"
             onClick={close}

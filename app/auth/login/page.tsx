@@ -8,7 +8,7 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import Link from "next/link";
-import Image from "next/image";
+import Logo from "@/components/brand/Logo";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -113,23 +113,10 @@ function LoginForm() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-2xl bg-white p-2 shadow-lg ring-1 ring-secondary/30"
+              className="mx-auto mb-4 flex justify-center"
             >
-              <Image
-                src="/logo-mosquee.png"
-                alt="AMP Mosquée de Plaisir"
-                width={80}
-                height={80}
-                className="h-full w-full object-contain"
-                priority
-              />
+              <Logo size={72} withWordmark />
             </motion.div>
-            <CardTitle className="text-3xl text-center text-primary mb-1">
-              MadrasaApp
-            </CardTitle>
-            <p className="text-xs uppercase tracking-widest text-secondary-dark">
-              Mosquée de Plaisir
-            </p>
             <CardDescription className="mt-2 text-center">
               Connectez-vous à votre compte
             </CardDescription>

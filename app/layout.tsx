@@ -32,6 +32,10 @@ export const metadata: Metadata = {
   },
   description:
     "Application de gestion pour les écoles coraniques des mosquées françaises",
+  manifest: "/manifest.json",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({

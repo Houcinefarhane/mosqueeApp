@@ -8,6 +8,7 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import Link from "next/link";
+import Logo from "@/components/brand/Logo";
 
 export default function InscriptionPage() {
   const router = useRouter();
@@ -100,6 +101,9 @@ export default function InscriptionPage() {
       >
         <Card variant="elevated">
           <CardHeader>
+            <div className="mb-4 flex justify-center">
+              <Logo size={56} withWordmark />
+            </div>
             <CardTitle className="text-3xl text-center text-primary">
               Créer un compte mosquée
             </CardTitle>

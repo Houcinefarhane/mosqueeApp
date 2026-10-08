@@ -1,0 +1,17 @@
+{
+  "name": "MadrasaApp",
+  "short_name": "MadrasaApp",
+  "description": "Gestion d'école coranique",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1E110A",
+  "theme_color": "#3B2216",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

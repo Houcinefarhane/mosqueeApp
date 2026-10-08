@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
+import Logo from "@/components/brand/Logo";
 import { LogOut, ChevronDown, Menu } from "lucide-react";
 import { ROLE_LABELS } from "@/lib/constants/status";
 import { cn } from "@/lib/utils";
@@ -54,21 +54,7 @@ export default function Navbar() {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <Image
-            src="/logo-mosquee.png"
-            alt="AMP Mosquée de Plaisir"
-            width={36}
-            height={36}
-            className="h-8 w-8 shrink-0 rounded-md bg-white/95 p-0.5 shadow-sm sm:h-10 sm:w-10"
-          />
-          <div className="min-w-0">
-            <p className="truncate text-base font-semibold tracking-tight text-white sm:text-lg">
-              MadrasaApp
-            </p>
-            <p className="hidden truncate text-[10px] tracking-widest text-secondary-light/90 sm:block">
-              MOSQUÉE DE PLAISIR
-            </p>
-          </div>
+          <Logo size={36} withWordmark onDark className="min-w-0" />
         </div>
 
         <div className="relative shrink-0" ref={menuRef}>
