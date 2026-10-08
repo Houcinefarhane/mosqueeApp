@@ -85,84 +85,79 @@ export default async function ElevePresencesPage() {
     totalPresences > 0 ? Math.round((presents / totalPresences) * 100) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Mes présences</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-2xl font-bold text-foreground">Mes présences</h1>
+        <p className="text-sm text-gray-600 mt-1">
           {eleve.prenom} {eleve.nom} - {eleve.classe.nom}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card variant="elevated" className="bg-gradient-to-r from-green-50 to-green-100">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Taux de présence</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">
-                  {tauxPresence}%
-                </p>
-              </div>
-              <CheckCircle className="w-10 h-10 text-green-600" />
-            </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+        <Card variant="elevated">
+          <CardContent className="p-3 sm:p-4">
+            <p className="text-xs text-gray-600">Taux de présence</p>
+            <p className="text-xl font-semibold text-foreground mt-1">
+              {tauxPresence}%
+            </p>
           </CardContent>
         </Card>
 
         <Card variant="elevated">
-          <CardContent className="p-6">
-            <p className="text-sm text-gray-600">Présents</p>
-            <p className="text-3xl font-bold text-foreground mt-2">{presents}</p>
+          <CardContent className="p-3 sm:p-4">
+            <p className="text-xs text-gray-600">Présents</p>
+            <p className="text-xl font-semibold text-foreground mt-1">{presents}</p>
           </CardContent>
         </Card>
 
         <Card variant="elevated">
-          <CardContent className="p-6">
-            <p className="text-sm text-gray-600">Absents</p>
-            <p className="text-3xl font-bold text-foreground mt-2">{absents}</p>
+          <CardContent className="p-3 sm:p-4">
+            <p className="text-xs text-gray-600">Absents</p>
+            <p className="text-xl font-semibold text-foreground mt-1">{absents}</p>
           </CardContent>
         </Card>
 
         <Card variant="elevated">
-          <CardContent className="p-6">
-            <p className="text-sm text-gray-600">Retards</p>
-            <p className="text-3xl font-bold text-foreground mt-2">{retards}</p>
+          <CardContent className="p-3 sm:p-4">
+            <p className="text-xs text-gray-600">Retards</p>
+            <p className="text-xl font-semibold text-foreground mt-1">{retards}</p>
           </CardContent>
         </Card>
       </div>
 
       <Card variant="elevated">
-        <CardHeader>
-          <CardTitle>Historique des présences</CardTitle>
+        <CardHeader className="px-4 py-3">
+          <CardTitle className="text-base">Historique des présences</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 pb-4 pt-0">
           {eleve.presences.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {eleve.presences.map((presence) => {
                 const Icon = statutIcons[presence.statut];
                 return (
                   <div
                     key={presence.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                    className="flex items-center justify-between p-2.5 border border-gray-200 rounded-lg"
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div
-                        className={`p-3 rounded-lg ${
+                        className={`p-2 rounded-lg shrink-0 ${
                           statutColors[presence.statut]
                         }`}
                       >
-                        <Icon className="w-6 h-6" />
+                        <Icon className="w-4 h-4" />
                       </div>
-                      <div>
-                        <p className="font-medium">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium leading-snug">
                           {formatDate(presence.date)} -{" "}
                           {statutLabels[presence.statut]}
                         </p>
                         {presence.commentaire && (
-                          <p className="text-sm text-gray-600 mt-1">
+                          <p className="text-xs text-gray-600 mt-0.5">
                             {presence.commentaire}
                           </p>
                         )}
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 mt-0.5">
                           Par {presence.professeur.prenom}{" "}
                           {presence.professeur.nom}
                         </p>
