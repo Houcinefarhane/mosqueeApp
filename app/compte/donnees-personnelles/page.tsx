@@ -10,6 +10,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { Download, Shield, Trash2 } from "lucide-react";
 import CookiePreferencesControl from "@/components/legal/CookiePreferencesControl";
+import BiometricSettingRow from "@/components/native/BiometricSettingRow";
 
 export default function DonneesPersonnellesPage() {
   const { data: session, status } = useSession();
@@ -127,6 +128,15 @@ export default function DonneesPersonnellesPage() {
             <Download className="h-4 w-4" />
             Télécharger mes données
           </Button>
+        </CardContent>
+      </Card>
+
+      <Card variant="elevated">
+        <CardContent className="space-y-4 p-5">
+          <h2 className="font-display text-lg font-extrabold text-foreground">
+            Sécurité de l&apos;app mobile
+          </h2>
+          <BiometricSettingRow />
         </CardContent>
       </Card>
 

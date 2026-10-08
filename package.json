@@ -32,8 +32,17 @@
     "mobile:android": "cd mobile && npm run open:android"
   },
   "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "^8.0.2",
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/browser": "^7.0.5",
     "@capacitor/core": "^7.6.9",
+    "@capacitor/haptics": "^7.0.5",
+    "@capacitor/keyboard": "^7.0.6",
+    "@capacitor/network": "^7.0.4",
+    "@capacitor/preferences": "^7.0.4",
     "@capacitor/push-notifications": "^7.0.7",
+    "@capacitor/splash-screen": "^7.0.5",
+    "@capacitor/status-bar": "^7.0.6",
     "@prisma/client": "^5.19.1",
     "@vercel/analytics": "^2.0.1",
     "bcryptjs": "^2.4.3",
