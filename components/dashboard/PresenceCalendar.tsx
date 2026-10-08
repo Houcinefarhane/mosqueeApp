@@ -18,10 +18,10 @@ interface PresenceCalendarProps {
 const WEEKDAY_HEADERS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
 const STATUT_DOT: Record<StatutPresence, string> = {
-  PRESENT: "bg-success",
-  ABSENT: "bg-danger",
-  RETARD: "bg-orange-500",
-  EXCUSE: "bg-blue-500",
+  PRESENT: "bg-or",
+  ABSENT: "bg-brun",
+  RETARD: "bg-or-clair",
+  EXCUSE: "bg-brun-doux",
 };
 
 export default function PresenceCalendar({
@@ -82,9 +82,9 @@ export default function PresenceCalendar({
             <div
               key={day}
               className={cn(
-                "flex aspect-square flex-col items-center justify-center rounded-lg text-xs",
-                isToday && "ring-2 ring-primary/30 bg-primary/5",
-                !statut && "text-gray-400"
+                "flex min-h-10 min-w-10 flex-col items-center justify-center rounded-2xl text-xs sm:min-h-[40px] sm:min-w-[40px]",
+                isToday && "ring-2 ring-or/40 bg-or/10",
+                !statut && "text-brun-doux"
               )}
               title={
                 statut

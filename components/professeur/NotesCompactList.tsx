@@ -34,7 +34,7 @@ export default function NotesCompactList({
   onNoteChange,
 }: NotesCompactListProps) {
   return (
-    <ul className="overflow-hidden rounded-lg border border-gray-200 bg-white md:hidden">
+    <ul className="overflow-hidden rounded-3xl border border-filet bg-blanc md:hidden">
       {eleves.map((eleve, index) => {
         const note = notesParEleve[eleve.id] || { valeur: "", commentaire: "" };
         const expanded = expandedIds.has(eleve.id);
@@ -47,8 +47,8 @@ export default function NotesCompactList({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.12, delay: Math.min(index * 0.01, 0.2) }}
             className={cn(
-              "border-b border-gray-100 last:border-b-0",
-              hasNote ? "bg-primary/[0.04]" : "bg-white"
+              "border-b border-filet last:border-b-0",
+              hasNote ? "bg-or/5" : "bg-blanc"
             )}
           >
             <div className="flex min-h-11 items-stretch">
@@ -73,10 +73,10 @@ export default function NotesCompactList({
                     placeholder="—"
                     aria-label={`Note de ${eleve.prenom} ${eleve.nom} sur ${noteMax}`}
                     className={cn(
-                      "min-h-10 w-[3.75rem] rounded-lg border py-1.5 pl-1.5 pr-6 text-center text-base font-semibold tabular-nums transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary",
+                      "min-h-12 w-[3.75rem] rounded-2xl border py-1.5 pl-1.5 pr-6 text-center text-base font-semibold tabular-nums transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-or",
                       hasNote
-                        ? "border-primary/40 bg-white text-primary-dark"
-                        : "border-gray-300 bg-gray-50/80 text-foreground"
+                        ? "border-or/50 bg-blanc text-brun"
+                        : "border-filet bg-sable text-brun-doux"
                     )}
                   />
                   <span
@@ -143,7 +143,7 @@ export default function NotesCompactList({
 
 export function NotesListSkeleton({ rows = 10 }: { rows?: number }) {
   return (
-    <ul className="overflow-hidden rounded-lg border border-gray-200 bg-white md:hidden">
+    <ul className="overflow-hidden rounded-3xl border border-filet bg-blanc md:hidden">
       {Array.from({ length: rows }).map((_, i) => (
         <li
           key={i}

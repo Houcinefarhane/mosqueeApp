@@ -72,11 +72,10 @@ function LoginForm() {
   };
 
   return (
-    <div className="app-background flex min-h-[100dvh] items-center justify-center p-3 sm:p-4 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-nuit p-3 sm:p-4">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <motion.div
-          className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl"
+          className="absolute top-20 left-10 h-72 w-72 rounded-full bg-or/20 blur-3xl"
           animate={{
             x: [0, 100, 0],
             y: [0, 50, 0],
@@ -88,7 +87,7 @@ function LoginForm() {
           }}
         />
         <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"
+          className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-or/15 blur-3xl"
           animate={{
             x: [0, -100, 0],
             y: [0, -50, 0],
@@ -107,7 +106,7 @@ function LoginForm() {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-md relative z-10"
       >
-        <Card variant="elevated" className="border-secondary/20 backdrop-blur-sm bg-surface/95">
+        <Card variant="elevated" className="border-filet bg-blanc shadow-elevated">
           <CardHeader className="text-center pb-6">
             <motion.div
               initial={{ scale: 0 }}
@@ -115,7 +114,7 @@ function LoginForm() {
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               className="mx-auto mb-4 flex justify-center"
             >
-              <Logo size={72} withWordmark />
+              <Logo size={72} withWordmark onDark={false} />
             </motion.div>
             <CardDescription className="mt-2 text-center">
               Connectez-vous à votre compte

@@ -34,8 +34,10 @@ interface TooltipPayloadItem {
 }
 
 const COLORS = {
-  present: "#16A34A",
-  absent: "#DC2626",
+  present: "#C8962E",
+  absent: "#3B2216",
+  grid: "#EADFCB",
+  muted: "#6B4528",
 };
 
 function CustomTooltip({
@@ -159,19 +161,19 @@ export default function PresenceChart({
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
-            margin={{ top: 4, right: 8, left: 0, bottom: 4 }}
+            margin={{ top: 8, right: 8, left: 0, bottom: 20 }}
             barCategoryGap="20%"
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#e5e7eb"
+              stroke={COLORS.grid}
               vertical={false}
             />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 11, fill: "#6b7280" }}
+              tick={{ fontSize: 11, fill: COLORS.muted }}
               tickLine={false}
-              axisLine={{ stroke: "#e5e7eb" }}
+              axisLine={{ stroke: COLORS.grid }}
               interval={0}
               tickFormatter={(value, index) =>
                 tickIndices.has(index) ? value : ""
@@ -179,7 +181,7 @@ export default function PresenceChart({
               dy={6}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: "#6b7280" }}
+              tick={{ fontSize: 11, fill: COLORS.muted }}
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
@@ -189,7 +191,7 @@ export default function PresenceChart({
             {avgPresentPerDay > 0 ? (
               <ReferenceLine
                 y={avgPresentPerDay}
-                stroke="#16A34A"
+                stroke={COLORS.present}
                 strokeDasharray="4 4"
                 strokeOpacity={0.45}
               />
@@ -226,18 +228,6 @@ export default function PresenceChart({
           <CardTitle className="text-base sm:text-lg">{title}</CardTitle>
           <CardDescription>{subtitle}</CardDescription>
         </div>
-        {data.length > 0 ? (
-          <div className="flex flex-wrap gap-2 text-xs">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 font-medium text-success">
-              <span className="h-2 w-2 rounded-full bg-success" />
-              Présents
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-danger/10 px-2.5 py-1 font-medium text-danger">
-              <span className="h-2 w-2 rounded-full bg-danger" />
-              Absents
-            </span>
-          </div>
-        ) : null}
       </div>
 
       {data.length > 0 ? (
@@ -270,6 +260,19 @@ export default function PresenceChart({
       ) : null}
 
       {chartBody}
+
+      {data.length > 0 ? (
+        <div className="mt-4 flex flex-wrap justify-center gap-4 border-t border-filet pt-4 text-xs">
+          <span className="inline-flex items-center gap-2 font-semibold text-brun-doux">
+            <span className="h-2.5 w-2.5 rounded-sm bg-or" />
+            Présents
+          </span>
+          <span className="inline-flex items-center gap-2 font-semibold text-brun-doux">
+            <span className="h-2.5 w-2.5 rounded-sm bg-brun" />
+            Absents
+          </span>
+        </div>
+      ) : null}
     </Card>
   );
 }

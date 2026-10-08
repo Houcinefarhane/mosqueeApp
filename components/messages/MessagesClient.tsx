@@ -391,7 +391,7 @@ export default function MessagesClient({ breadcrumbs }: MessagesClientProps) {
                       setMobileShowDetail(false);
                       setSelectedId(null);
                     }}
-                    className="mt-0.5 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 lg:hidden"
+                    className="mt-0.5 flex min-h-11 min-w-11 items-center justify-center rounded-2xl text-brun-doux hover:bg-sable hover:text-brun lg:hidden"
                     aria-label="Retour à la liste"
                   >
                     <ArrowLeft className="h-4 w-4" />
@@ -400,14 +400,12 @@ export default function MessagesClient({ breadcrumbs }: MessagesClientProps) {
                     <h2 className="text-lg font-semibold text-foreground">
                       {selectedMessage.objet}
                     </h2>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {box === "received" ? "De" : "À"}{" "}
-                      <span className="font-medium text-gray-700">
-                        {displayPerson(selectedMessage).prenom}{" "}
-                        {displayPerson(selectedMessage).nom}
-                      </span>
-                      {" · "}
+                    <p className="label-caps mt-2">
                       {ROLE_LABELS[displayPerson(selectedMessage).role]}
+                    </p>
+                    <p className="mt-1 text-sm text-brun-doux">
+                      {displayPerson(selectedMessage).prenom}{" "}
+                      {displayPerson(selectedMessage).nom}
                     </p>
                     <p className="mt-0.5 text-xs text-gray-400">
                       {formatDateTime(selectedMessage.createdAt)}
@@ -421,9 +419,16 @@ export default function MessagesClient({ breadcrumbs }: MessagesClientProps) {
               </div>
 
               <div className="flex-1 overflow-y-auto px-5 py-4">
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
-                  {selectedMessage.contenu}
-                </p>
+                <div
+                  className={cn(
+                    "max-w-[92%] rounded-3xl px-4 py-3 text-sm leading-relaxed",
+                    box === "sent"
+                      ? "ml-auto bg-brun text-blanc"
+                      : "bg-sable text-brun"
+                  )}
+                >
+                  <p className="whitespace-pre-wrap">{selectedMessage.contenu}</p>
+                </div>
               </div>
 
               {showReply && (
