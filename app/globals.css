@@ -3,13 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --foreground: #3D251E;
-  --background: #FAF6F0;
-  --surface: #FFFCF8;
-  --surface-muted: #F0E8DE;
-  --sidebar: #3D251E;
-  --sidebar-hover: #5D3A2F;
-  --accent-gold: #B28C5F;
+  --nuit: #1e110a;
+  --brun: #3b2216;
+  --brun-doux: #6b4528;
+  --or: #c8962e;
+  --or-clair: #e6c072;
+  --blanc: #ffffff;
+  --filet: #eadfcb;
+  --sable: #f3ebdd;
+
+  --foreground: var(--brun);
+  --background: var(--blanc);
+  --surface: var(--blanc);
+  --surface-muted: var(--sable);
+  --sidebar: var(--brun);
+  --sidebar-hover: var(--nuit);
+  --accent-gold: var(--or);
 }
 
 * {
@@ -37,7 +46,7 @@ body > div {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -53,29 +62,37 @@ a {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F0E8DE;
+  background: var(--sable);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #5D3A2F;
+  background: var(--brun-doux);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3D251E;
+  background: var(--brun);
 }
 
 @layer utilities {
   .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:ring-offset-1;
+    @apply focus:outline-none focus:ring-2 focus:ring-or/50 focus:ring-offset-1;
   }
 
   .app-background {
-    background-color: var(--background);
-    background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgb(178 140 95 / 0.15), transparent),
-      radial-gradient(circle at 100% 100%, rgb(93 58 47 / 0.06), transparent 40%),
-      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%235D3A2F' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-color: var(--blanc);
+    background-image: radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      rgb(200 150 46 / 0.08),
+      transparent
+    );
   }
 
+  .label-caps {
+    @apply text-xs font-bold uppercase tracking-[0.14em] text-or;
+  }
+
+  .page-title {
+    @apply font-display text-2xl font-extrabold tracking-tight text-brun sm:text-3xl;
+  }
 }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -8,18 +8,26 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
-  themeColor: "#5D3A2F",
+  themeColor: "#3B2216",
 };
 
-const inter = Inter({
+const fontDisplay = Bricolage_Grotesque({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["800"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const fontBody = Figtree({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-body",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "MadrasaApp - Mosquée de Plaisir",
+    default: "MadrasaApp",
     template: "%s | MadrasaApp",
   },
   description:
@@ -33,7 +41,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body
+        className={`${fontDisplay.variable} ${fontBody.variable} font-body antialiased`}
+      >
         <Providers>{children}</Providers>
       </body>
     </html>

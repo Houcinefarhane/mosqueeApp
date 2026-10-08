@@ -9,32 +9,51 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        nuit: "#1E110A",
+        brun: {
+          DEFAULT: "#3B2216",
+          doux: "#6B4528",
+        },
+        or: {
+          DEFAULT: "#C8962E",
+          clair: "#E6C072",
+        },
+        blanc: "#FFFFFF",
+        filet: "#EADFCB",
+        sable: "#F3EBDD",
+        /* Alias legacy → nouvelle identité */
         primary: {
-          DEFAULT: "#5D3A2F",
-          light: "#7B5245",
-          dark: "#3D251E",
+          DEFAULT: "#3B2216",
+          light: "#6B4528",
+          dark: "#1E110A",
         },
         secondary: {
-          DEFAULT: "#B28C5F",
-          light: "#C9A876",
-          dark: "#967349",
+          DEFAULT: "#C8962E",
+          light: "#E6C072",
+          dark: "#A67B24",
         },
-        background: "#FAF6F0",
+        background: "#FFFFFF",
         surface: {
-          DEFAULT: "#FFFCF8",
-          muted: "#F0E8DE",
-          warm: "#F7F0E8",
+          DEFAULT: "#FFFFFF",
+          muted: "#F3EBDD",
+          warm: "#F3EBDD",
         },
-        foreground: "#3D251E",
-        success: "#16A34A",
-        danger: "#DC2626",
+        foreground: "#3B2216",
+        success: "#C8962E",
+        danger: "#6B4528",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        body: ["var(--font-body)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+      },
+      borderRadius: {
+        "2xl": "1rem",
+        "3xl": "1.5rem",
       },
       boxShadow: {
-        card: "0 1px 3px 0 rgb(93 58 47 / 0.08), 0 4px 12px -2px rgb(93 58 47 / 0.1)",
-        elevated: "0 4px 6px -1px rgb(93 58 47 / 0.1), 0 10px 24px -4px rgb(93 58 47 / 0.14)",
+        card: "0 1px 2px 0 rgb(30 17 10 / 0.04)",
+        elevated: "0 2px 8px -2px rgb(30 17 10 / 0.08)",
       },
     },
   },
