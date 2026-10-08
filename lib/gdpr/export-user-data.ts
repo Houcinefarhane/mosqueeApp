@@ -24,6 +24,21 @@ export async function exportUserPersonalData(userId: string) {
         },
         orderBy: { createdAt: "asc" },
       },
+      deviceTokens: {
+        select: {
+          platform: true,
+          createdAt: true,
+          lastSeenAt: true,
+        },
+      },
+      pushPreference: {
+        select: {
+          annoncesEnabled: true,
+          messagesEnabled: true,
+          absencesEnabled: true,
+          pushPromptSeenAt: true,
+        },
+      },
       mosquee: {
         select: { nom: true, adresse: true, email: true, telephone: true },
       },
@@ -95,6 +110,10 @@ export async function exportUserPersonalData(userId: string) {
         politiqueVersion: user.privacyPolicyVersion,
         accordParentalLe: user.parentalConsentAt,
         journal: user.privacyConsentLogs,
+      },
+      notifications: {
+        appareilsEnregistres: user.deviceTokens,
+        preferences: user.pushPreference,
       },
     },
     mosquee: user.mosquee,

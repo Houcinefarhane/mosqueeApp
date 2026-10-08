@@ -8,6 +8,7 @@ import { isDestinataireAutorise } from "@/lib/messages/destinataires";
 import { MESSAGING_ROLES } from "@/lib/messages/constants";
 import { withDevPerf } from "@/lib/dev/with-dev-perf";
 import type { Role } from "@prisma/client";
+import { fireMessagePush } from "@/lib/push/triggers";
 
 const ALLOWED_ROLES = MESSAGING_ROLES;
 
@@ -97,6 +98,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const receiver = await prisma.user.findFirst({
+      where: {
+        id: data.receiverId,
+        mosqueeId: session.user.mosqueeId,
+      },
+      select: { role: true },
+    });
+
+    if (!receiver) {
+      return NextResponse.json(
+        { error: "Destinataire introuvable" },
+        { status: 404 }
+      );
+    }
+
     const message = await withRetry(() =>
       prisma.message.create({
         data: {
@@ -109,6 +125,8 @@ export async function POST(req: NextRequest) {
         include: messageInclude,
       })
     );
+
+    fireMessagePush(data.receiverId, receiver.role, data.objet);
 
     return NextResponse.json(message, { status: 201 });
   } catch (error) {

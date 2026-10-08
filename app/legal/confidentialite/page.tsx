@@ -64,6 +64,11 @@ export default function ConfidentialitePage() {
             acceptée à l&apos;inscription ; pour les comptes élèves,
             confirmation d&apos;accord parental ou d&apos;âge ≥ 15 ans.
           </li>
+          <li>
+            <strong>Notifications push</strong> (app mobile uniquement, avec votre
+            accord) : identifiant d&apos;appareil (token FCM/APNs), plateforme
+            iOS ou Android ; préférences par type (annonces, messages, absences).
+          </li>
         </ul>
         <p className="text-sm">
           Nous ne vendons pas vos données. Pas de publicité comportementale.
@@ -130,6 +135,10 @@ export default function ConfidentialitePage() {
           <li>
             <strong>Vercel Analytics</strong> (optionnel) — uniquement après
             consentement cookies.
+          </li>
+          <li>
+            <strong>Firebase Cloud Messaging</strong> (Google) — envoi des
+            notifications push si vous les activez dans l&apos;app mobile.
           </li>
         </ul>
         <p>

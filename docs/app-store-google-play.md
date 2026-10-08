@@ -24,6 +24,7 @@ Les URLs sont aussi calculées dans `getLegalConfig().urls` (voir `lib/legal/con
 | Nom, e-mail | Oui | Oui | Fonctionnalité app, compte | Non (sauf sous-traitants hébergement) |
 | Contenu utilisateur (messages) | Oui | Oui | Fonctionnalité app | Non |
 | Identifiants (ID compte, session) | Oui | Oui | Fonctionnalité app, sécurité | Non |
+| Identifiant d'appareil (token push) | Oui **si** l'utilisateur active les notifications dans l'app mobile | Oui | Notifications (annonces, messages, absences) | Firebase (Google) pour transport APNs/FCM |
 | Données d'utilisation / diagnostics | Oui **si** l'utilisateur accepte les cookies analytics | Non (agrégé Vercel) | Analytics | Vercel uniquement |
 
 4. **App Review** : lien « Confidentialité » visible dans l'app (pied de page connecté + page login).
@@ -40,6 +41,7 @@ Les URLs sont aussi calculées dans `getLegalConfig().urls` (voir `lib/legal/con
 - **Security practices** : data encrypted in transit (HTTPS).
 - **Account deletion** : URL `{APP_URL}/legal/suppression-compte` + in-app path documented.
 - **Analytics** : declare only if user opts in via cookie banner (Vercel Analytics).
+- **Device ID / push token** : declare if push enabled; purpose « App functionality » / notifications ; not used for ads.
 
 3. **Target audience** : si enfants possibles, remplir le questionnaire ; politique mineurs déjà dans `/legal/confidentialite`.
 4. Cohérence **Data safety ↔ politique** : toute divergence peut entraîner un rejet.

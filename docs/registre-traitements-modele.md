@@ -24,7 +24,17 @@ Document à compléter par **chaque mosquée** (responsable de traitement). Cons
 | Données | E-mail, mot de passe hashé, rôle, journal consentements |
 | Durée | Jusqu'à suppression du compte ou fin d'activité mosquée |
 
-## Traitement 3 — Mesure d'audience (optionnelle)
+## Traitement 3 — Notifications push (optionnelle, app mobile)
+
+| Champ | Contenu |
+|--------|---------|
+| Finalité | Annonces, messages, absences/retards (texte non sensible) |
+| Base légale | Consentement (écran explicite + permission OS) |
+| Données | Token FCM/APNs, plateforme, préférences par type |
+| Sous-traitant | Google Firebase Cloud Messaging |
+| Durée | Tant que le compte est actif ; token supprimé à la déconnexion |
+
+## Traitement 4 — Mesure d'audience (optionnelle)
 
 | Champ | Contenu |
 |--------|---------|

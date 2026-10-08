@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Logo from "@/components/brand/Logo";
-import { LogOut, ChevronDown, Menu, Shield } from "lucide-react";
+import { LogOut, ChevronDown, Menu, Shield, Bell } from "lucide-react";
+import { isNativePlatform } from "@/lib/native/is-native";
 import Link from "next/link";
 import { ROLE_LABELS } from "@/lib/constants/status";
 import { cn } from "@/lib/utils";
@@ -100,9 +101,28 @@ export default function Navbar() {
                 <Shield className="h-4 w-4 text-or" />
                 Mes données (RGPD)
               </Link>
+              <Link
+                href="/compte/notifications"
+                onClick={() => setOpen(false)}
+                className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-brun transition-colors hover:bg-sable"
+              >
+                <Bell className="h-4 w-4 text-or" />
+                Notifications
+              </Link>
               <button
                 type="button"
-                onClick={() => signOut({ callbackUrl: "/auth/login" })}
+                onClick={() => {
+                  void (async () => {
+                    if (isNativePlatform()) {
+                      await fetch("/api/push/register", {
+                        method: "DELETE",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({}),
+                      });
+                    }
+                    signOut({ callbackUrl: "/auth/login" });
+                  })();
+                }}
                 className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50"
               >
                 <LogOut className="h-4 w-4" />

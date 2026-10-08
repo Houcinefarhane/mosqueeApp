@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { fireAbsencePushForEleve } from "@/lib/push/triggers";
 
 const createPresencesSchema = z.object({
   classeId: z.string(),
@@ -129,6 +130,12 @@ export async function POST(req: NextRequest) {
     revalidatePath("/eleve/presences");
     revalidatePath("/admin");
     revalidateTag("presences");
+
+    for (const p of data.presences) {
+      if (p.statut === "ABSENT" || p.statut === "RETARD") {
+        fireAbsencePushForEleve(p.eleveId, p.statut);
+      }
+    }
 
     return NextResponse.json(result, { status: 201 });
   } catch (error: any) {

@@ -5,6 +5,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import BottomNav from "@/components/layout/BottomNav";
 import { MobileNavProvider } from "@/components/layout/MobileNavContext";
 import LegalAppFooter from "@/components/legal/LegalAppFooter";
+import NativeBridge from "@/components/native/NativeBridge";
 
 interface DashboardShellProps {
   role: string;
@@ -15,6 +16,7 @@ export default function DashboardShell({ role, children }: DashboardShellProps) 
   return (
     <MobileNavProvider>
       <div className="app-background flex min-h-screen min-h-[100dvh] flex-col">
+        <NativeBridge />
         <Navbar />
         <div className="flex min-h-0 flex-1">
           <Sidebar role={role} />

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { fireAnnoncePush } from "@/lib/push/triggers";
 
 const createAnnonceSchema = z.object({
   titre: z.string().min(1, "Le titre est requis"),
@@ -37,6 +38,8 @@ export async function POST(req: NextRequest) {
     revalidatePath("/admin/annonces");
     revalidatePath("/admin");
     revalidateTag("annonces");
+
+    fireAnnoncePush(session.user.mosqueeId, titre);
 
     return NextResponse.json(annonce, { status: 201 });
   } catch (error: any) {

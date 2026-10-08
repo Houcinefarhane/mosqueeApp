@@ -18,6 +18,12 @@ const config: CapacitorConfig = {
     iosScheme: "https",
     cleartext: false,
   },
+  android: {
+    appendUserAgent: " MadrasApp-Mobile",
+  },
+  ios: {
+    appendUserAgent: " MadrasApp-Mobile",
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 1500,
