@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import LoginClient from "@/components/auth/LoginClient";
-import { getAuthToken } from "@/lib/auth-token-server";
+import { getServerAuthSession } from "@/lib/auth-token-server";
 import { homePathForRole } from "@/lib/auth-redirect";
 
 type LoginPageProps = {
@@ -8,11 +8,11 @@ type LoginPageProps = {
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const token = await getAuthToken();
+  const session = await getServerAuthSession();
   const fromPath = searchParams?.from?.trim();
 
-  if (token) {
-    const dest = homePathForRole(token.role as string);
+  if (session?.user?.role) {
+    const dest = homePathForRole(session.user.role);
     if (dest !== "/auth/login") {
       if (fromPath && dest === fromPath) {
         console.warn(

@@ -1,48 +1,26 @@
-import { getToken } from "next-auth/jwt";
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import {
-  homePathForRole,
-  normalizeAuthRole,
-} from "@/lib/auth-redirect";
-import {
-  getNextAuthSecret,
-  shouldUseSecureAuthCookies,
-} from "@/lib/auth-cookies";
+import { authOptions } from "@/lib/auth";
+import { homePathForRole, normalizeAuthRole } from "@/lib/auth-redirect";
 
-function cookieHeaderFromStore(): string {
-  return cookies()
-    .getAll()
-    .map((c) => `${c.name}=${c.value}`)
-    .join("; ");
-}
-
-/** Même source que le middleware (JWT), sans importer Prisma. */
-export async function getAuthToken() {
-  const secret = getNextAuthSecret();
-  if (!secret) return null;
-
-  return getToken({
-    req: {
-      headers: { cookie: cookieHeaderFromStore() },
-    } as Parameters<typeof getToken>[0]["req"],
-    secret,
-    secureCookie: shouldUseSecureAuthCookies(),
-  });
+/** Session serveur NextAuth (même source que /api/auth/session). */
+export async function getServerAuthSession() {
+  return getServerSession(authOptions);
 }
 
 export async function requireDashboardRole(
   expectedRole: "ADMIN" | "PROFESSEUR" | "PARENT" | "ELEVE"
 ) {
-  const token = await getAuthToken();
-  if (!token) {
+  const session = await getServerAuthSession();
+
+  if (!session?.user) {
     console.warn(
-      `[auth] redirect login: no JWT (expected role ${expectedRole}, secureCookie=${shouldUseSecureAuthCookies()})`
+      `[auth] redirect login: no session (expected role ${expectedRole})`
     );
     redirect("/auth/login");
   }
 
-  const role = normalizeAuthRole(token.role as string);
+  const role = normalizeAuthRole(session.user.role);
   if (role !== expectedRole) {
     const dest = homePathForRole(role);
     console.warn(
@@ -51,5 +29,5 @@ export async function requireDashboardRole(
     redirect(dest);
   }
 
-  return token;
+  return session;
 }
