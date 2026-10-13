@@ -119,18 +119,20 @@ export async function POST(req: NextRequest) {
     revalidatePath("/admin");
     revalidateTag("notes");
 
-    void Promise.all(
-      result.notes.map((note) =>
-        fireNotePushForEleve(
-          note.eleveId,
-          data.matiere,
-          note.valeur,
-          data.noteMax
+    try {
+      await Promise.all(
+        result.notes.map((note) =>
+          fireNotePushForEleve(
+            note.eleveId,
+            data.matiere,
+            note.valeur,
+            data.noteMax
+          )
         )
-      )
-    ).catch((err) => {
+      );
+    } catch (err) {
       console.warn("[push] notes après saisie prof:", err);
-    });
+    }
 
     return NextResponse.json(result, { status: 201 });
   } catch (error: any) {
