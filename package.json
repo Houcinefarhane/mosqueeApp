@@ -22,6 +22,7 @@
     "db:seed-charge": "tsx prisma/seed-charge.ts",
     "import:amp": "tsx scripts/import-amp.ts",
     "import:profs-amp": "tsx scripts/import-profs-amp.ts",
+    "import:inscriptions": "tsx scripts/import-inscriptions.ts",
     "create:admin-amp": "tsx scripts/create-admin-amp.ts",
     "db:setup": "npm run db:push && npm run db:seed",
     "db:docker": "docker compose up -d",

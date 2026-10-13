@@ -83,7 +83,8 @@ export async function middleware(req: NextRequest) {
   if (
     path.startsWith("/api/auth") ||
     path.startsWith("/_next") ||
-    path.startsWith("/.well-known")
+    path.startsWith("/.well-known") ||
+    path.startsWith("/auth/changer-mot-de-passe")
   ) {
     return NextResponse.next();
   }
@@ -135,6 +136,14 @@ export async function middleware(req: NextRequest) {
 
   if (!role) {
     return loginRedirect(req, path, "token_missing_role", cookieInfo, tokenSummary);
+  }
+
+  const mustChange = Boolean(
+    (token as { mustChangePassword?: boolean }).mustChangePassword
+  );
+  if (mustChange) {
+    logAuthRedirect("must_change_password", path, { dest: "/auth/changer-mot-de-passe" });
+    return NextResponse.redirect(new URL("/auth/changer-mot-de-passe", req.url));
   }
 
   if (path.startsWith("/admin") && role !== "ADMIN") {

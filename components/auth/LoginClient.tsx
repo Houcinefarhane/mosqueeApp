@@ -27,14 +27,19 @@ async function fetchSessionDestination(): Promise<string | null> {
     cache: "no-store",
   });
   if (!res.ok) return null;
-  const data = (await res.json()) as { user?: { role?: string } };
+  const data = (await res.json()) as {
+    user?: { role?: string; mustChangePassword?: boolean };
+  };
+  if (data.user?.mustChangePassword) {
+    return "/auth/changer-mot-de-passe";
+  }
   const dest = homePathForRole(data.user?.role);
   if (dest === "/auth/login") return null;
   return dest;
 }
 
 export default function LoginClient({ message, fromPath }: LoginClientProps) {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -61,13 +66,13 @@ export default function LoginClient({ message, fromPath }: LoginClientProps) {
 
     try {
       const result = await signIn("credentials", {
-        email,
+        identifier: identifier.trim(),
         password,
         redirect: false,
       });
 
       if (result?.error) {
-        setError("Email ou mot de passe incorrect");
+        setError("Identifiant ou mot de passe incorrect");
         setIsLoading(false);
         return;
       }
@@ -155,13 +160,13 @@ export default function LoginClient({ message, fromPath }: LoginClientProps) {
                 transition={{ delay: 0.3 }}
               >
                 <Input
-                  label="Email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  label="Email ou téléphone"
+                  type="text"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   required
-                  placeholder="votre@email.com"
-                  autoComplete="email"
+                  placeholder="06 12 34 56 78 ou email@exemple.fr"
+                  autoComplete="username"
                 />
               </motion.div>
 

@@ -63,6 +63,11 @@ model User {
   nom       String
   prenom    String
   telephone String?
+  /// Identifiant de connexion unique (0XXXXXXXXX)
+  telephoneNormalized String? @unique
+  mustChangePassword  Boolean @default(false)
+  /// Regroupement famille (import inscriptions)
+  familyKey           String?
   role      Role
   mosqueeId String
   createdAt DateTime @default(now())
@@ -90,6 +95,15 @@ model User {
   @@index([mosqueeId])
   @@index([email])
   @@index([role])
+  @@index([telephoneNormalized])
+  @@index([familyKey])
+}
+
+model LoginRateLimit {
+  key       String   @id
+  attempts  Int      @default(0)
+  resetAt   DateTime
+  updatedAt DateTime @updatedAt
 }
 
 model DeviceToken {
@@ -185,6 +199,7 @@ model Eleve {
   id            String    @id @default(cuid())
   nom           String
   prenom        String
+  dateNaissance DateTime?
   telephone     String?
   email         String?
   classeId      String
