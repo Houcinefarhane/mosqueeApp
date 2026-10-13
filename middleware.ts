@@ -12,10 +12,11 @@ import {
 function summarizeToken(
   token: Awaited<ReturnType<typeof getToken>>
 ): string {
-  if (!token) return "null";
-  const role = normalizeAuthRole(token.role as string) ?? "(no-role)";
+  if (!token || typeof token === "string") return "null";
+  const role =
+    normalizeAuthRole(token.role as string | undefined) ?? "(no-role)";
   const sub = token.sub ? String(token.sub).slice(0, 8) : "?";
-  return `role=${role} sub=${sub}…`;
+  return `present role=${role} sub=${sub}…`;
 }
 
 function logAuthRedirect(
@@ -108,7 +109,7 @@ export async function middleware(req: NextRequest) {
   }
 
   if (path === "/") {
-    if (!token) {
+    if (!token || typeof token === "string") {
       return loginRedirect(req, path, "unauthenticated_root", cookieInfo, tokenSummary);
     }
     const dest = homePathForRole(token.role as string);
@@ -119,7 +120,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL(dest, req.url));
   }
 
-  if (!token) {
+  if (!token || typeof token === "string") {
     const mismatch =
       cookieInfo.hasNextAuthSessionValue &&
       cookieInfo.presentSessionCookieName !== cookieInfo.expectedName
@@ -130,7 +131,7 @@ export async function middleware(req: NextRequest) {
     return loginRedirect(req, path, mismatch, cookieInfo, tokenSummary);
   }
 
-  const role = normalizeAuthRole(token.role as string) ?? "";
+  const role = normalizeAuthRole((token as { role?: string }).role) ?? "";
 
   if (!role) {
     return loginRedirect(req, path, "token_missing_role", cookieInfo, tokenSummary);
