@@ -26,7 +26,11 @@ export default function BiometricGate({
       const { value } = await Preferences.get({ key: BIOMETRIC_LOCK_ENABLED_KEY });
       const on = value === "true";
       setEnabled(on);
-      setLocked(on);
+      // Ne pas afficher l'écran noir / verrou au premier lancement à froid.
+      const { value: lastBg } = await Preferences.get({
+        key: LAST_BACKGROUND_AT_KEY,
+      });
+      setLocked(on && Boolean(lastBg));
     })();
   }, [native]);
 

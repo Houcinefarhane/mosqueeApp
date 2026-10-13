@@ -9,8 +9,6 @@ import Button from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import Link from "next/link";
 import Logo from "@/components/brand/Logo";
-import AuthLegalLinks from "@/components/legal/AuthLegalLinks";
-
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -234,10 +232,6 @@ function LoginForm() {
                 </Link>
               </div>
             </motion.div>
-
-            <div className="mt-4">
-              <AuthLegalLinks />
-            </div>
           </CardContent>
         </Card>
       </motion.div>

@@ -13,11 +13,17 @@ export default function OfflineOverlay() {
     if (!native) return;
 
     let remove: (() => void) | undefined;
+    let mounted = true;
 
     void (async () => {
       const { Network } = await import("@capacitor/network");
+      // iOS peut signaler brièvement « hors ligne » au cold start — ne pas masquer le WebView.
+      await new Promise((r) => setTimeout(r, 800));
+      if (!mounted) return;
       const status = await Network.getStatus();
-      setOffline(!status.connected);
+      if (status.connected) {
+        setOffline(false);
+      }
 
       const sub = await Network.addListener("networkStatusChange", (s) => {
         setOffline(!s.connected);
@@ -25,7 +31,10 @@ export default function OfflineOverlay() {
       remove = () => void sub.remove();
     })();
 
-    return () => remove?.();
+    return () => {
+      mounted = false;
+      remove?.();
+    };
   }, [native]);
 
   if (!native || !offline) return null;

@@ -29,6 +29,8 @@ export default function NativeSystemBridge() {
     if (!isNativePlatform()) return;
 
     void (async () => {
+      await retrySessionFetch();
+
       const { StatusBar, Style } = await import("@capacitor/status-bar");
       const { SplashScreen } = await import("@capacitor/splash-screen");
       const { App } = await import("@capacitor/app");
@@ -81,4 +83,20 @@ export default function NativeSystemBridge() {
   }, [router]);
 
   return null;
+}
+
+/** Réessaie /api/auth/session après timeout réseau au cold start (WebView iOS). */
+async function retrySessionFetch() {
+  const delays = [0, 1500, 3500];
+  for (let i = 0; i < delays.length; i++) {
+    if (delays[i] > 0) {
+      await new Promise((r) => setTimeout(r, delays[i]));
+    }
+    try {
+      const res = await fetch("/api/auth/session", { credentials: "include" });
+      if (res.ok) return;
+    } catch {
+      /* retry */
+    }
+  }
 }
