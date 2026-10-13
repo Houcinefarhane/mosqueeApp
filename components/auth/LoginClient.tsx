@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { signIn } from "next-auth/react";
 import { homePathForRole } from "@/lib/auth-redirect";
 import { motion } from "framer-motion";
@@ -17,27 +17,42 @@ import Logo from "@/components/brand/Logo";
 
 type LoginClientProps = {
   message?: string;
+  /** Chemin protégé d’où l’utilisateur a été renvoyé (ex. /eleve). */
+  fromPath?: string;
 };
 
-async function goToRoleHome(): Promise<boolean> {
-  const res = await fetch("/api/auth/session", { credentials: "include" });
-  if (!res.ok) return false;
+async function fetchSessionDestination(): Promise<string | null> {
+  const res = await fetch("/api/auth/session", {
+    credentials: "include",
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
   const data = (await res.json()) as { user?: { role?: string } };
   const dest = homePathForRole(data.user?.role);
-  if (dest === "/auth/login") return false;
-  window.location.replace(dest);
-  return true;
+  if (dest === "/auth/login") return null;
+  return dest;
 }
 
-export default function LoginClient({ message }: LoginClientProps) {
+export default function LoginClient({ message, fromPath }: LoginClientProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const postLoginRedirectDone = useRef(false);
 
-  useEffect(() => {
-    void goToRoleHome();
-  }, []);
+  const redirectAfterLoginOnce = async () => {
+    if (postLoginRedirectDone.current) return;
+    const dest = await fetchSessionDestination();
+    if (!dest) return;
+    if (fromPath && dest === fromPath) {
+      console.warn(
+        "[auth-login] post-signIn redirect to protected route (from loop guard)",
+        fromPath
+      );
+    }
+    postLoginRedirectDone.current = true;
+    window.location.replace(dest);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,9 +74,8 @@ export default function LoginClient({ message }: LoginClientProps) {
 
       if (result?.ok) {
         await new Promise((r) => setTimeout(r, 300));
-        if (!(await goToRoleHome())) {
-          window.location.replace("/auth/login");
-        }
+        await redirectAfterLoginOnce();
+        setIsLoading(false);
         return;
       }
 

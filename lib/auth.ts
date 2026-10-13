@@ -2,8 +2,26 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
+import { getNextAuthSecret, shouldUseSecureAuthCookies } from "./auth-cookies";
+
+const useSecureCookies = shouldUseSecureAuthCookies();
 
 export const authOptions: NextAuthOptions = {
+  secret: getNextAuthSecret(),
+  useSecureCookies,
+  cookies: {
+    sessionToken: {
+      name: useSecureCookies
+        ? "__Secure-next-auth.session-token"
+        : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
+  },
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -55,7 +73,10 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role =
+          typeof user.role === "string"
+            ? user.role.trim().toUpperCase()
+            : user.role;
         token.mosqueeId = user.mosqueeId;
       }
       return token;
