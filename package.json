@@ -18,6 +18,7 @@
     "db:studio": "prisma studio",
     "db:test": "tsx scripts/test-db.ts",
     "db:seed": "tsx scripts/seed.ts",
+    "db:seed-apple-demo": "tsx scripts/seed-apple-demo.ts",
     "db:seed-charge": "tsx prisma/seed-charge.ts",
     "import:amp": "tsx scripts/import-amp.ts",
     "import:profs-amp": "tsx scripts/import-profs-amp.ts",
