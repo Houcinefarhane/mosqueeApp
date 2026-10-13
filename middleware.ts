@@ -40,24 +40,35 @@ function logAuthRequest(
   tokenSummary: string,
   hasSecret: boolean
 ) {
+  const cookieFound = cookieInfo.presentSessionCookieName ?? "none";
   console.warn(
     [
       "[auth-middleware] request",
       `path=${path}`,
+      `cookieFound=${cookieFound}`,
+      `expectedCookie=${cookieInfo.expectedName}`,
+      `sessionValue=${cookieInfo.hasNextAuthSessionValue ? "yes" : "no"}`,
+      `getToken=${tokenSummary}`,
       `hasSecret=${hasSecret}`,
       `secretLength=${hasSecret ? getNextAuthSecret()!.length : 0}`,
       `secureCookie=${shouldUseSecureAuthCookies()}`,
-      `expectedCookie=${cookieInfo.expectedName}`,
-      `presentCookie=${cookieInfo.presentSessionCookieName ?? "none"}`,
-      `sessionValue=${cookieInfo.hasNextAuthSessionValue ? "yes" : "no"}`,
       `nextAuthCookies=[${cookieInfo.nextAuthCookieNames.join(",") || "none"}]`,
-      `getToken=${tokenSummary}`,
     ].join(" ")
   );
 }
 
-function loginRedirect(req: NextRequest, fromPath: string, reason: string) {
-  logAuthRedirect(reason, fromPath, { dest: "/auth/login" });
+function loginRedirect(
+  req: NextRequest,
+  fromPath: string,
+  reason: string,
+  cookieInfo: ReturnType<typeof inspectSessionCookies>,
+  tokenSummary: string
+) {
+  logAuthRedirect(reason, fromPath, {
+    dest: "/auth/login",
+    cookieFound: cookieInfo.presentSessionCookieName ?? "none",
+    getToken: tokenSummary,
+  });
   const url = new URL("/auth/login", req.url);
   if (fromPath && fromPath !== "/auth/login") {
     url.searchParams.set("from", fromPath);
@@ -67,6 +78,15 @@ function loginRedirect(req: NextRequest, fromPath: string, reason: string) {
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+
+  if (
+    path.startsWith("/api/auth") ||
+    path.startsWith("/_next") ||
+    path.startsWith("/.well-known")
+  ) {
+    return NextResponse.next();
+  }
+
   const cookieInfo = inspectSessionCookies(req);
   const hasSecret = Boolean(getNextAuthSecret());
   const tokenOpts = getTokenOptionsFromRequest(req);
@@ -84,12 +104,12 @@ export async function middleware(req: NextRequest) {
   logAuthRequest(path, cookieInfo, tokenSummary, hasSecret);
 
   if (!hasSecret) {
-    return loginRedirect(req, path, "missing_NEXTAUTH_SECRET");
+    return loginRedirect(req, path, "missing_NEXTAUTH_SECRET", cookieInfo, tokenSummary);
   }
 
   if (path === "/") {
     if (!token) {
-      return loginRedirect(req, path, "unauthenticated_root");
+      return loginRedirect(req, path, "unauthenticated_root", cookieInfo, tokenSummary);
     }
     const dest = homePathForRole(token.role as string);
     logAuthRedirect("root_to_role_home", path, {
@@ -107,13 +127,13 @@ export async function middleware(req: NextRequest) {
         : cookieInfo.hasNextAuthSessionValue
           ? "getToken_null_with_cookie"
           : "unauthenticated_no_session_cookie";
-    return loginRedirect(req, path, mismatch);
+    return loginRedirect(req, path, mismatch, cookieInfo, tokenSummary);
   }
 
   const role = normalizeAuthRole(token.role as string) ?? "";
 
   if (!role) {
-    return loginRedirect(req, path, "token_missing_role");
+    return loginRedirect(req, path, "token_missing_role", cookieInfo, tokenSummary);
   }
 
   if (path.startsWith("/admin") && role !== "ADMIN") {
@@ -148,7 +168,10 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
-/** /api/auth/* est volontairement exclu (session, callback, csrf). */
+/**
+ * Routes protégées uniquement — le middleware ne s’exécute pas sur :
+ * /api/auth/*, /_next/*, /.well-known/* (non listés + garde en tête de handler).
+ */
 export const config = {
   matcher: [
     "/",

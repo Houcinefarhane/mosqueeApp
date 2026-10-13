@@ -9,6 +9,7 @@ export function shouldUseSecureAuthCookies(): boolean {
   return process.env.NODE_ENV === "production";
 }
 
+/** Source unique : middleware Edge (getToken) et authOptions.secret. */
 export function getNextAuthSecret(): string | undefined {
   return process.env.NEXTAUTH_SECRET?.trim();
 }

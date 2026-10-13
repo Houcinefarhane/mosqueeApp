@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
+import { normalizeAuthRole } from "./auth-redirect";
 import { getNextAuthSecret, shouldUseSecureAuthCookies } from "./auth-cookies";
 
 const useSecureCookies = shouldUseSecureAuthCookies();
@@ -74,10 +75,10 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role =
-          typeof user.role === "string"
-            ? user.role.trim().toUpperCase()
-            : user.role;
+          normalizeAuthRole(String(user.role)) ?? String(user.role).toUpperCase();
         token.mosqueeId = user.mosqueeId;
+      } else if (typeof token.role === "string") {
+        token.role = normalizeAuthRole(token.role) ?? token.role.trim().toUpperCase();
       }
       return token;
     },
