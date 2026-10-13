@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isApnsDeviceTokenHex } from "@/lib/push/token-format";
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -18,6 +19,20 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { token, platform } = registerSchema.parse(body);
+
+    if (platform === "ios" && isApnsDeviceTokenHex(token)) {
+      console.warn(
+        "[push] register refusé: token APNs hex (FCM requis). Mettre à jour l'app iOS avec Firebase Messaging."
+      );
+      return NextResponse.json(
+        {
+          error:
+            "Token push iOS obsolète. Mettez à jour l'application MadrasApp depuis l'App Store / Xcode puis reconnectez-vous.",
+          code: "APNS_NOT_FCM",
+        },
+        { status: 400 }
+      );
+    }
 
     await prisma.deviceToken.upsert({
       where: { token },

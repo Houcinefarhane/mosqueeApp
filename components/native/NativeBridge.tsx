@@ -69,32 +69,95 @@ export default function NativeBridge() {
   );
 }
 
-async function enablePushRegistration(router: ReturnType<typeof useRouter>) {
-  const { PushNotifications } = await import("@capacitor/push-notifications");
-  const { Capacitor } = await import("@capacitor/core");
-  const { ANDROID_PUSH_CHANNEL_ID } = await import(
-    "@/lib/push/android-channel"
-  );
+async function postDeviceToken(token: string, platform: "ios" | "android") {
+  await fetch("/api/push/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, platform }),
+  });
+}
 
-  if (Capacitor.getPlatform() === "android") {
+async function enablePushRegistration(router: ReturnType<typeof useRouter>) {
+  const { Capacitor } = await import("@capacitor/core");
+  const platform: "ios" | "android" =
+    Capacitor.getPlatform() === "ios" ? "ios" : "android";
+
+  if (platform === "android") {
+    const { ANDROID_PUSH_CHANNEL_ID } = await import(
+      "@/lib/push/android-channel"
+    );
+    const { PushNotifications } = await import(
+      "@capacitor/push-notifications"
+    );
     await PushNotifications.createChannel({
       id: ANDROID_PUSH_CHANNEL_ID,
       name: "Alertes MadrasApp",
-      description: "Annonces, messages et absences",
+      description: "Annonces, messages, notes et absences",
       importance: 5,
       visibility: 1,
     });
   }
 
+  const fcmOk = await tryFirebaseMessagingRegistration(router, platform);
+  if (fcmOk) return;
+
+  await legacyPushNotificationsRegistration(router, platform);
+}
+
+/** Token FCM (requis par Firebase Admin) — pas le hex APNs seul. */
+async function tryFirebaseMessagingRegistration(
+  router: ReturnType<typeof useRouter>,
+  platform: "ios" | "android"
+): Promise<boolean> {
+  try {
+    const { FirebaseMessaging } = await import(
+      "@capacitor-firebase/messaging"
+    );
+
+    await FirebaseMessaging.removeAllListeners();
+
+    await FirebaseMessaging.addListener(
+      "notificationActionPerformed",
+      (action) => {
+        const data = action.notification?.data as { route?: string } | undefined;
+        const route = data?.route;
+        if (typeof route === "string" && route.startsWith("/")) {
+          router.push(route);
+        }
+      }
+    );
+
+    await FirebaseMessaging.addListener("tokenReceived", async (event) => {
+      if (event.token) {
+        await postDeviceToken(event.token, platform);
+      }
+    });
+
+    const perm = await FirebaseMessaging.checkPermissions();
+    if (perm.receive !== "granted") {
+      return false;
+    }
+
+    const { token } = await FirebaseMessaging.getToken();
+    if (token) {
+      await postDeviceToken(token, platform);
+    }
+    return Boolean(token);
+  } catch {
+    return false;
+  }
+}
+
+async function legacyPushNotificationsRegistration(
+  router: ReturnType<typeof useRouter>,
+  platform: "ios" | "android"
+) {
+  const { PushNotifications } = await import("@capacitor/push-notifications");
+
   await PushNotifications.removeAllListeners();
 
   await PushNotifications.addListener("registration", async (ev) => {
-    const platform = Capacitor.getPlatform() === "ios" ? "ios" : "android";
-    await fetch("/api/push/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: ev.value, platform }),
-    });
+    await postDeviceToken(ev.value, platform);
   });
 
   await PushNotifications.addListener(
@@ -110,7 +173,10 @@ async function enablePushRegistration(router: ReturnType<typeof useRouter>) {
   await PushNotifications.addListener("pushNotificationReceived", (n) => {
     const title = n.title ?? "MadrasApp";
     const body = n.body ?? "";
-    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+    if (
+      typeof Notification !== "undefined" &&
+      Notification.permission === "granted"
+    ) {
       new Notification(title, { body });
     }
   });
@@ -122,6 +188,19 @@ async function enablePushRegistration(router: ReturnType<typeof useRouter>) {
 }
 
 async function requestPushPermission(router: ReturnType<typeof useRouter>) {
+  try {
+    const { FirebaseMessaging } = await import(
+      "@capacitor-firebase/messaging"
+    );
+    const perm = await FirebaseMessaging.requestPermissions();
+    if (perm.receive === "granted") {
+      await enablePushRegistration(router);
+      return;
+    }
+  } catch {
+    /* fallback ci-dessous */
+  }
+
   const { PushNotifications } = await import("@capacitor/push-notifications");
   const perm = await PushNotifications.requestPermissions();
   if (perm.receive === "granted") {

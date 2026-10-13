@@ -4,7 +4,7 @@
 
 1. [Console Firebase](https://console.firebase.google.com/) → créer un projet (ex. `madrasapp-prod`).
 2. Ajouter une app **Android** (package `fr.madrasapp.mobile`) → télécharger `google-services.json` → placer dans `mobile/android/app/`.
-3. Ajouter une app **iOS** (bundle `fr.madrasapp.mobile`) → télécharger `GoogleService-Info.plist` → placer dans `mobile/ios/App/App/`.
+3. Ajouter une app **iOS** (bundle `fr.madrasapp.mobile`) → télécharger `GoogleService-Info.plist` → placer dans `mobile/ios/App/App/` et l’ajouter à la cible **App** dans Xcode (**obligatoire** pour les push : sans ce fichier, iOS n’enregistre qu’un token APNs hex, incompatible avec Firebase).
 
 ## 2. Clé Admin SDK (serveur Vercel)
 
@@ -37,11 +37,13 @@ Si « Firebase configuré: oui » et pas de notif sur le téléphone → rebuild
 
 Après un appel / une annonce, cherchez `[push]` dans les logs de la fonction (init échouée, send failed, 0 message envoyé).
 
-## 3. iOS — APNs
+## 3. iOS — FCM + APNs
 
-1. Firebase → Cloud Messaging → Apple → uploader la **clé APNs** (.p8) ou certificat.
-2. Xcode → target App → **Signing & Capabilities** → **Push Notifications**.
-3. `pod install` dans `mobile/ios/App`.
+1. **`GoogleService-Info.plist`** dans `mobile/ios/App/App/` (voir étape 1).
+2. `cd mobile && npm install && npm run sync` (plugin `@capacitor-firebase/messaging`).
+3. Firebase → Cloud Messaging → Apple → uploader la **clé APNs** (.p8) ou certificat.
+4. Xcode → target App → **Signing & Capabilities** → **Push Notifications**.
+5. Rebuild l’app sur l’iPhone, reconnecter l’élève/parent : le token en base doit être un **long token FCM**, pas 64 caractères hex.
 
 ## 4. Android
 

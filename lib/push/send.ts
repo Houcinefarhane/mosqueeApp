@@ -3,6 +3,7 @@ import type { PushKind } from "@/lib/push/preferences";
 import { filterUsersByPushPreference } from "@/lib/push/preferences";
 import { ANDROID_PUSH_CHANNEL_ID } from "@/lib/push/android-channel";
 import { normalizeFirebasePrivateKey } from "@/lib/push/firebase-key";
+import { isApnsDeviceTokenHex } from "@/lib/push/token-format";
 
 export type PushPayload = {
   title: string;
@@ -56,10 +57,27 @@ export async function notifyUsers(
 
     const tokens = await prisma.deviceToken.findMany({
       where: { userId: { in: allowed } },
-      select: { id: true, token: true },
+      select: { id: true, token: true, platform: true },
     });
-    if (tokens.length === 0) {
-      console.warn("[push] aucun token pour", kind, "users:", allowed.length);
+
+    const invalidApnsIds = tokens
+      .filter((t) => t.platform === "ios" && isApnsDeviceTokenHex(t.token))
+      .map((t) => t.id);
+    if (invalidApnsIds.length > 0) {
+      console.warn(
+        "[push] suppression tokens iOS APNs (non FCM):",
+        invalidApnsIds.length
+      );
+      await prisma.deviceToken.deleteMany({
+        where: { id: { in: invalidApnsIds } },
+      });
+    }
+
+    const sendable = tokens.filter(
+      (t) => !(t.platform === "ios" && isApnsDeviceTokenHex(t.token))
+    );
+    if (sendable.length === 0) {
+      console.warn("[push] aucun token FCM pour", kind, "users:", allowed.length);
       return;
     }
 
@@ -70,7 +88,7 @@ export async function notifyUsers(
     let sent = 0;
 
     await Promise.all(
-      tokens.map(async ({ id, token }) => {
+      sendable.map(async ({ id, token }) => {
         try {
           await messaging.send({
             token,
@@ -93,9 +111,15 @@ export async function notifyUsers(
             err && typeof err === "object" && "code" in err
               ? String((err as { code: string }).code)
               : "";
-          if (process.env.NODE_ENV === "production") {
-            console.warn("[push] send failed", { kind, code: code || "unknown" });
-          }
+          const message =
+            err && typeof err === "object" && "message" in err
+              ? String((err as { message: string }).message)
+              : "";
+          console.warn("[push] send failed", {
+            kind,
+            code: code || "unknown",
+            message: message.slice(0, 200),
+          });
           if (
             code.includes("registration-token-not-registered") ||
             code.includes("invalid-registration-token")
@@ -112,8 +136,8 @@ export async function notifyUsers(
       });
     }
 
-    if (sent === 0 && tokens.length > 0) {
-      console.warn("[push] 0 message envoyé", { kind, tokens: tokens.length });
+    if (sent === 0 && sendable.length > 0) {
+      console.warn("[push] 0 message envoyé", { kind, tokens: sendable.length });
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : "notifyUsers";
