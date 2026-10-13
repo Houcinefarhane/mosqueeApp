@@ -1,24 +1,17 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-
-const homeByRole: Record<string, string> = {
-  ADMIN: "/admin",
-  PROFESSEUR: "/professeur",
-  PARENT: "/parent",
-  ELEVE: "/eleve",
-};
+import { getAuthToken } from "@/lib/auth-token-server";
+import { homePathForRole } from "@/lib/auth-redirect";
 
 export default async function CompteLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
-  if (!session) redirect("/auth/login");
+  const token = await getAuthToken();
+  if (!token) redirect("/auth/login");
 
-  const home = homeByRole[session.user.role] ?? "/";
+  const home = homePathForRole(token.role as string);
 
   return (
     <div className="app-background min-h-[100dvh]">

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
+import { homePathForRole } from "@/lib/auth-redirect";
 import { motion } from "framer-motion";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -18,11 +19,25 @@ type LoginClientProps = {
   message?: string;
 };
 
+async function goToRoleHome(): Promise<boolean> {
+  const res = await fetch("/api/auth/session", { credentials: "include" });
+  if (!res.ok) return false;
+  const data = (await res.json()) as { user?: { role?: string } };
+  const dest = homePathForRole(data.user?.role);
+  if (dest === "/auth/login") return false;
+  window.location.replace(dest);
+  return true;
+}
+
 export default function LoginClient({ message }: LoginClientProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    void goToRoleHome();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +58,10 @@ export default function LoginClient({ message }: LoginClientProps) {
       }
 
       if (result?.ok) {
-        window.location.href = "/";
+        await new Promise((r) => setTimeout(r, 300));
+        if (!(await goToRoleHome())) {
+          window.location.replace("/auth/login");
+        }
         return;
       }
 
