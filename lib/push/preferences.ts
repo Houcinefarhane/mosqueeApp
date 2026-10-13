@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export type PushKind = "annonces" | "messages" | "absences";
+export type PushKind = "annonces" | "messages" | "absences" | "notes";
 
 export async function isPushEnabledForUser(
   userId: string,
@@ -17,6 +17,8 @@ export async function isPushEnabledForUser(
       return pref.messagesEnabled;
     case "absences":
       return pref.absencesEnabled;
+    case "notes":
+      return pref.notesEnabled;
     default:
       return true;
   }
@@ -36,6 +38,7 @@ export async function filterUsersByPushPreference(
     if (!p) return true;
     if (kind === "annonces") return p.annoncesEnabled;
     if (kind === "messages") return p.messagesEnabled;
-    return p.absencesEnabled;
+    if (kind === "absences") return p.absencesEnabled;
+    return p.notesEnabled;
   });
 }

@@ -30,6 +30,17 @@ export function annoncesRouteForRole(role: Role): string {
   }
 }
 
+export function notesRouteForRole(role: Role): string {
+  switch (role) {
+    case "PARENT":
+      return "/parent/notes";
+    case "ELEVE":
+      return "/eleve/notes";
+    default:
+      return "/parent/notes";
+  }
+}
+
 export function presencesRouteForRole(role: Role): string {
   switch (role) {
     case "PARENT":

@@ -30,10 +30,10 @@ export default function PushConsentModal({
         </h2>
         <p className="mt-2 text-sm text-brun-doux">
           MadrasApp peut vous envoyer des alertes pour les{" "}
-          <strong>annonces</strong> de la mosquée, les <strong>messages</strong>{" "}
-          et les <strong>absences ou retards</strong> à l&apos;appel. Aucune note
-          ni donnée médicale n&apos;est incluse. Vous pourrez choisir les types
-          dans{" "}
+          <strong>annonces</strong> de la mosquée, les <strong>messages</strong>,
+          les <strong>notes</strong> et les <strong>absences ou retards</strong>{" "}
+          à l&apos;appel. Vous pourrez
+          choisir les types dans{" "}
           <span className="font-semibold">Compte → Notifications</span>.
         </p>
         <div className="mt-6 flex flex-col gap-2 sm:flex-row">

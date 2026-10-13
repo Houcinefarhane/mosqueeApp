@@ -13,6 +13,7 @@ type Prefs = {
   annoncesEnabled: boolean;
   messagesEnabled: boolean;
   absencesEnabled: boolean;
+  notesEnabled: boolean;
 };
 
 export default function NotificationsPage() {
@@ -96,10 +97,17 @@ export default function NotificationsPage() {
           />
           <ToggleRow
             label="Absences et retards"
-            description="Alerte après l'appel (sans détail sensible)"
+            description="Alerte après l'appel"
             checked={prefs.absencesEnabled}
             disabled={saving}
             onChange={(v) => void update({ absencesEnabled: v })}
+          />
+          <ToggleRow
+            label="Notes"
+            description="Nouvelle note pour vos enfants ou votre compte élève"
+            checked={prefs.notesEnabled}
+            disabled={saving}
+            onChange={(v) => void update({ notesEnabled: v })}
           />
         </CardContent>
       </Card>

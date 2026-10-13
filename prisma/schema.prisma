@@ -112,6 +112,7 @@ model PushNotificationPreference {
   annoncesEnabled  Boolean  @default(true)
   messagesEnabled  Boolean  @default(true)
   absencesEnabled  Boolean  @default(true)
+  notesEnabled     Boolean  @default(true)
   pushPromptSeenAt DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

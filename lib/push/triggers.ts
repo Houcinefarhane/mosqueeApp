@@ -4,6 +4,7 @@ import { notifyUsers } from "@/lib/push/send";
 import {
   annoncesRouteForRole,
   messagesRouteForRole,
+  notesRouteForRole,
   presencesRouteForRole,
 } from "@/lib/push/routes";
 
@@ -43,6 +44,40 @@ export async function fireMessagePush(
     body: objet.slice(0, 120),
     route: messagesRouteForRole(receiverRole),
   });
+}
+
+export async function fireNotePushForEleve(
+  eleveId: string,
+  matiere: string,
+  valeur: number,
+  noteMax: number
+): Promise<void> {
+  const eleve = await prisma.eleve.findUnique({
+    where: { id: eleveId },
+    select: {
+      userId: true,
+      parentId: true,
+    },
+  });
+  if (!eleve) return;
+
+  const matiereLabel = matiere.trim().slice(0, 60) || "matière";
+  const body = `Nouvelle note en ${matiereLabel} : ${valeur}/${noteMax}. Consultez vos notes.`;
+
+  if (eleve.parentId) {
+    await notifyUsers([eleve.parentId], "notes", {
+      title: "Nouvelle note",
+      body,
+      route: notesRouteForRole("PARENT"),
+    });
+  }
+  if (eleve.userId) {
+    await notifyUsers([eleve.userId], "notes", {
+      title: "Nouvelle note",
+      body,
+      route: notesRouteForRole("ELEVE"),
+    });
+  }
 }
 
 export async function fireAbsencePushForEleve(

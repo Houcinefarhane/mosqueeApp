@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { fireNotePushForEleve } from "@/lib/push/triggers";
 
 const createNotesSchema = z.object({
   classeId: z.string(),
@@ -117,6 +118,19 @@ export async function POST(req: NextRequest) {
     revalidatePath("/eleve/notes");
     revalidatePath("/admin");
     revalidateTag("notes");
+
+    void Promise.all(
+      result.notes.map((note) =>
+        fireNotePushForEleve(
+          note.eleveId,
+          data.matiere,
+          note.valeur,
+          data.noteMax
+        )
+      )
+    ).catch((err) => {
+      console.warn("[push] notes après saisie prof:", err);
+    });
 
     return NextResponse.json(result, { status: 201 });
   } catch (error: any) {

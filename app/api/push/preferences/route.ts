@@ -18,6 +18,7 @@ export async function GET() {
     annoncesEnabled: pref?.annoncesEnabled ?? true,
     messagesEnabled: pref?.messagesEnabled ?? true,
     absencesEnabled: pref?.absencesEnabled ?? true,
+    notesEnabled: pref?.notesEnabled ?? true,
     pushPromptSeenAt: pref?.pushPromptSeenAt ?? null,
   });
 }
@@ -26,6 +27,7 @@ const patchSchema = z.object({
   annoncesEnabled: z.boolean().optional(),
   messagesEnabled: z.boolean().optional(),
   absencesEnabled: z.boolean().optional(),
+  notesEnabled: z.boolean().optional(),
   pushPromptSeenAt: z.string().datetime().optional(),
 });
 
@@ -46,6 +48,7 @@ export async function PATCH(req: NextRequest) {
         annoncesEnabled: data.annoncesEnabled ?? true,
         messagesEnabled: data.messagesEnabled ?? true,
         absencesEnabled: data.absencesEnabled ?? true,
+        notesEnabled: data.notesEnabled ?? true,
         pushPromptSeenAt: data.pushPromptSeenAt
           ? new Date(data.pushPromptSeenAt)
           : undefined,
@@ -59,6 +62,9 @@ export async function PATCH(req: NextRequest) {
           : {}),
         ...(data.absencesEnabled !== undefined
           ? { absencesEnabled: data.absencesEnabled }
+          : {}),
+        ...(data.notesEnabled !== undefined
+          ? { notesEnabled: data.notesEnabled }
           : {}),
         ...(data.pushPromptSeenAt
           ? { pushPromptSeenAt: new Date(data.pushPromptSeenAt) }
