@@ -4,9 +4,6 @@
  * Usage :
  *   npm run import:inscriptions -- --dry-run
  *   npm run import:inscriptions -- --write   (après validation du rapport)
- *
- * Fichier : data/Inscription_Paiement_2026_2027.xlsx (ou chemin via INSCRIPTIONS_XLSX)
- * Feuille : « Inscription Paiement 2026 2027 »
  */
 
 import { randomBytes } from "crypto";
@@ -17,8 +14,16 @@ import * as XLSX from "xlsx";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 import { normalizePhoneFR, phoneToLoginEmail } from "../lib/phone/fr";
-import { normalizePersonName, samePersonName } from "../lib/text-normalize";
 import { resolveAmpMosquee } from "../lib/import/resolve-amp-mosquee";
+import {
+  buildEleveIndex,
+  isAdultClasse,
+  matchFamilyChildren,
+  parseExcelDateUtc,
+  printReportSection,
+  resolveExcelIdentity,
+  type MatchOutcome,
+} from "../lib/import/inscription-match";
 
 config();
 
@@ -58,59 +63,39 @@ function cellString(v: unknown): string {
   return String(v).trim();
 }
 
-function parseExcelDate(value: unknown): Date | null {
-  if (value == null || value === "") return null;
-  if (value instanceof Date && !Number.isNaN(value.getTime())) {
-    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
-  }
-  if (typeof value === "number") {
-    const parsed = XLSX.SSF.parse_date_code(value);
-    if (parsed) {
-      return new Date(parsed.y, parsed.m - 1, parsed.d);
-    }
-  }
-  const s = cellString(value);
-  if (!s) return null;
-  const fr = s.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})$/);
-  if (fr) {
-    const y = fr[3].length === 2 ? 2000 + parseInt(fr[3], 10) : parseInt(fr[3], 10);
-    return new Date(y, parseInt(fr[2], 10) - 1, parseInt(fr[1], 10));
-  }
-  const iso = Date.parse(s);
-  if (!Number.isNaN(iso)) {
-    const d = new Date(iso);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  }
-  return null;
-}
-
-function sameDate(a: Date | null | undefined, b: Date | null | undefined): boolean {
-  if (!a && !b) return true;
-  if (!a || !b) return false;
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
-function isAdultClasse(classeNom: string, niveau: string): boolean {
-  return /ADULTE/i.test(classeNom) || /ADULTE/i.test(niveau);
+function normHeader(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .trim();
 }
 
 function headerIndex(headers: string[], ...needles: string[]): number {
-  const norm = (s: string) =>
-    s
-      .normalize("NFD")
-      .replace(/\p{M}/gu, "")
-      .toLowerCase();
-  const h = headers.map(norm);
+  const h = headers.map(normHeader);
   for (const needle of needles) {
-    const n = norm(needle);
+    const n = normHeader(needle);
     const idx = h.findIndex((col) => col.includes(n));
     if (idx >= 0) return idx;
   }
   return -1;
+}
+
+function indexRepPrenom(headers: string[]): number {
+  const explicit = headerIndex(
+    headers,
+    "prénom représentant",
+    "prenom representant",
+    "prenom rep"
+  );
+  if (explicit >= 0) return explicit;
+  return headers.findIndex((col) => {
+    const n = normHeader(col);
+    return (
+      (n === "prenom" || n === "prénom" || n.startsWith("prenom ")) &&
+      !n.includes("enfant")
+    );
+  });
 }
 
 function parseSheet(filePath: string): ExcelChildRow[] {
@@ -128,7 +113,10 @@ function parseSheet(filePath: string): ExcelChildRow[] {
   });
 
   let headerRowIdx = matrix.findIndex((row) =>
-    row.some((c) => cellString(c).toLowerCase().includes("nom") && cellString(c).toLowerCase().includes("repr"))
+    row.some((c) => {
+      const s = normHeader(cellString(c));
+      return s.includes("nom") && s.includes("representant");
+    })
   );
   if (headerRowIdx < 0) {
     headerRowIdx = matrix.findIndex((row) =>
@@ -138,8 +126,13 @@ function parseSheet(filePath: string): ExcelChildRow[] {
   if (headerRowIdx < 0) headerRowIdx = 0;
 
   const headers = (matrix[headerRowIdx] ?? []).map((c) => cellString(c));
-  const iRepNom = headerIndex(headers, "nom représentant", "nom representant", "nom rep");
-  const iRepPrenom = headerIndex(headers, "prénom", "prenom");
+  const iRepNom = headerIndex(
+    headers,
+    "nom représentant",
+    "nom representant",
+    "représentant légal"
+  );
+  const iRepPrenom = indexRepPrenom(headers);
   const iTel = headerIndex(headers, "n° tel", "n tel", "telephone", "tél");
   const iTel2 = headerIndex(headers, "tel2", "n° tel2");
   const iEnfantNom = headerIndex(headers, "nom enfant");
@@ -158,7 +151,8 @@ function parseSheet(filePath: string): ExcelChildRow[] {
     const tel2 = iTel2 >= 0 ? cellString(line[iTel2]) : "";
     const enfantNom = iEnfantNom >= 0 ? cellString(line[iEnfantNom]) : "";
     const enfantPrenom = iEnfantPrenom >= 0 ? cellString(line[iEnfantPrenom]) : "";
-    const dateNaissance = iDob >= 0 ? parseExcelDate(line[iDob]) : null;
+    const dateNaissance =
+      iDob >= 0 ? parseExcelDateUtc(line[iDob]) : null;
     const montant = iMontant >= 0 ? cellString(line[iMontant]) : "";
     const gratuit = iGratuit >= 0 ? cellString(line[iGratuit]) : "";
     const reduit = iReduit >= 0 ? cellString(line[iReduit]) : "";
@@ -206,7 +200,7 @@ function buildFamilies(rows: ExcelChildRow[]): {
       emptyLines.push(row.excelRow);
       continue;
     }
-    if (!row.enfantNom && !row.enfantPrenom) {
+    if (!row.enfantPrenom && !row.enfantNom && !/ADULTE/i.test(row.enfantPrenom)) {
       emptyLines.push(row.excelRow);
       continue;
     }
@@ -244,13 +238,13 @@ function generateFamilyPassword(): string {
   return `Am${randomBytes(9).toString("base64url")}#1`;
 }
 
+function formatDob(d: Date | null): string {
+  if (!d) return "";
+  return d.toISOString().slice(0, 10);
+}
+
 async function main() {
   const write = process.argv.includes("--write");
-  const dryRun = !write || process.argv.includes("--dry-run");
-
-  if (write && dryRun && !process.argv.includes("--write")) {
-    /* dry-run only */
-  }
 
   const xlsxPath = resolve(
     process.cwd(),
@@ -274,72 +268,45 @@ async function main() {
     include: { classe: { select: { nom: true, niveau: true } }, user: true, parent: true },
   });
 
-  type MatchResult =
-    | { status: "found"; eleveId: string; label: string; adult: boolean }
-    | { status: "not_found" }
-    | { status: "ambiguous"; ids: string[] };
-
-  function matchEleve(
-    nom: string,
-    prenom: string,
-    dob: Date | null
-  ): MatchResult {
-    const byName = eleves.filter(
-      (e) => samePersonName(e.nom, nom) && samePersonName(e.prenom, prenom)
-    );
-    if (byName.length === 0) return { status: "not_found" };
-    if (dob) {
-      const withDob = byName.filter((e) => sameDate(e.dateNaissance, dob));
-      if (withDob.length === 1) {
-        const e = withDob[0];
-        return {
-          status: "found",
-          eleveId: e.id,
-          label: `${e.prenom} ${e.nom}`,
-          adult: isAdultClasse(e.classe.nom, e.classe.niveau),
-        };
-      }
-      if (withDob.length > 1) {
-        return { status: "ambiguous", ids: withDob.map((e) => e.id) };
-      }
-    }
-    if (byName.length === 1 && !dob) {
-      const e = byName[0];
-      return {
-        status: "found",
-        eleveId: e.id,
-        label: `${e.prenom} ${e.nom}`,
-        adult: isAdultClasse(e.classe.nom, e.classe.niveau),
-      };
-    }
-    return { status: "ambiguous", ids: byName.map((e) => e.id) };
-  }
+  const index = buildEleveIndex(eleves);
 
   const found: string[] = [];
   const notFound: string[] = [];
   const ambiguous: string[] = [];
   const doubtfulPhones: string[] = [];
   const matchedEleveIds = new Set<string>();
+  const outcomeByRow = new Map<number, MatchOutcome>();
 
   for (const fam of families) {
     if (fam.doubtfulPhone) {
       doubtfulPhones.push(`${fam.phone} (famille ${fam.repPrenom} ${fam.repNom})`);
     }
-    for (const child of fam.children) {
-      const m = matchEleve(child.enfantNom, child.enfantPrenom, child.dateNaissance);
+
+    const childInputs = fam.children.map((child) => ({
+      excelRow: child.excelRow,
+      identity: resolveExcelIdentity(child),
+      raw: child,
+    }));
+
+    const familyOutcomes = matchFamilyChildren(childInputs, index);
+
+    for (const { excelRow, identity, raw } of childInputs) {
+      const m = familyOutcomes.get(excelRow) ?? { status: "not_found" as const };
+      outcomeByRow.set(excelRow, m);
+
+      const labelExtra = `${identity.prenom} ${identity.nom}${identity.dob ? ` (${formatDob(identity.dob)})` : ""}`;
+
       if (m.status === "found") {
         found.push(
-          `L${child.excelRow} → ${m.label} (${m.adult ? "ADULTE" : "enfant"}) [${m.eleveId}]`
+          `L${excelRow} → ${m.label} (${m.adult ? "ADULTE" : "enfant"}) [${m.eleveId}] ← Excel: ${labelExtra}`
         );
         matchedEleveIds.add(m.eleveId);
       } else if (m.status === "ambiguous") {
         ambiguous.push(
-          `L${child.excelRow} ${child.enfantPrenom} ${child.enfantNom} → ${m.ids.join(", ")}`
+          `L${excelRow} ${labelExtra} → ${m.ids.join(", ")} — ${m.reason}`
         );
       } else {
-        notFound.push(
-          `L${child.excelRow} ${child.enfantPrenom} ${child.enfantNom}${child.dateNaissance ? ` (${child.dateNaissance.toISOString().slice(0, 10)})` : ""}`
-        );
+        notFound.push(`L${excelRow} ${labelExtra} (rep: ${raw.repPrenom} ${raw.repNom})`);
       }
     }
   }
@@ -348,30 +315,31 @@ async function main() {
     .filter((e) => !matchedEleveIds.has(e.id))
     .map(
       (e) =>
-        `${e.prenom} ${e.nom}${e.dateNaissance ? ` (${e.dateNaissance.toISOString().slice(0, 10)})` : ""} — ${e.classe.nom} [${e.id}]`
+        `${e.prenom} ${e.nom}${e.dateNaissance ? ` (${formatDob(e.dateNaissance)})` : ""} — ${e.classe.nom} [${e.id}]`
     );
+
+  const totalChildRows = families.reduce((s, f) => s + f.children.length, 0);
 
   console.log("╔══════════════════════════════════════════════════════════╗");
   console.log("║              RAPPORT IMPORT INSCRIPTIONS                  ║");
   console.log("╚══════════════════════════════════════════════════════════╝\n");
   console.log(`Familles (téléphone) : ${families.length}`);
-  console.log(`Lignes Excel (enfants) : ${families.reduce((s, f) => s + f.children.length, 0)}`);
+  console.log(`Lignes Excel (enfants) : ${totalChildRows}`);
+  console.log(`Élèves MadrasApp (AMP) : ${eleves.length}`);
   console.log(`Lignes vides ignorées : ${emptyLines.length}`);
-  console.log(`Frères/sœurs sans téléphone au-dessus : ${orphanSiblingRows.length}\n`);
+  console.log(`Frères/sœurs sans téléphone au-dessus : ${orphanSiblingRows.length}`);
 
-  console.log(`✅ Élèves trouvés (${found.length}) :`);
-  found.forEach((l) => console.log(`   ${l}`));
-  console.log(`\n❌ Excel → introuvable MadrasApp (${notFound.length}) :`);
-  notFound.forEach((l) => console.log(`   ${l}`));
-  console.log(`\n⚠️  Correspondances ambiguës (${ambiguous.length}) :`);
-  ambiguous.forEach((l) => console.log(`   ${l}`));
-  console.log(`\n📋 MadrasApp → absents Excel (${madrasappNotInExcel.length}) :`);
-  madrasappNotInExcel.slice(0, 50).forEach((l) => console.log(`   ${l}`));
-  if (madrasappNotInExcel.length > 50) {
-    console.log(`   … et ${madrasappNotInExcel.length - 50} autres`);
-  }
-  console.log(`\n☎️  Numéros douteux (${doubtfulPhones.length}) :`);
-  doubtfulPhones.forEach((l) => console.log(`   ${l}`));
+  printReportSection("✅ Élèves trouvés", found);
+  printReportSection("❌ Excel → introuvable MadrasApp", notFound);
+  printReportSection("⚠️  Correspondances ambiguës", ambiguous);
+  printReportSection("📋 MadrasApp → absents Excel", madrasappNotInExcel);
+  printReportSection("☎️  Numéros douteux", doubtfulPhones);
+
+  console.log("\n── Synthèse ──");
+  console.log(`   Trouvés      : ${found.length} / ${totalChildRows}`);
+  console.log(`   Introuvables : ${notFound.length}`);
+  console.log(`   Ambigus      : ${ambiguous.length}`);
+  console.log(`   Absents Excel: ${madrasappNotInExcel.length}`);
 
   if (!write) {
     console.log("\n➡️  Aucune écriture (dry-run). Relancez avec --write après validation.\n");
@@ -398,14 +366,15 @@ async function main() {
     const plainPassword = passwordByFamily.get(fam.familyKey)!;
     const hash = await bcrypt.hash(plainPassword, 12);
 
-    const minors = fam.children.filter((c) => {
-      const m = matchEleve(c.enfantNom, c.enfantPrenom, c.dateNaissance);
-      return m.status === "found" && !m.adult;
-    });
-    const adults = fam.children.filter((c) => {
-      const m = matchEleve(c.enfantNom, c.enfantPrenom, c.dateNaissance);
-      return m.status === "found" && m.adult;
-    });
+    const minors: ExcelChildRow[] = [];
+    const adults: ExcelChildRow[] = [];
+
+    for (const child of fam.children) {
+      const m = outcomeByRow.get(child.excelRow);
+      if (!m || m.status !== "found") continue;
+      if (m.adult) adults.push(child);
+      else minors.push(child);
+    }
 
     if (minors.length > 0) {
       const email = phoneToLoginEmail(fam.phone);
@@ -444,8 +413,8 @@ async function main() {
       }
 
       for (const child of minors) {
-        const m = matchEleve(child.enfantNom, child.enfantPrenom, child.dateNaissance);
-        if (m.status !== "found") continue;
+        const m = outcomeByRow.get(child.excelRow);
+        if (!m || m.status !== "found") continue;
         await prisma.eleve.update({
           where: { id: m.eleveId },
           data: { parentId: parent.id },
@@ -453,14 +422,15 @@ async function main() {
       }
 
       csvLines.push(
-        `${fam.phone};PARENT;${fam.repNom};${fam.repPrenom};${plainPassword};${fam.familyKey};${minors.map((c) => `${c.enfantPrenom} ${c.enfantNom}`).join("|")}`
+        `${fam.phone};PARENT;${fam.repNom};${fam.repPrenom};${plainPassword};${fam.familyKey};${minors.map((c) => `${c.enfantPrenom} ${c.enfantNom}`.trim()).join("|")}`
       );
     }
 
     for (const child of adults) {
-      const m = matchEleve(child.enfantNom, child.enfantPrenom, child.dateNaissance);
-      if (m.status !== "found") continue;
+      const m = outcomeByRow.get(child.excelRow);
+      if (!m || m.status !== "found") continue;
       const eleve = eleves.find((e) => e.id === m.eleveId)!;
+      const id = resolveExcelIdentity(child);
       const adultPhone = fam.phone;
       const email = phoneToLoginEmail(adultPhone);
 
@@ -470,8 +440,8 @@ async function main() {
           data: {
             email,
             password: hash,
-            nom: child.enfantNom,
-            prenom: child.enfantPrenom,
+            nom: id.nom,
+            prenom: id.prenom,
             telephone: adultPhone,
             telephoneNormalized: adultPhone,
             role: "ELEVE",
@@ -498,7 +468,7 @@ async function main() {
       }
 
       csvLines.push(
-        `${adultPhone};ELEVE (ADULTE);${child.enfantNom};${child.enfantPrenom};${plainPassword};${fam.familyKey};${m.label}`
+        `${adultPhone};ELEVE (ADULTE);${id.nom};${id.prenom};${plainPassword};${fam.familyKey};${m.label}`
       );
     }
   }
