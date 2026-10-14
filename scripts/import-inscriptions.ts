@@ -3,18 +3,25 @@
  *
  * Usage :
  *   npm run import:inscriptions -- --dry-run
- *   npm run import:inscriptions -- --write   (après validation du rapport)
+ *   npm run import:inscriptions -- --mapping data/import-output/rapprochement-....csv
+ *   npm run import:inscriptions -- --mapping ... --write
  */
 
 import { randomBytes } from "crypto";
 import { config } from "dotenv";
-import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
 import * as XLSX from "xlsx";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 import { normalizePhoneFR, phoneToLoginEmail } from "../lib/phone/fr";
 import { resolveAmpMosquee } from "../lib/import/resolve-amp-mosquee";
+import {
+  csvEscape,
+  fuzzyMatchUnmatched,
+  fuzzyResultFromAmbiguous,
+  type FuzzyRowResult,
+} from "../lib/import/fuzzy-match";
 import {
   buildEleveIndex,
   isAdultClasse,
@@ -56,6 +63,13 @@ type FamilyGroup = {
   phone2: string | null;
   doubtfulPhone: boolean;
   children: ExcelChildRow[];
+};
+
+type ConfirmedMatch = {
+  eleveId: string;
+  adult: boolean;
+  label: string;
+  source: "exact" | "mapping" | "fuzzy_sur";
 };
 
 function cellString(v: unknown): string {
@@ -151,8 +165,7 @@ function parseSheet(filePath: string): ExcelChildRow[] {
     const tel2 = iTel2 >= 0 ? cellString(line[iTel2]) : "";
     const enfantNom = iEnfantNom >= 0 ? cellString(line[iEnfantNom]) : "";
     const enfantPrenom = iEnfantPrenom >= 0 ? cellString(line[iEnfantPrenom]) : "";
-    const dateNaissance =
-      iDob >= 0 ? parseExcelDateUtc(line[iDob]) : null;
+    const dateNaissance = iDob >= 0 ? parseExcelDateUtc(line[iDob]) : null;
     const montant = iMontant >= 0 ? cellString(line[iMontant]) : "";
     const gratuit = iGratuit >= 0 ? cellString(line[iGratuit]) : "";
     const reduit = iReduit >= 0 ? cellString(line[iReduit]) : "";
@@ -243,8 +256,143 @@ function formatDob(d: Date | null): string {
   return d.toISOString().slice(0, 10);
 }
 
+function parseArgValue(flag: string): string | null {
+  const idx = process.argv.indexOf(flag);
+  if (idx < 0) return null;
+  return process.argv[idx + 1] ?? null;
+}
+
+function timestampForFile(): string {
+  return new Date().toISOString().replace(/[:.]/g, "-");
+}
+
+function exportRapprochementCsv(
+  outDir: string,
+  rows: FuzzyRowResult[],
+  typeByRow: Map<number, string>
+): string {
+  const path = resolve(outDir, `rapprochement-${timestampForFile()}.csv`);
+  const header =
+    "ligne_excel;nom_excel;candidat_id;candidat_prenom;candidat_nom;groupe;score;statut;type;decision";
+  const lines = [header];
+
+  for (const r of rows) {
+    const type = typeByRow.get(r.excelRow) ?? "FUZZY";
+    if (r.proposals.length === 0) {
+      lines.push(
+        [
+          r.excelRow,
+          csvEscape(r.excelLabel),
+          "",
+          "",
+          "",
+          "",
+          "",
+          r.statut,
+          type,
+          "",
+        ].join(";")
+      );
+      continue;
+    }
+    for (const p of r.proposals) {
+      lines.push(
+        [
+          r.excelRow,
+          csvEscape(r.excelLabel),
+          p.eleveId,
+          csvEscape(p.prenom),
+          csvEscape(p.nom),
+          csvEscape(p.groupe),
+          String(p.score),
+          r.statut,
+          type,
+          "",
+        ].join(";")
+      );
+    }
+  }
+
+  writeFileSync(path, lines.join("\n"), "utf8");
+  return path;
+}
+
+function exportElevesACreerCsv(
+  outDir: string,
+  items: Array<{
+    excelRow: number;
+    prenom: string;
+    nom: string;
+    dob: string;
+    rep: string;
+    phone: string;
+  }>
+): string {
+  const path = resolve(outDir, `eleves-a-creer-${timestampForFile()}.csv`);
+  const header =
+    "ligne_excel;prenom;nom;date_naissance;representant;telephone_famille;groupe";
+  const lines = [header];
+  for (const it of items) {
+    lines.push(
+      [
+        it.excelRow,
+        csvEscape(it.prenom),
+        csvEscape(it.nom),
+        it.dob,
+        csvEscape(it.rep),
+        it.phone,
+        "",
+      ].join(";")
+    );
+  }
+  writeFileSync(path, lines.join("\n"), "utf8");
+  return path;
+}
+
+function parseMappingCsv(
+  mappingPath: string,
+  eleves: Array<{ id: string; prenom: string; nom: string; classe: { nom: string } }>
+): Map<number, string> {
+  const content = readFileSync(mappingPath, "utf8");
+  const lines = content.split(/\r?\n/).filter((l) => l.trim());
+  if (lines.length < 2) return new Map();
+
+  const header = lines[0].split(";").map((h) => normHeader(h));
+  const iRow = header.findIndex((h) => h.includes("ligne"));
+  const iCand = header.findIndex((h) => h.includes("candidat_id"));
+  const iDecision = header.findIndex((h) => h.includes("decision"));
+
+  const byRow = new Map<number, string>();
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(";");
+    const excelRow = parseInt(cols[iRow] ?? "", 10);
+    if (!excelRow) continue;
+
+    const decision = (cols[iDecision] ?? "").trim();
+    if (!decision || decision.toUpperCase() === "NON") continue;
+
+    let eleveId = "";
+    if (/^cm[a-z0-9]+$/i.test(decision)) {
+      eleveId = decision;
+    } else if (decision.toUpperCase() === "OUI") {
+      eleveId = (cols[iCand] ?? "").trim();
+    }
+
+    if (!eleveId) continue;
+    if (!eleves.some((e) => e.id === eleveId)) continue;
+
+    if (!byRow.has(excelRow)) {
+      byRow.set(excelRow, eleveId);
+    }
+  }
+
+  return byRow;
+}
+
 async function main() {
   const write = process.argv.includes("--write");
+  const mappingPath = parseArgValue("--mapping");
 
   const xlsxPath = resolve(
     process.cwd(),
@@ -255,7 +403,10 @@ async function main() {
   }
 
   console.log(`📄 Fichier : ${xlsxPath}`);
-  console.log(write ? "✍️  Mode ÉCRITURE" : "🔍 Mode dry-run (aucune écriture)\n");
+  if (write) console.log("✍️  Mode ÉCRITURE");
+  else console.log("🔍 Mode dry-run (aucune écriture)");
+  if (mappingPath) console.log(`📎 Mapping : ${mappingPath}`);
+  console.log("");
 
   const mosquee = await resolveAmpMosquee(prisma);
   console.log(`🕌 Mosquée cible : ${mosquee.nom} (${mosquee.id})\n`);
@@ -269,24 +420,35 @@ async function main() {
   });
 
   const index = buildEleveIndex(eleves);
+  const confirmed = new Map<number, ConfirmedMatch>();
+  const outcomeByRow = new Map<number, MatchOutcome>();
 
   const found: string[] = [];
-  const notFound: string[] = [];
-  const ambiguous: string[] = [];
+  const notFoundRows: Array<{
+    excelRow: number;
+    identity: ReturnType<typeof resolveExcelIdentity>;
+    excelLabel: string;
+    raw: ExcelChildRow;
+  }> = [];
+  const ambiguousRows: Array<{
+    excelRow: number;
+    excelLabel: string;
+    ids: string[];
+  }> = [];
   const doubtfulPhones: string[] = [];
-  const matchedEleveIds = new Set<string>();
-  const outcomeByRow = new Map<number, MatchOutcome>();
 
   for (const fam of families) {
     if (fam.doubtfulPhone) {
       doubtfulPhones.push(`${fam.phone} (famille ${fam.repPrenom} ${fam.repNom})`);
     }
 
-    const childInputs = fam.children.map((child) => ({
-      excelRow: child.excelRow,
-      identity: resolveExcelIdentity(child),
-      raw: child,
-    }));
+    const childInputs = fam.children.map((child) => {
+      return {
+        excelRow: child.excelRow,
+        identity: resolveExcelIdentity(child),
+        raw: child,
+      };
+    });
 
     const familyOutcomes = matchFamilyChildren(childInputs, index);
 
@@ -294,22 +456,118 @@ async function main() {
       const m = familyOutcomes.get(excelRow) ?? { status: "not_found" as const };
       outcomeByRow.set(excelRow, m);
 
-      const labelExtra = `${identity.prenom} ${identity.nom}${identity.dob ? ` (${formatDob(identity.dob)})` : ""}`;
+      const excelLabel = `${identity.prenom} ${identity.nom}${identity.dob ? ` (${formatDob(identity.dob)})` : ""}`;
 
       if (m.status === "found") {
+        confirmed.set(excelRow, {
+          eleveId: m.eleveId,
+          adult: m.adult,
+          label: m.label,
+          source: "exact",
+        });
         found.push(
-          `L${excelRow} → ${m.label} (${m.adult ? "ADULTE" : "enfant"}) [${m.eleveId}] ← Excel: ${labelExtra}`
+          `L${excelRow} → ${m.label} (${m.adult ? "ADULTE" : "enfant"}) [${m.eleveId}] ← Excel: ${excelLabel}`
         );
-        matchedEleveIds.add(m.eleveId);
       } else if (m.status === "ambiguous") {
-        ambiguous.push(
-          `L${excelRow} ${labelExtra} → ${m.ids.join(", ")} — ${m.reason}`
-        );
+        ambiguousRows.push({ excelRow, excelLabel, ids: m.ids });
       } else {
-        notFound.push(`L${excelRow} ${labelExtra} (rep: ${raw.repPrenom} ${raw.repNom})`);
+        notFoundRows.push({ excelRow, identity, excelLabel, raw });
       }
     }
   }
+
+  const matchedEleveIds = new Set([...confirmed.values()].map((c) => c.eleveId));
+  const unmatchedEleves = eleves.filter((e) => !matchedEleveIds.has(e.id));
+
+  const fuzzyInput = notFoundRows.map((r) => ({
+    excelRow: r.excelRow,
+    identity: r.identity,
+    excelLabel: r.excelLabel,
+  }));
+  const fuzzyResults = fuzzyMatchUnmatched(fuzzyInput, unmatchedEleves);
+
+  const rapprochementRows: FuzzyRowResult[] = [];
+  const typeByRow = new Map<number, string>();
+
+  for (const a of ambiguousRows) {
+    rapprochementRows.push(
+      fuzzyResultFromAmbiguous(a.excelRow, a.excelLabel, eleves, a.ids)
+    );
+    typeByRow.set(a.excelRow, "EXACT_AMBIGU");
+  }
+  for (const f of fuzzyResults) {
+    rapprochementRows.push(f);
+    typeByRow.set(f.excelRow, "FUZZY");
+  }
+
+  rapprochementRows.sort((a, b) => a.excelRow - b.excelRow);
+
+  const countByStatut = {
+    SUR: 0,
+    A_VERIFIER: 0,
+    AUCUN: 0,
+    AMBIGU: 0,
+  };
+  const seenExcelStatut = new Set<number>();
+  for (const r of rapprochementRows) {
+    if (seenExcelStatut.has(r.excelRow)) continue;
+    seenExcelStatut.add(r.excelRow);
+    if (r.statut === "SÛR") countByStatut.SUR++;
+    else if (r.statut === "À VÉRIFIER") countByStatut.A_VERIFIER++;
+    else if (r.statut === "AMBIGU") countByStatut.AMBIGU++;
+    else countByStatut.AUCUN++;
+  }
+
+  const outDir = resolve(process.cwd(), "data/import-output");
+  mkdirSync(outDir, { recursive: true });
+
+  const rapprochementPath = exportRapprochementCsv(outDir, rapprochementRows, typeByRow);
+
+  if (mappingPath) {
+    if (!existsSync(mappingPath)) {
+      throw new Error(`Fichier mapping introuvable : ${mappingPath}`);
+    }
+    const decisions = parseMappingCsv(mappingPath, eleves);
+    for (const [excelRow, eleveId] of decisions) {
+      const e = eleves.find((x) => x.id === eleveId);
+      if (!e) continue;
+      if (confirmed.has(excelRow)) continue;
+      confirmed.set(excelRow, {
+        eleveId,
+        adult: isAdultClasse(e.classe.nom, e.classe.niveau),
+        label: `${e.prenom} ${e.nom}`,
+        source: "mapping",
+      });
+      matchedEleveIds.add(eleveId);
+    }
+    console.log(`📎 Décisions mapping appliquées : ${decisions.size} ligne(s)\n`);
+  }
+
+  const elevesACreer: Array<{
+    excelRow: number;
+    prenom: string;
+    nom: string;
+    dob: string;
+    rep: string;
+    phone: string;
+  }> = [];
+
+  for (const fam of families) {
+    for (const child of fam.children) {
+      if (confirmed.has(child.excelRow)) continue;
+      const id = resolveExcelIdentity(child);
+      elevesACreer.push({
+        excelRow: child.excelRow,
+        prenom: id.prenom,
+        nom: id.nom,
+        dob: formatDob(id.dob),
+        rep: `${child.repPrenom} ${child.repNom}`.trim(),
+        phone: fam.phone,
+      });
+    }
+  }
+
+  const elevesACreerPath = exportElevesACreerCsv(outDir, elevesACreer);
 
   const madrasappNotInExcel = eleves
     .filter((e) => !matchedEleveIds.has(e.id))
@@ -329,59 +587,71 @@ async function main() {
   console.log(`Lignes vides ignorées : ${emptyLines.length}`);
   console.log(`Frères/sœurs sans téléphone au-dessus : ${orphanSiblingRows.length}`);
 
-  printReportSection("✅ Élèves trouvés", found);
-  printReportSection("❌ Excel → introuvable MadrasApp", notFound);
-  printReportSection("⚠️  Correspondances ambiguës", ambiguous);
+  printReportSection("✅ Passe 1 — trouvés (exact)", found);
   printReportSection("📋 MadrasApp → absents Excel", madrasappNotInExcel);
   printReportSection("☎️  Numéros douteux", doubtfulPhones);
 
-  console.log("\n── Synthèse ──");
-  console.log(`   Trouvés      : ${found.length} / ${totalChildRows}`);
-  console.log(`   Introuvables : ${notFound.length}`);
-  console.log(`   Ambigus      : ${ambiguous.length}`);
-  console.log(`   Absents Excel: ${madrasappNotInExcel.length}`);
+  console.log("\n── Passe 2 — rapprochement flou (lignes Excel) ──");
+  console.log(`   SÛR           : ${countByStatut.SUR}`);
+  console.log(`   À VÉRIFIER    : ${countByStatut.A_VERIFIER}`);
+  console.log(`   AUCUN         : ${countByStatut.AUCUN}`);
+  console.log(`   AMBIGU        : ${countByStatut.AMBIGU}`);
+
+  const confirmedExact = [...confirmed.values()].filter((c) => c.source === "exact").length;
+  const confirmedMapping = [...confirmed.values()].filter((c) => c.source === "mapping").length;
+
+  console.log("\n── Confirmés (prêt import comptes) ──");
+  console.log(`   Exact (passe 1)     : ${confirmedExact}`);
+  console.log(`   Via mapping CSV     : ${confirmedMapping}`);
+  console.log(`   Total confirmés     : ${confirmed.size} / ${totalChildRows}`);
+  console.log(`   À créer en base     : ${elevesACreer.length} (non créés par le script)`);
+
+  console.log(`\n📁 Export rapprochement : ${rapprochementPath}`);
+  console.log(`📁 Export à créer       : ${elevesACreerPath}`);
 
   if (!write) {
-    console.log("\n➡️  Aucune écriture (dry-run). Relancez avec --write après validation.\n");
+    console.log(
+      "\n➡️  Dry-run : remplissez « decision » (OUI / NON / id élève), puis :\n" +
+        "    npm run import:inscriptions -- --mapping <csv> --write\n"
+    );
     return;
   }
 
-  if (ambiguous.length > 0 || orphanSiblingRows.length > 0) {
-    console.error("\n❌ Écriture refusée : corrigez les ambiguïtés / lignes orphelines d’abord.\n");
+  if (!mappingPath) {
+    console.error("\n❌ --write exige --mapping <rapprochement.csv> rempli.\n");
     process.exit(1);
   }
 
-  const outDir = resolve(process.cwd(), "data/import-output");
-  mkdirSync(outDir, { recursive: true });
-  const csvLines = [
+  if (orphanSiblingRows.length > 0) {
+    console.error("\n❌ Écriture refusée : lignes orphelines sans téléphone.\n");
+    process.exit(1);
+  }
+
+  const credentialsLines = [
     "telephone;role;nom;prenom;mot_de_passe_provisoire;family_key;eleves_lies",
   ];
-
   const passwordByFamily = new Map<string, string>();
 
   for (const fam of families) {
+    const confirmedChildren = fam.children.filter((c) => confirmed.has(c.excelRow));
+    if (confirmedChildren.length === 0) continue;
+
     if (!passwordByFamily.has(fam.familyKey)) {
       passwordByFamily.set(fam.familyKey, generateFamilyPassword());
     }
     const plainPassword = passwordByFamily.get(fam.familyKey)!;
     const hash = await bcrypt.hash(plainPassword, 12);
 
-    const minors: ExcelChildRow[] = [];
-    const adults: ExcelChildRow[] = [];
-
-    for (const child of fam.children) {
-      const m = outcomeByRow.get(child.excelRow);
-      if (!m || m.status !== "found") continue;
-      if (m.adult) adults.push(child);
-      else minors.push(child);
-    }
+    const minors = confirmedChildren.filter((c) => {
+      const m = confirmed.get(c.excelRow)!;
+      return !m.adult;
+    });
+    const adults = confirmedChildren.filter((c) => confirmed.get(c.excelRow)!.adult);
 
     if (minors.length > 0) {
       const email = phoneToLoginEmail(fam.phone);
       let parent = await prisma.user.findFirst({
-        where: {
-          OR: [{ telephoneNormalized: fam.phone }, { email }],
-        },
+        where: { OR: [{ telephoneNormalized: fam.phone }, { email }] },
       });
 
       if (!parent) {
@@ -413,26 +683,23 @@ async function main() {
       }
 
       for (const child of minors) {
-        const m = outcomeByRow.get(child.excelRow);
-        if (!m || m.status !== "found") continue;
+        const m = confirmed.get(child.excelRow)!;
         await prisma.eleve.update({
           where: { id: m.eleveId },
           data: { parentId: parent.id },
         });
       }
 
-      csvLines.push(
+      credentialsLines.push(
         `${fam.phone};PARENT;${fam.repNom};${fam.repPrenom};${plainPassword};${fam.familyKey};${minors.map((c) => `${c.enfantPrenom} ${c.enfantNom}`.trim()).join("|")}`
       );
     }
 
     for (const child of adults) {
-      const m = outcomeByRow.get(child.excelRow);
-      if (!m || m.status !== "found") continue;
+      const m = confirmed.get(child.excelRow)!;
       const eleve = eleves.find((e) => e.id === m.eleveId)!;
       const id = resolveExcelIdentity(child);
-      const adultPhone = fam.phone;
-      const email = phoneToLoginEmail(adultPhone);
+      const email = phoneToLoginEmail(fam.phone);
 
       let user = eleve.user;
       if (!user) {
@@ -442,8 +709,8 @@ async function main() {
             password: hash,
             nom: id.nom,
             prenom: id.prenom,
-            telephone: adultPhone,
-            telephoneNormalized: adultPhone,
+            telephone: fam.phone,
+            telephoneNormalized: fam.phone,
             role: "ELEVE",
             mosqueeId: mosquee.id,
             mustChangePassword: true,
@@ -452,14 +719,14 @@ async function main() {
         });
         await prisma.eleve.update({
           where: { id: eleve.id },
-          data: { userId: user.id, telephone: adultPhone },
+          data: { userId: user.id, telephone: fam.phone },
         });
       } else {
         await prisma.user.update({
           where: { id: user.id },
           data: {
-            telephone: adultPhone,
-            telephoneNormalized: adultPhone,
+            telephone: fam.phone,
+            telephoneNormalized: fam.phone,
             password: hash,
             mustChangePassword: true,
             familyKey: fam.familyKey,
@@ -467,18 +734,18 @@ async function main() {
         });
       }
 
-      csvLines.push(
-        `${adultPhone};ELEVE (ADULTE);${id.nom};${id.prenom};${plainPassword};${fam.familyKey};${m.label}`
+      credentialsLines.push(
+        `${fam.phone};ELEVE (ADULTE);${id.nom};${id.prenom};${plainPassword};${fam.familyKey};${m.label}`
       );
     }
   }
 
   const csvPath = resolve(
     outDir,
-    `inscriptions-credentials-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`
+    `inscriptions-credentials-${timestampForFile()}.csv`
   );
-  writeFileSync(csvPath, csvLines.join("\n"), "utf8");
-  console.log(`\n✅ Écriture terminée. CSV : ${csvPath}\n`);
+  writeFileSync(csvPath, credentialsLines.join("\n"), "utf8");
+  console.log(`\n✅ Écriture terminée. Identifiants : ${csvPath}\n`);
 }
 
 main()
