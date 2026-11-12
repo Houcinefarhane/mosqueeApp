@@ -1,59 +1,99 @@
 /**
  * Jeu de données « École Démo » pour review Apple (isolé de l’AMP).
  *
+ * Mots de passe stables : lib/seed/apple-demo-accounts.ts (+ copie data/apple-review-credentials.txt)
+ *
  * Usage :
  *   npm run db:seed-apple-demo
  *   npm run db:seed-apple-demo -- --force
- *
- * Les mots de passe sont générés à l’exécution et affichés uniquement en console
- * (jamais stockés dans le dépôt).
  */
 
-import { randomBytes } from "crypto";
+import { mkdirSync, writeFileSync } from "fs";
+import { resolve } from "path";
 import { config } from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { addDays, subDays } from "date-fns";
+import {
+  APPLE_DEMO_ACCOUNTS,
+  APPLE_DEMO_MOSQUEE_NOM,
+  formatAppleDemoCredentialsBlock,
+} from "../lib/seed/apple-demo-accounts";
 
 config();
 
 const prisma = new PrismaClient();
 
-const DEMO_MOSQUEE_NOM = "École Démo";
 const AMP_GUARD = /AMP|Mosquée de Plaisir/i;
 
-const DEMO_EMAILS = {
-  admin: "admin@review.ecole-demo.fr",
-  prof: "prof@review.ecole-demo.fr",
-  eleve: "eleve@review.ecole-demo.fr",
-} as const;
-
-function generatePassword(): string {
-  const base = randomBytes(18).toString("base64url");
-  return `Md${base}!7`;
-}
+const DEMO_EMAILS = [
+  APPLE_DEMO_ACCOUNTS.admin.email,
+  APPLE_DEMO_ACCOUNTS.prof.email,
+  APPLE_DEMO_ACCOUNTS.eleve.email,
+] as const;
 
 async function hashPassword(password: string) {
   return bcrypt.hash(password, 12);
 }
 
 function assertSafeMosquee(nom: string) {
-  if (nom !== DEMO_MOSQUEE_NOM) {
-    throw new Error(`Refus : mosquée « ${nom} » ≠ « ${DEMO_MOSQUEE_NOM} »`);
+  if (nom !== APPLE_DEMO_MOSQUEE_NOM) {
+    throw new Error(`Refus : mosquée « ${nom} » ≠ « ${APPLE_DEMO_MOSQUEE_NOM} »`);
   }
   if (AMP_GUARD.test(nom)) {
     throw new Error("Refus : tentative de toucher aux données AMP.");
   }
 }
 
+function writeCredentialsFile() {
+  const dir = resolve(process.cwd(), "data");
+  mkdirSync(dir, { recursive: true });
+  const path = resolve(dir, "apple-review-credentials.txt");
+  writeFileSync(path, `${formatAppleDemoCredentialsBlock()}\n`, "utf8");
+  return path;
+}
+
+async function cleanDemoNotesAndDevoirs(mosqueeId: string) {
+  await prisma.note.deleteMany({ where: { mosqueeId } });
+  await prisma.noteSession.deleteMany({ where: { mosqueeId } });
+  await prisma.devoir.deleteMany({ where: { mosqueeId } });
+}
+
+async function syncDemoPasswords(mosqueeId: string) {
+  const entries = [
+    { email: APPLE_DEMO_ACCOUNTS.admin.email, password: APPLE_DEMO_ACCOUNTS.admin.password },
+    { email: APPLE_DEMO_ACCOUNTS.prof.email, password: APPLE_DEMO_ACCOUNTS.prof.password },
+    { email: APPLE_DEMO_ACCOUNTS.eleve.email, password: APPLE_DEMO_ACCOUNTS.eleve.password },
+  ];
+
+  for (const { email, password } of entries) {
+    const user = await prisma.user.findFirst({
+      where: { email, mosqueeId },
+    });
+    if (!user) continue;
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: await hashPassword(password) },
+    });
+  }
+}
+
+function printCredentials(extra?: { mosqueeId?: string; eleveId?: string }) {
+  const filePath = writeCredentialsFile();
+  console.log(formatAppleDemoCredentialsBlock());
+  if (extra?.mosqueeId) console.log(`\nID mosquée : ${extra.mosqueeId}`);
+  if (extra?.eleveId) console.log(`ID élève   : ${extra.eleveId}`);
+  console.log(`\n📄 Copie locale : ${filePath}`);
+  console.log(`📄 Référence repo : docs/apple-review-credentials.md\n`);
+}
+
 async function deleteAppleDemoOnly() {
   const mosquee = await prisma.mosquee.findFirst({
-    where: { nom: DEMO_MOSQUEE_NOM },
+    where: { nom: APPLE_DEMO_MOSQUEE_NOM },
   });
 
   if (!mosquee) {
     const byEmail = await prisma.user.findFirst({
-      where: { email: { in: Object.values(DEMO_EMAILS) } },
+      where: { email: { in: [...DEMO_EMAILS] } },
       include: { mosquee: true },
     });
     if (byEmail?.mosquee) {
@@ -73,13 +113,19 @@ async function seed() {
   console.log("🍎 Seed Apple — École Démo (sans AMP)\n");
 
   const existing = await prisma.mosquee.findFirst({
-    where: { nom: DEMO_MOSQUEE_NOM },
+    where: { nom: APPLE_DEMO_MOSQUEE_NOM },
   });
 
   if (existing && !force) {
     console.log(
-      "ℹ️  « École Démo » existe déjà. Utilisez --force pour recréer (nouveaux mots de passe).\n"
+      "ℹ️  « École Démo » existe déjà — mots de passe + retrait notes/devoirs démo…"
     );
+    await syncDemoPasswords(existing.id);
+    await cleanDemoNotesAndDevoirs(existing.id);
+    const eleve = await prisma.eleve.findFirst({
+      where: { mosqueeId: existing.id, email: APPLE_DEMO_ACCOUNTS.eleve.email },
+    });
+    printCredentials({ mosqueeId: existing.id, eleveId: eleve?.id });
     return;
   }
 
@@ -89,18 +135,15 @@ async function seed() {
   }
 
   const passwords = {
-    admin: generatePassword(),
-    prof: generatePassword(),
-    eleve: generatePassword(),
+    admin: APPLE_DEMO_ACCOUNTS.admin.password,
+    prof: APPLE_DEMO_ACCOUNTS.prof.password,
+    eleve: APPLE_DEMO_ACCOUNTS.eleve.password,
   };
-
-  const today = new Date();
-  today.setHours(10, 0, 0, 0);
 
   const result = await prisma.$transaction(async (tx) => {
     const mosquee = await tx.mosquee.create({
       data: {
-        nom: DEMO_MOSQUEE_NOM,
+        nom: APPLE_DEMO_MOSQUEE_NOM,
         adresse: "1 Rue Démo, 75000 Paris",
         telephone: "01 00 00 00 00",
         email: "contact@review.ecole-demo.fr",
@@ -109,7 +152,7 @@ async function seed() {
 
     const admin = await tx.user.create({
       data: {
-        email: DEMO_EMAILS.admin,
+        email: APPLE_DEMO_ACCOUNTS.admin.email,
         nom: "Demo",
         prenom: "Admin",
         role: "ADMIN",
@@ -122,7 +165,7 @@ async function seed() {
 
     const prof = await tx.user.create({
       data: {
-        email: DEMO_EMAILS.prof,
+        email: APPLE_DEMO_ACCOUNTS.prof.email,
         nom: "Demo",
         prenom: "Professeur",
         role: "PROFESSEUR",
@@ -135,7 +178,7 @@ async function seed() {
 
     const eleveUser = await tx.user.create({
       data: {
-        email: DEMO_EMAILS.eleve,
+        email: APPLE_DEMO_ACCOUNTS.eleve.email,
         nom: "Demo",
         prenom: "Élève",
         role: "ELEVE",
@@ -160,7 +203,7 @@ async function seed() {
       data: {
         nom: "Demo",
         prenom: "Élève",
-        email: DEMO_EMAILS.eleve,
+        email: APPLE_DEMO_ACCOUNTS.eleve.email,
         classeId: classe.id,
         userId: eleveUser.id,
         mosqueeId: mosquee.id,
@@ -196,66 +239,6 @@ async function seed() {
       ],
     });
 
-    const session = await tx.noteSession.create({
-      data: {
-        date: subDays(today, 4),
-        classeId: classe.id,
-        professeurId: prof.id,
-        mosqueeId: mosquee.id,
-        matiere: "Coran",
-        noteMax: 20,
-        commentaireSeance: "Session de démonstration Apple.",
-      },
-    });
-
-    await tx.note.createMany({
-      data: [
-        {
-          valeur: 17,
-          noteMax: 20,
-          matiere: "Coran",
-          commentaire: "Très bonne récitation",
-          eleveId: eleve.id,
-          professeurId: prof.id,
-          mosqueeId: mosquee.id,
-          sessionId: session.id,
-        },
-        {
-          valeur: 15,
-          noteMax: 20,
-          matiere: "Tajwid",
-          eleveId: eleve.id,
-          professeurId: prof.id,
-          mosqueeId: mosquee.id,
-        },
-      ],
-    });
-
-    await tx.devoir.createMany({
-      data: [
-        {
-          titre: "Révision sourate Al-Fatiha",
-          contenu: "Relire et mémoriser les 7 versets. Préparer la récitation pour le prochain cours.",
-          matiere: "Coran",
-          type: "CAHIER_TEXTE",
-          dateLimite: addDays(today, 5),
-          classeId: classe.id,
-          professeurId: prof.id,
-          mosqueeId: mosquee.id,
-        },
-        {
-          titre: "Devoir — lettres arabes",
-          contenu: "Exercice d’écriture : أ، ب، ت (3 lignes de chaque).",
-          matiere: "Arabe",
-          type: "DEVOIR",
-          dateLimite: addDays(today, 10),
-          classeId: classe.id,
-          professeurId: prof.id,
-          mosqueeId: mosquee.id,
-        },
-      ],
-    });
-
     await tx.annonce.create({
       data: {
         titre: "École Démo — Review Apple",
@@ -270,19 +253,7 @@ async function seed() {
   });
 
   console.log("✅ École Démo créée.\n");
-  console.log("=== IDENTIFIANTS REVIEW APPLE (confidentiel) ===");
-  console.log(`École        : ${DEMO_MOSQUEE_NOM}`);
-  console.log(`ID mosquée   : ${result.mosquee.id}`);
-  console.log(`ID élève     : ${result.eleve.id}`);
-  console.log(`URL          : https://madrasa-app-pi.vercel.app/auth/login`);
-  console.log("");
-  console.log(`ADMIN        ${DEMO_EMAILS.admin}`);
-  console.log(`  mot de passe : ${passwords.admin}`);
-  console.log(`PROFESSEUR   ${DEMO_EMAILS.prof}`);
-  console.log(`  mot de passe : ${passwords.prof}`);
-  console.log(`ÉLÈVE        ${DEMO_EMAILS.eleve}`);
-  console.log(`  mot de passe : ${passwords.eleve}`);
-  console.log("================================================\n");
+  printCredentials({ mosqueeId: result.mosquee.id, eleveId: result.eleve.id });
 }
 
 seed()

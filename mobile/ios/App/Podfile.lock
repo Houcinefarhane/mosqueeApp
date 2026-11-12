@@ -8,6 +8,9 @@ PODS:
   - CapacitorBrowser (8.0.1):
     - Capacitor
   - CapacitorCordova (8.5.3)
+  - CapacitorFirebaseMessaging (8.5.2):
+    - Capacitor
+    - FirebaseMessaging (~> 12.7)
   - CapacitorHaptics (8.0.0):
     - Capacitor
   - CapacitorKeyboard (8.0.0):
@@ -22,6 +25,59 @@ PODS:
     - Capacitor
   - CapacitorStatusBar (8.0.1):
     - Capacitor
+  - FirebaseCore (12.19.0):
+    - FirebaseCoreInternal (~> 12.19.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/Logger (~> 8.1)
+  - FirebaseCoreInternal (12.19.0):
+    - "GoogleUtilities/NSData+zlib (~> 8.1)"
+  - FirebaseInstallations (12.19.0):
+    - FirebaseCore (~> 12.19.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - PromisesObjC (~> 2.4)
+  - FirebaseMessaging (12.19.0):
+    - FirebaseCore (~> 12.19.0)
+    - FirebaseInstallations (~> 12.19.0)
+    - GoogleDataTransport (~> 10.1)
+    - GoogleUtilities/AppDelegateSwizzler (~> 8.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/Reachability (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - nanopb (~> 3.30910.0)
+  - GoogleDataTransport (10.1.1):
+    - nanopb (~> 3.30910.0)
+    - PromisesObjC (~> 2.4)
+  - GoogleUtilities/AppDelegateSwizzler (8.1.4):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Environment (8.1.4):
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Logger (8.1.4):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Network (8.1.4):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Privacy
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (8.1.4)":
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/Privacy (8.1.4)
+  - GoogleUtilities/Reachability (8.1.4):
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/UserDefaults (8.1.4):
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Privacy
+  - nanopb (3.30910.0):
+    - nanopb/decode (= 3.30910.0)
+    - nanopb/encode (= 3.30910.0)
+  - nanopb/decode (3.30910.0)
+  - nanopb/encode (3.30910.0)
+  - PromisesObjC (2.4.1)
 
 DEPENDENCIES:
   - "AparajitaCapacitorBiometricAuth (from `../../node_modules/@aparajita/capacitor-biometric-auth`)"
@@ -29,6 +85,7 @@ DEPENDENCIES:
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorBrowser (from `../../node_modules/@capacitor/browser`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorFirebaseMessaging (from `../../node_modules/@capacitor-firebase/messaging`)"
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
   - "CapacitorNetwork (from `../../node_modules/@capacitor/network`)"
@@ -36,6 +93,17 @@ DEPENDENCIES:
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
   - "CapacitorSplashScreen (from `../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
+
+SPEC REPOS:
+  trunk:
+    - FirebaseCore
+    - FirebaseCoreInternal
+    - FirebaseInstallations
+    - FirebaseMessaging
+    - GoogleDataTransport
+    - GoogleUtilities
+    - nanopb
+    - PromisesObjC
 
 EXTERNAL SOURCES:
   AparajitaCapacitorBiometricAuth:
@@ -48,6 +116,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/browser"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorFirebaseMessaging:
+    :path: "../../node_modules/@capacitor-firebase/messaging"
   CapacitorHaptics:
     :path: "../../node_modules/@capacitor/haptics"
   CapacitorKeyboard:
@@ -69,6 +139,7 @@ SPEC CHECKSUMS:
   CapacitorApp: 942306cd1acf7774a00e89a3986af3a67c8cad7a
   CapacitorBrowser: e72e572d5dbdbb854fda5950586a2451e981f2d6
   CapacitorCordova: 0b7326439c7a09fc5d20eced5e0dab986327a493
+  CapacitorFirebaseMessaging: 070184e8e683b3955d900bc1162da6429c74f16b
   CapacitorHaptics: 2079d9fa04c5a71e18663b4722323c304c58245c
   CapacitorKeyboard: d7868c079a4d5277a3deca27a10a488fcbbb8b69
   CapacitorNetwork: 156f8096cbbce5337eb1769fcc0d6adc4b85d3f3
@@ -76,7 +147,15 @@ SPEC CHECKSUMS:
   CapacitorPushNotifications: 99644101c6a82036e459929b6d897ee1cb27d97f
   CapacitorSplashScreen: 422880d7117605c30699eb4b21644b62db42e86c
   CapacitorStatusBar: 32206abd53b14f339763da26f71286deaa891e16
+  FirebaseCore: c990214798d7c568ad436a15ba7da25c7a278c9a
+  FirebaseCoreInternal: 656b1c2fd5a1c5976183dc54b73deda78fb26ee3
+  FirebaseInstallations: f70a49eed611f5602f373e40974b3b01556ac217
+  FirebaseMessaging: c15f48126adbe8b4d3238a5e1fa24bab3ad3e472
+  GoogleDataTransport: a24e58982ab3ba2f64d79613e027fe7f57e88539
+  GoogleUtilities: db34c1c11c6f2eccb6fab2340cb8ceb1451299dc
+  nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
+  PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
 
-PODFILE CHECKSUM: 79fd8f2c718d71fe5d3572dd6475b5ad2d893d37
+PODFILE CHECKSUM: 0711b12db9544ffd21680e53ff83570eeeb35feb
 
 COCOAPODS: 1.17.0

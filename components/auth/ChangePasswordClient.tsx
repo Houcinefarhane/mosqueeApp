@@ -7,7 +7,6 @@ import Input from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/Card";
 
 export default function ChangePasswordClient() {
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
@@ -17,7 +16,7 @@ export default function ChangePasswordClient() {
     e.preventDefault();
     setError("");
     if (newPassword !== confirm) {
-      setError("Les nouveaux mots de passe ne correspondent pas.");
+      setError("Les mots de passe ne correspondent pas.");
       return;
     }
     setLoading(true);
@@ -25,7 +24,7 @@ export default function ChangePasswordClient() {
       const res = await fetch("/api/auth/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentPassword, newPassword }),
+        body: JSON.stringify({ newPassword }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -55,15 +54,7 @@ export default function ChangePasswordClient() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Mot de passe provisoire"
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
-          <Input
-            label="Nouveau mot de passe"
+            label="Mot de passe"
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
@@ -72,11 +63,12 @@ export default function ChangePasswordClient() {
             autoComplete="new-password"
           />
           <Input
-            label="Confirmer le nouveau mot de passe"
+            label="Retaper le mot de passe"
             type="password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
+            minLength={10}
             autoComplete="new-password"
           />
           {error && (

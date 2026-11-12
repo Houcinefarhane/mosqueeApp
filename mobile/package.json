@@ -13,6 +13,8 @@
     "open:android": "npx --yes node@22 ./node_modules/@capacitor/cli/bin/capacitor open android",
     "run:ios": "npx --yes node@22 ./node_modules/@capacitor/cli/bin/capacitor run ios",
     "run:android": "npx --yes node@22 ./node_modules/@capacitor/cli/bin/capacitor run android",
+    "android:keystore": "bash scripts/create-android-keystore.sh",
+    "android:bundle": "cd android && ./gradlew clean bundleRelease",
     "assets": "npx @capacitor/assets generate --iconBackgroundColor '#C8962E' --iconBackgroundColorDark '#1E110A' --splashBackgroundColor '#1E110A' --splashBackgroundColorDark '#1E110A'"
   },
   "dependencies": {

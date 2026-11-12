@@ -66,3 +66,8 @@ export function isPhoneLikeIdentifier(input: string): boolean {
 export function phoneToLoginEmail(normalizedPhone: string): string {
   return `tel.${normalizedPhone.replace(/\D/g, "")}@login.madrasapp.internal`;
 }
+
+/** Email de connexion pour un élève majeur (évite le conflit avec le compte parent même téléphone). */
+export function eleveLoginEmail(eleveId: string): string {
+  return `eleve.${eleveId}@login.madrasapp.internal`;
+}

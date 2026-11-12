@@ -46,6 +46,8 @@ yarn-error.log*
 /data/*.xlsx
 /data/*.xls
 /data/import-output/
+/data/apple-review-credentials.txt
+/data/import-output/inscriptions-credentials-*.csv
 /data/Inscription*.xlsx
 
 # vercel

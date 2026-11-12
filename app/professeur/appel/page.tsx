@@ -14,7 +14,7 @@ import { ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   type AppelUiStatut,
-  nextAppelStatut,
+  type StatutPresence,
   toApiStatut,
 } from "@/lib/constants/appel-ui";
 import { ListSkeleton } from "@/components/ui/Skeleton";
@@ -60,7 +60,6 @@ function AppelPageContent() {
     {}
   );
   const [commentaires, setCommentaires] = useState<Record<string, string>>({});
-  const [pulseId, setPulseId] = useState<string | null>(null);
   const [showCommentaireSeance, setShowCommentaireSeance] = useState(false);
   const [commentaireSeance, setCommentaireSeance] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -107,7 +106,7 @@ function AppelPageContent() {
           setEleves(data);
           const initial: Record<string, AppelUiStatut> = {};
           data.forEach((eleve: Eleve) => {
-            initial[eleve.id] = "EN_ATTENTE";
+            initial[eleve.id] = "PRESENT";
           });
           setUiPresences(initial);
           setCommentaires({});
@@ -130,15 +129,16 @@ function AppelPageContent() {
   const counts = useMemo(() => {
     const values = Object.values(uiPresences);
     return {
-      presents: values.filter((s) => s === "PRESENT").length,
+      presents: values.filter((s) => s === "PRESENT" || s === "EN_ATTENTE").length,
       absents: values.filter((s) => s === "ABSENT").length,
-      treated: values.filter((s) => s !== "EN_ATTENTE").length,
+      retards: values.filter((s) => s === "RETARD").length,
+      excuses: values.filter((s) => s === "EXCUSE").length,
     };
   }, [uiPresences]);
 
   const selectedClasse = classes.find((c) => c.id === selectedClasseId);
-  const progress =
-    eleves.length > 0 ? counts.treated / eleves.length : 0;
+  const presentRatio =
+    eleves.length > 0 ? counts.presents / eleves.length : 0;
 
   const sessionSubtitle = useMemo(() => {
     const d = new Date(date + "T12:00:00");
@@ -150,16 +150,14 @@ function AppelPageContent() {
     return `${jour} · séance du jour`;
   }, [date]);
 
-  const handleTogglePresence = (eleveId: string) => {
+  const handleSetPresence = (eleveId: string, statut: StatutPresence) => {
     void import("@/lib/native/haptics").then(({ lightTapHaptic }) =>
       lightTapHaptic()
     );
     setUiPresences((prev) => ({
       ...prev,
-      [eleveId]: nextAppelStatut(prev[eleveId] ?? "EN_ATTENTE"),
+      [eleveId]: statut,
     }));
-    setPulseId(eleveId);
-    window.setTimeout(() => setPulseId(null), 320);
   };
 
   const handleMarkAllPresent = () => {
@@ -233,7 +231,7 @@ function AppelPageContent() {
             : "Appel"
         }
         title="Faire l'appel"
-        description={selectedClasse ? sessionSubtitle : "Marquez les présences en un tap"}
+        description={selectedClasse ? sessionSubtitle : "Présent ou absent en un clic"}
         breadcrumbs={[
           { label: "Espace professeur", href: "/professeur" },
           { label: "Appel" },
@@ -277,7 +275,7 @@ function AppelPageContent() {
             </div>
             <p className="font-semibold text-brun">Choisissez une classe</p>
             <p className="mt-1 max-w-xs text-sm text-brun-doux">
-              Tapez chaque ligne pour faire défiler le statut : en attente, présent, absent…
+              Les élèves sont présents par défaut : touchez Absent si besoin.
             </p>
           </CardContent>
         </Card>
@@ -314,12 +312,12 @@ function AppelPageContent() {
               <motion.div
                 className="h-full rounded-full bg-or"
                 initial={false}
-                animate={{ width: `${Math.round(progress * 100)}%` }}
+                animate={{ width: `${Math.round(presentRatio * 100)}%` }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
               />
             </div>
             <p className="mt-2 text-center text-xs text-blanc/75 tabular-nums">
-              {counts.treated} / {eleves.length} élèves traités
+              {eleves.length} élève{eleves.length > 1 ? "s" : ""} dans la liste
             </p>
           </div>
 
@@ -333,11 +331,10 @@ function AppelPageContent() {
             eleves={eleves}
             uiPresences={uiPresences}
             commentaires={commentaires}
-            onTogglePresence={handleTogglePresence}
+            onSetPresence={handleSetPresence}
             onCommentChange={(id, value) =>
               setCommentaires((prev) => ({ ...prev, [id]: value }))
             }
-            pulseId={pulseId}
           />
 
           <Card className="md:hidden">

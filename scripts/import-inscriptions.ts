@@ -7,14 +7,15 @@
  *   npm run import:inscriptions -- --mapping ... --write
  */
 
-import { randomBytes } from "crypto";
 import { config } from "dotenv";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
 import * as XLSX from "xlsx";
-import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
-import { normalizePhoneFR, phoneToLoginEmail } from "../lib/phone/fr";
+import { applyInscriptionsImport } from "../lib/import/apply-inscriptions";
+import { IMPORT_PROVISIONAL_PASSWORD } from "../lib/import/provisional-password";
+import { parseMappingCsv } from "../lib/import/mapping-csv";
+import { normalizePhoneFR } from "../lib/phone/fr";
 import { resolveAmpMosquee } from "../lib/import/resolve-amp-mosquee";
 import {
   csvEscape,
@@ -38,6 +39,7 @@ const prisma = new PrismaClient();
 
 const SHEET_NAME = "Inscription Paiement 2026 2027";
 const DEFAULT_XLSX = "data/Inscription_Paiement_2026_2027.xlsx";
+const DEFAULT_MAPPING = "data/rapprochement-propose.csv";
 
 type ExcelChildRow = {
   excelRow: number;
@@ -69,7 +71,7 @@ type ConfirmedMatch = {
   eleveId: string;
   adult: boolean;
   label: string;
-  source: "exact" | "mapping" | "fuzzy_sur";
+  source: "exact" | "mapping";
 };
 
 function cellString(v: unknown): string {
@@ -247,8 +249,23 @@ function buildFamilies(rows: ExcelChildRow[]): {
   return { families, emptyLines, orphanSiblingRows };
 }
 
+function familiesWithMultipleNumbers(families: FamilyGroup[]): {
+  count: number;
+  labels: string[];
+} {
+  const labels: string[] = [];
+  for (const fam of families) {
+    if (fam.phone2 && fam.phone2 !== fam.phone) {
+      labels.push(
+        `${fam.repPrenom} ${fam.repNom} — ${fam.phone} / ${fam.phone2} (${fam.children.length} ligne(s))`
+      );
+    }
+  }
+  return { count: labels.length, labels };
+}
+
 function generateFamilyPassword(): string {
-  return `Am${randomBytes(9).toString("base64url")}#1`;
+  return IMPORT_PROVISIONAL_PASSWORD;
 }
 
 function formatDob(d: Date | null): string {
@@ -256,10 +273,14 @@ function formatDob(d: Date | null): string {
   return d.toISOString().slice(0, 10);
 }
 
-function parseArgValue(flag: string): string | null {
-  const idx = process.argv.indexOf(flag);
+function resolveMappingPath(): string | null {
+  const idx = process.argv.indexOf("--mapping");
   if (idx < 0) return null;
-  return process.argv[idx + 1] ?? null;
+  const next = process.argv[idx + 1];
+  if (next && !next.startsWith("--")) {
+    return resolve(process.cwd(), next);
+  }
+  return resolve(process.cwd(), DEFAULT_MAPPING);
 }
 
 function timestampForFile(): string {
@@ -349,50 +370,9 @@ function exportElevesACreerCsv(
   return path;
 }
 
-function parseMappingCsv(
-  mappingPath: string,
-  eleves: Array<{ id: string; prenom: string; nom: string; classe: { nom: string } }>
-): Map<number, string> {
-  const content = readFileSync(mappingPath, "utf8");
-  const lines = content.split(/\r?\n/).filter((l) => l.trim());
-  if (lines.length < 2) return new Map();
-
-  const header = lines[0].split(";").map((h) => normHeader(h));
-  const iRow = header.findIndex((h) => h.includes("ligne"));
-  const iCand = header.findIndex((h) => h.includes("candidat_id"));
-  const iDecision = header.findIndex((h) => h.includes("decision"));
-
-  const byRow = new Map<number, string>();
-
-  for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(";");
-    const excelRow = parseInt(cols[iRow] ?? "", 10);
-    if (!excelRow) continue;
-
-    const decision = (cols[iDecision] ?? "").trim();
-    if (!decision || decision.toUpperCase() === "NON") continue;
-
-    let eleveId = "";
-    if (/^cm[a-z0-9]+$/i.test(decision)) {
-      eleveId = decision;
-    } else if (decision.toUpperCase() === "OUI") {
-      eleveId = (cols[iCand] ?? "").trim();
-    }
-
-    if (!eleveId) continue;
-    if (!eleves.some((e) => e.id === eleveId)) continue;
-
-    if (!byRow.has(excelRow)) {
-      byRow.set(excelRow, eleveId);
-    }
-  }
-
-  return byRow;
-}
-
 async function main() {
   const write = process.argv.includes("--write");
-  const mappingPath = parseArgValue("--mapping");
+  const mappingPath = resolveMappingPath();
 
   const xlsxPath = resolve(
     process.cwd(),
@@ -523,12 +503,18 @@ async function main() {
 
   const rapprochementPath = exportRapprochementCsv(outDir, rapprochementRows, typeByRow);
 
+  let mappingStats: ReturnType<typeof parseMappingCsv>["stats"] | null = null;
   if (mappingPath) {
     if (!existsSync(mappingPath)) {
       throw new Error(`Fichier mapping introuvable : ${mappingPath}`);
     }
-    const decisions = parseMappingCsv(mappingPath, eleves);
-    for (const [excelRow, eleveId] of decisions) {
+    const validIds = new Set(eleves.map((e) => e.id));
+    const parsed = parseMappingCsv(mappingPath, validIds);
+    mappingStats = parsed.stats;
+    if (parsed.conflicts.length > 0) {
+      printReportSection("⚠️  Mapping — conflits (ligne ignorée)", parsed.conflicts);
+    }
+    for (const [excelRow, eleveId] of parsed.byRow) {
       const e = eleves.find((x) => x.id === eleveId);
       if (!e) continue;
       if (confirmed.has(excelRow)) continue;
@@ -540,7 +526,11 @@ async function main() {
       });
       matchedEleveIds.add(eleveId);
     }
-    console.log(`📎 Décisions mapping appliquées : ${decisions.size} ligne(s)\n`);
+    console.log(
+      `📎 Mapping : ${parsed.byRow.size} rattachement(s) OUI, ` +
+        `${parsed.stats.atrancherRows} ligne(s) A_TRANCHER, ` +
+        `${parsed.stats.nonCandidates} candidat(s) NON\n`
+    );
   }
 
   const elevesACreer: Array<{
@@ -609,10 +599,59 @@ async function main() {
   console.log(`\n📁 Export rapprochement : ${rapprochementPath}`);
   console.log(`📁 Export à créer       : ${elevesACreerPath}`);
 
+  const importFamilies = families.map((f) => ({
+    familyKey: f.familyKey,
+    repNom: f.repNom,
+    repPrenom: f.repPrenom,
+    phone: f.phone,
+    doubtfulPhone: f.doubtfulPhone,
+    children: f.children.map((c) => ({
+      excelRow: c.excelRow,
+      repNom: c.repNom,
+      repPrenom: c.repPrenom,
+      enfantNom: c.enfantNom,
+      enfantPrenom: c.enfantPrenom,
+      dateNaissance: c.dateNaissance,
+    })),
+  }));
+
+  const { stats: applyStats, credentialsLines } = await applyInscriptionsImport({
+    prisma,
+    mosqueeId: mosquee.id,
+    families: importFamilies,
+    confirmed,
+    write,
+    generatePassword: generateFamilyPassword,
+  });
+
+  const multiPhone = familiesWithMultipleNumbers(families);
+
   if (!write) {
+    console.log("\n── Simulation import (exact + OUI, sans création d’élèves) ──");
+    console.log(`   Parents créés            : ${applyStats.parentsCreated}`);
+    console.log(`   Parents déjà en base     : ${applyStats.parentsReused}`);
+    console.log(`   Enfants liés             : ${applyStats.childrenLinked}`);
+    console.log(`   Enfants déjà liés        : ${applyStats.childrenAlreadyLinked}`);
+    console.log(`   Comptes adultes à créer  : ${applyStats.adultAccountsCreated}`);
+    console.log(`   Comptes ignorés (lignes) : ${applyStats.accountsIgnored}`);
+    console.log(`   Numéros invalides        : ${applyStats.invalidPhones}`);
+    console.log(`   Familles multi-numéros   : ${multiPhone.count}`);
+    if (applyStats.crossFamilyBlocked > 0) {
+      console.log(`   Bloqués (autre famille)  : ${applyStats.crossFamilyBlocked}`);
+    }
+    if (applyStats.duplicateEleveBlocked > 0) {
+      console.log(`   Doublon élève (1 ligne)  : ${applyStats.duplicateEleveBlocked}`);
+    }
+    if (mappingStats) {
+      console.log(`   Lignes A_TRANCHER (CSV)  : ${mappingStats.atrancherRows}`);
+    }
+    if (multiPhone.count > 0) {
+      printReportSection("☎️  Familles avec tel + tel2 distincts", multiPhone.labels);
+    }
+
     console.log(
-      "\n➡️  Dry-run : remplissez « decision » (OUI / NON / id élève), puis :\n" +
-        "    npm run import:inscriptions -- --mapping <csv> --write\n"
+      "\n➡️  Dry-run : aucune écriture. Pour importer après validation :\n" +
+        "    npm run import:inscriptions -- --mapping data/rapprochement-propose.csv --write\n"
     );
     return;
   }
@@ -627,124 +666,35 @@ async function main() {
     process.exit(1);
   }
 
-  const credentialsLines = [
-    "telephone;role;nom;prenom;mot_de_passe_provisoire;family_key;eleves_lies",
-  ];
-  const passwordByFamily = new Map<string, string>();
-
-  for (const fam of families) {
-    const confirmedChildren = fam.children.filter((c) => confirmed.has(c.excelRow));
-    if (confirmedChildren.length === 0) continue;
-
-    if (!passwordByFamily.has(fam.familyKey)) {
-      passwordByFamily.set(fam.familyKey, generateFamilyPassword());
-    }
-    const plainPassword = passwordByFamily.get(fam.familyKey)!;
-    const hash = await bcrypt.hash(plainPassword, 12);
-
-    const minors = confirmedChildren.filter((c) => {
-      const m = confirmed.get(c.excelRow)!;
-      return !m.adult;
-    });
-    const adults = confirmedChildren.filter((c) => confirmed.get(c.excelRow)!.adult);
-
-    if (minors.length > 0) {
-      const email = phoneToLoginEmail(fam.phone);
-      let parent = await prisma.user.findFirst({
-        where: { OR: [{ telephoneNormalized: fam.phone }, { email }] },
-      });
-
-      if (!parent) {
-        parent = await prisma.user.create({
-          data: {
-            email,
-            password: hash,
-            nom: fam.repNom || "Parent",
-            prenom: fam.repPrenom || "Famille",
-            telephone: fam.phone,
-            telephoneNormalized: fam.phone,
-            role: "PARENT",
-            mosqueeId: mosquee.id,
-            mustChangePassword: true,
-            familyKey: fam.familyKey,
-          },
-        });
-      } else {
-        parent = await prisma.user.update({
-          where: { id: parent.id },
-          data: {
-            telephone: fam.phone,
-            telephoneNormalized: fam.phone,
-            password: hash,
-            mustChangePassword: true,
-            familyKey: fam.familyKey,
-          },
-        });
-      }
-
-      for (const child of minors) {
-        const m = confirmed.get(child.excelRow)!;
-        await prisma.eleve.update({
-          where: { id: m.eleveId },
-          data: { parentId: parent.id },
-        });
-      }
-
-      credentialsLines.push(
-        `${fam.phone};PARENT;${fam.repNom};${fam.repPrenom};${plainPassword};${fam.familyKey};${minors.map((c) => `${c.enfantPrenom} ${c.enfantNom}`.trim()).join("|")}`
-      );
-    }
-
-    for (const child of adults) {
-      const m = confirmed.get(child.excelRow)!;
-      const eleve = eleves.find((e) => e.id === m.eleveId)!;
-      const id = resolveExcelIdentity(child);
-      const email = phoneToLoginEmail(fam.phone);
-
-      let user = eleve.user;
-      if (!user) {
-        user = await prisma.user.create({
-          data: {
-            email,
-            password: hash,
-            nom: id.nom,
-            prenom: id.prenom,
-            telephone: fam.phone,
-            telephoneNormalized: fam.phone,
-            role: "ELEVE",
-            mosqueeId: mosquee.id,
-            mustChangePassword: true,
-            familyKey: fam.familyKey,
-          },
-        });
-        await prisma.eleve.update({
-          where: { id: eleve.id },
-          data: { userId: user.id, telephone: fam.phone },
-        });
-      } else {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            telephone: fam.phone,
-            telephoneNormalized: fam.phone,
-            password: hash,
-            mustChangePassword: true,
-            familyKey: fam.familyKey,
-          },
-        });
-      }
-
-      credentialsLines.push(
-        `${fam.phone};ELEVE (ADULTE);${id.nom};${id.prenom};${plainPassword};${fam.familyKey};${m.label}`
-      );
-    }
-  }
-
   const csvPath = resolve(
     outDir,
     `inscriptions-credentials-${timestampForFile()}.csv`
   );
-  writeFileSync(csvPath, credentialsLines.join("\n"), "utf8");
+  writeFileSync(
+    csvPath,
+    [
+      "identifiant_connexion;role;nom;prenom;mot_de_passe_provisoire;family_key;detail",
+      ...credentialsLines,
+    ].join("\n"),
+    "utf8"
+  );
+
+  console.log("\n── Import réel — bilan ──");
+  console.log(`   Parents créés            : ${applyStats.parentsCreated}`);
+  console.log(`   Parents réutilisés       : ${applyStats.parentsReused}`);
+  console.log(`   Enfants liés             : ${applyStats.childrenLinked}`);
+  console.log(`   Enfants déjà liés        : ${applyStats.childrenAlreadyLinked}`);
+  console.log(`   Adultes créés            : ${applyStats.adultAccountsCreated}`);
+  console.log(`   Adultes réutilisés       : ${applyStats.adultAccountsReused}`);
+  console.log(`   Comptes ignorés (lignes) : ${applyStats.accountsIgnored}`);
+  console.log(`   Numéros invalides        : ${applyStats.invalidPhones}`);
+  if (applyStats.crossFamilyBlocked > 0) {
+    console.log(`   Bloqués (autre famille)  : ${applyStats.crossFamilyBlocked}`);
+  }
+  if (applyStats.duplicateEleveBlocked > 0) {
+    console.log(`   Doublon élève (1 ligne)  : ${applyStats.duplicateEleveBlocked}`);
+  }
+
   console.log(`\n✅ Écriture terminée. Identifiants : ${csvPath}\n`);
 }
 

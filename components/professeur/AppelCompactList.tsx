@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   APPEL_UI_LABELS,
   type AppelUiStatut,
+  type StatutPresence,
 } from "@/lib/constants/appel-ui";
 import SearchInput from "@/components/ui/SearchInput";
 import { TOUCH_CONTROL } from "@/lib/ui/touch-styles";
@@ -23,34 +23,83 @@ type AppelCompactListProps = {
   eleves: Eleve[];
   uiPresences: Record<string, AppelUiStatut>;
   commentaires: Record<string, string>;
-  onTogglePresence: (eleveId: string) => void;
+  onSetPresence: (eleveId: string, statut: StatutPresence) => void;
   onCommentChange: (eleveId: string, value: string) => void;
-  /** Id élève en flash animation */
-  pulseId?: string | null;
 };
 
 function initials(prenom: string, nom: string) {
   return `${prenom.charAt(0)}${nom.charAt(0)}`.toUpperCase();
 }
 
-function StatusPill({ statut }: { statut: AppelUiStatut }) {
-  const styles: Record<AppelUiStatut, string> = {
-    EN_ATTENTE: "bg-sable text-brun-doux border border-filet",
-    PRESENT: "bg-or text-nuit",
-    ABSENT: "bg-brun text-blanc",
-    RETARD: "bg-or-clair text-nuit",
-    EXCUSE: "bg-brun-doux text-blanc",
-  };
+const MAIN_STATUTS: StatutPresence[] = ["PRESENT", "ABSENT"];
+const EXTRA_STATUTS: StatutPresence[] = ["RETARD", "EXCUSE"];
+
+function PresenceToggle({
+  statut,
+  onSelect,
+}: {
+  statut: AppelUiStatut;
+  onSelect: (s: StatutPresence) => void;
+}) {
+  const current: StatutPresence =
+    statut === "EN_ATTENTE" ? "PRESENT" : statut;
 
   return (
-    <span
-      className={cn(
-        "inline-flex min-w-[5.5rem] items-center justify-center rounded-full px-2.5 py-1 text-xs font-bold",
-        styles[statut]
+    <div className="flex shrink-0 flex-col items-end gap-1">
+      <div
+        className="flex rounded-2xl border border-filet bg-sable/50 p-0.5"
+        role="group"
+        aria-label="Présence"
+      >
+        {MAIN_STATUTS.map((s) => {
+          const selected = current === s;
+          return (
+            <button
+              key={s}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(s);
+              }}
+              className={cn(
+                "min-h-10 min-w-[4.5rem] rounded-xl px-2.5 text-xs font-bold transition-colors",
+                selected && s === "PRESENT" && "bg-or text-nuit shadow-sm",
+                selected && s === "ABSENT" && "bg-brun text-blanc shadow-sm",
+                !selected && "text-brun-doux hover:bg-blanc/80"
+              )}
+              aria-pressed={selected}
+            >
+              {s === "PRESENT" ? "Présent" : "Absent"}
+            </button>
+          );
+        })}
+      </div>
+      {(current === "RETARD" || current === "EXCUSE" || statut === "RETARD" || statut === "EXCUSE") && (
+        <span className="text-[10px] font-semibold text-or">
+          {APPEL_UI_LABELS[current]}
+        </span>
       )}
-    >
-      {APPEL_UI_LABELS[statut]}
-    </span>
+      <div className="flex gap-1">
+        {EXTRA_STATUTS.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(s);
+            }}
+            className={cn(
+              "rounded-lg px-2 py-0.5 text-[10px] font-semibold",
+              current === s
+                ? "bg-or-clair text-nuit"
+                : "text-brun-doux underline-offset-2 hover:underline"
+            )}
+          >
+            {APPEL_UI_LABELS[s]}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -58,11 +107,9 @@ export default function AppelCompactList({
   eleves,
   uiPresences,
   commentaires,
-  onTogglePresence,
+  onSetPresence,
   onCommentChange,
-  pulseId,
 }: AppelCompactListProps) {
-  const reduceMotion = useReducedMotion();
   const [search, setSearch] = useState("");
   const [commentOpenId, setCommentOpenId] = useState<string | null>(null);
 
@@ -92,44 +139,23 @@ export default function AppelCompactList({
 
       <ul className="overflow-hidden rounded-3xl border border-filet bg-blanc">
         {filtered.map((eleve) => {
-          const statut = uiPresences[eleve.id] ?? "EN_ATTENTE";
-          const isPulsing = pulseId === eleve.id;
+          const statut = uiPresences[eleve.id] ?? "PRESENT";
           const commentOpen = commentOpenId === eleve.id;
 
           return (
-            <li
-              key={eleve.id}
-              className={cn(
-                "border-b border-filet last:border-b-0",
-                isPulsing && !reduceMotion && "bg-or/10"
-              )}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  onTogglePresence(eleve.id);
-                  if (typeof navigator !== "undefined" && navigator.vibrate) {
-                    navigator.vibrate(10);
-                  }
-                }}
-                className="flex min-h-14 w-full items-center gap-3 px-3 py-2 text-left active:bg-sable/80"
-              >
-                <motion.span
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brun text-sm font-bold text-or-clair"
-                  animate={
-                    isPulsing && !reduceMotion
-                      ? { scale: [1, 1.15, 1] }
-                      : { scale: 1 }
-                  }
-                  transition={{ duration: 0.3 }}
-                >
+            <li key={eleve.id} className="border-b border-filet last:border-b-0">
+              <div className="flex min-h-14 items-center gap-3 px-3 py-2">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brun text-sm font-bold text-or-clair">
                   {initials(eleve.prenom, eleve.nom)}
-                </motion.span>
-                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-brun">
+                </span>
+                <span className="min-w-0 flex-1 text-sm font-semibold text-brun">
                   {eleve.prenom} {eleve.nom}
                 </span>
-                <StatusPill statut={statut} />
-              </button>
+                <PresenceToggle
+                  statut={statut}
+                  onSelect={(s) => onSetPresence(eleve.id, s)}
+                />
+              </div>
 
               <div className="flex items-center gap-2 border-t border-filet/80 bg-sable/30 px-3 py-1.5">
                 <button
@@ -176,7 +202,7 @@ export function AppelListSkeleton({ rows = 10 }: { rows?: number }) {
         >
           <div className="h-11 w-11 shrink-0 rounded-full bg-sable" />
           <div className="h-3.5 flex-1 rounded bg-sable" />
-          <div className="h-7 w-20 shrink-0 rounded-full bg-sable" />
+          <div className="h-9 w-28 shrink-0 rounded-2xl bg-sable" />
         </li>
       ))}
     </ul>

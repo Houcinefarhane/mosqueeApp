@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "107990442126",
+    "project_id": "madrasapp-prod",
+    "storage_bucket": "madrasapp-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:107990442126:android:343acb16aaea5f27eb29df",
+        "android_client_info": {
+          "package_name": "fr.madrasapp.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZOon-_nVYMz5VCovhakCR5r2h0mSmjp4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -66,8 +66,8 @@ export default function CookieConsent({ onChoice }: CookieConsentProps) {
         </Button>
         <Button
           type="button"
-          variant="outline"
-          className="min-h-11 w-full border-blanc/30 text-blanc hover:bg-blanc/10"
+          variant="ghost"
+          className="min-h-11 w-full border border-blanc/40 bg-transparent text-blanc hover:bg-blanc/10 hover:text-blanc"
           onClick={() => save("analytics")}
         >
           Continuer avec mesure d&apos;audience

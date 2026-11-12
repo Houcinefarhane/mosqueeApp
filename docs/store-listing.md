@@ -27,12 +27,9 @@ Application de gestion pour écoles associatives et mosquées, destinée aux ens
 
 ## Comptes démo (review)
 
-| Store | Rôle | Identifiants |
-|--------|------|----------------|
-| Apple / Google | Élève test | `tasneem.farhane.eleve@test.local` / mot de passe communiqué séparément |
-| Apple / Google | Admin mosquée | Compte AMP sur demande à l'association |
+Comptes **École Démo** (review Apple) : voir **[`docs/apple-review-credentials.md`](apple-review-credentials.md)** (emails + mots de passe stables).
 
-Ne pas publier de mots de passe dans la fiche publique : les saisir dans App Store Connect → App Review Information.
+Ne pas publier les mots de passe sur la fiche store publique : les saisir dans **App Store Connect → App Review Information**.
 
 ## Captures à produire
 

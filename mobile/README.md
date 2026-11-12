@@ -75,11 +75,20 @@ Voir **`../docs/app-store-google-play.md`** pour les URLs légales et les formul
 
 ### Google Play
 
-1. Android Studio → **Build → Generate Signed Bundle / APK** → **AAB**.
-2. Play Console → nouvelle app → téléverser l’AAB.
-3. Privacy policy : même URL `/legal/confidentialite`
-4. Suppression de compte : `https://madrasa-app-pi.vercel.app/legal/suppression-compte`
-5. Remplir **Data safety** (voir doc ci-dessus).
+Guide détaillé : **[`../docs/android-release.md`](../docs/android-release.md)** (keystore, AAB, Firebase).
+
+Résumé :
+
+```bash
+cd mobile
+bash scripts/create-android-keystore.sh   # une fois — sauvegarder le keystore !
+npm run sync
+cd android && ./gradlew clean bundleRelease
+```
+
+AAB : `android/app/build/outputs/bundle/release/app-release.aab`
+
+Push Android : placer `google-services.json` dans `android/app/` (déjà câblé via `@capacitor-firebase/messaging`).
 
 ## Identifiants
 
