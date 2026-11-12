@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -10,20 +9,6 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   themeColor: "#3B2216",
 };
-
-const fontDisplay = Bricolage_Grotesque({
-  subsets: ["latin"],
-  weight: ["800"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const fontBody = Figtree({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-body",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -45,9 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body
-        className={`${fontDisplay.variable} ${fontBody.variable} font-body antialiased`}
-      >
+      <body className="font-body antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>
